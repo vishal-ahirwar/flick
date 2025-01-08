@@ -1028,14 +1028,19 @@ void App::vscode()
 void App::rebuild()
 {
 	namespace fs = std::filesystem;
-	if (fs::exists("./build"))
-		for (const auto &entry : fs::directory_iterator("./build"))
+	try
+	{
+		if (fs::exists("./build"))
 		{
-			for (const auto &e : fs::recursive_directory_iterator(entry.path()))
-			{
-				fs::remove_all(e.path());
-			};
-		};
+			fs::remove_all("./build");
+		}
+		/* code */
+	}
+	catch (const std::exception &e)
+	{
+		std::cerr << e.what() << '\n';
+		return;
+	}
 
 	compile();
 };
