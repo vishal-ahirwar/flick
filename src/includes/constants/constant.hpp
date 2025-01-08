@@ -54,7 +54,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
-include_directories(./src/includes)
 #@find
 set(SOURCE ./src/main.cc)#add your additional source file here!
 add_executable(${PROJECT_NAME} ${SOURCE})
@@ -133,7 +132,7 @@ constexpr std::string_view CONAN_URL_64BIT{"https://github.com/conan-io/conan/re
 
 constexpr std::string_view NINJA_URL_64BIT{"https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-win.zip"};
 
-constexpr std::string_view NSIS_URL{};//TODO
+constexpr std::string_view NSIS_URL{"https://cyfuture.dl.sourceforge.net/project/nsis/NSIS%203/3.10/nsis-3.10.zip?viasf=1"};//TODO
 
 #else
 constexpr std::string_view UPDATER_URL{"https://github.com/vishal-ahirwar/aura/releases/latest/download/utool"

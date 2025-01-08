@@ -42,3 +42,10 @@ include(CPack)
 target_link_libraries(${PROJECT_NAME} PRIVATE cpr::cpr)
 target_link_libraries(utool PRIVATE cpr::cpr)
 
+
+include(InstallRequiredSystemLibraries)
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/License.txt")
+set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
+set(CPACK_PACKAGE_VENDOR "Undefined")
+include(CPack)

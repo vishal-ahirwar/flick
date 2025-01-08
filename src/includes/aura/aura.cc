@@ -1,4 +1,4 @@
-#include<aura/aura.hpp>
+#include <aura/aura.hpp>
 #include <constants/colors.hpp>
 #include <thread>
 #include <constants/constant.hpp>
@@ -182,8 +182,7 @@ void App::addToPathWin()
 		else
 		{
 			printf("%sCopying aura into %s%s\n", GREEN, aura.c_str(), WHITE);
-			fs::remove(destination);
-			if (fs::copy_file(source, destination, fs::copy_options::overwrite_existing))
+			if (fs::copy_file(source, destination, fs::copy_options::update_existing))
 			{
 				printf("%s copied to %s\n", source.c_str(), destination.c_str());
 			}
@@ -199,12 +198,15 @@ void App::addToPathWin()
 	{
 		if (dir.is_directory())
 		{
-			path += dir.path().string();
-			if (path.find("conan") != std::string::npos)
-			{
-				path += ";";
+			if (dir.path().string().find("_internal") != std::string::npos)
 				continue;
-			}
+			if (dir.path().string().find("nsis") != std::string::npos)
+			{
+				path += dir.path().string() + ";";
+				path += (dir.path().string() + "\\Bin;");
+				continue;
+			};
+			path += dir.path().string();
 			path += "\\bin;";
 		}
 	};
@@ -335,9 +337,15 @@ void App::installEssentialTools(bool &isInstallationComplete)
 		   "continue??[y/n] %s\n",
 		   YELLOW,
 		   WHITE);
-	char input{};
-	fscanf(stdin, "%c", &input);
-	if (tolower(input) != 'y')
+	char c;
+	while (true)
+	{
+
+		fscanf(stdin, "%c", &c);
+		if (c != '\n')
+			break;
+	};
+	if (tolower(c) != 'y')
 		exit(0);
 	std::string home = getenv(USERNAME);
 	if (!home.c_str())
@@ -347,7 +355,7 @@ void App::installEssentialTools(bool &isInstallationComplete)
 	Downloader::download(std::string(CMAKE_URL_64BIT), home + "\\cmake.zip");
 	Downloader::download(std::string(CONAN_URL_64BIT), home + "\\conan.zip");
 	Downloader::download(std::string(NINJA_URL_64BIT), home + "\\ninja.zip");
-
+	Downloader::download(std::string(NSIS_URL), home + "\\nsis.zip");
 	printf("%sunzipping file at %s%s\n", BLUE, home.c_str(), WHITE);
 	if (system((std::string("tar -xf ") + "\"" + home + "\\compiler.zip\"" + " -C " + "\"" + home + "\"").c_str()))
 		return;
@@ -357,11 +365,14 @@ void App::installEssentialTools(bool &isInstallationComplete)
 		return;
 	if (system((std::string("tar -xf ") + "\"" + home + "\\ninja.zip\"" + " -C " + "\"" + home + "\"").c_str()))
 		return;
+	if (system((std::string("tar -xf ") + "\"" + home + "\\nsis.zip\"" + " -C " + "\"" + home + "\"").c_str()))
+		return;
 	printf("%sremoving downloaded archives...%s\n", RED, WHITE);
 	fs::remove((home + "\\compiler.zip"));
 	fs::remove((home + "\\cmake.zip"));
 	fs::remove((home + "\\conan.zip"));
 	fs::remove((home + "\\ninja.zip"));
+	fs::remove((home + "\\nsis.zip"));
 	isInstallationComplete = true;
 	addToPathWin();
 #else
@@ -483,8 +494,6 @@ void App::createDir(const char *argv)
 	if (fs::create_directory(cmdString.c_str()))
 	{
 		cmdString += "/src";
-		fs::create_directory(cmdString.c_str());
-		cmdString += "/includes";
 		fs::create_directory(cmdString.c_str());
 		auto pos = cmdString.find("/");
 		cmdString.replace(pos + 1, cmdString.length() - pos, "res");
@@ -724,9 +733,16 @@ void App::fixInstallation()
 		   "continue??[y/n] %s\n",
 		   YELLOW,
 		   WHITE);
-	std::string input{};
-	std::cin >> input;
-	if (tolower(input[0]) != 'y')
+	char c;
+	while (true)
+	{
+
+		fscanf(stdin, "%c", &c);
+		if (c != '\n')
+			break;
+	};
+
+	if (tolower(c) != 'y')
 		return;
 #ifdef WIN32
 	std::string home = getenv(USERNAME);
@@ -1013,10 +1029,13 @@ void App::rebuild()
 {
 	namespace fs = std::filesystem;
 	if (fs::exists("./build"))
-		if (!fs::remove_all("./build"))
+		for (const auto &entry : fs::directory_iterator("./build"))
 		{
-			fprintf(stderr, "%s[Error] : Failed to remove build directory!\n%s", RED, WHITE);
-			return;
+			for (const auto &e : fs::recursive_directory_iterator(entry.path()))
+			{
+				fs::remove_all(e.path());
+			};
 		};
+
 	compile();
 };

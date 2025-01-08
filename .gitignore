@@ -13,3 +13,5 @@ CMakeLists.txt.user
 /cmake-build-minsizerel
 /cmake-build-release
 Build
+CMakeUserPresets.json
+CMakeUserPresets.json
