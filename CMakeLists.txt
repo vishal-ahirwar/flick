@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.6...3.31)
-project(aura VERSION 2.3.0)
+project(aura VERSION 2.4.0)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -14,7 +14,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(COMPANY "Vishal ahirwar")
 string(TIMESTAMP CURRENT_YEAR "%Y")
 set(COPYRIGHT "Copyright(c) ${CURRENT_YEAR} Vishal Ahirwar and all Contributors. All rights reserved.")
-include_directories(./src/includes ${PROJECT_BINARY_DIR})
+include_directories(src ${CMAKE_BINARY_DIR})
 configure_file(auraConfig.h.in auraConfig.h)
 include(FetchContent)
 FetchContent_Declare(cpr GIT_REPOSITORY https://github.com/libcpr/cpr.git
@@ -23,11 +23,11 @@ FetchContent_MakeAvailable(cpr)
 
 add_executable(${PROJECT_NAME} 
     src/main.cc
-    src/includes/app/app.cc
-    src/includes/aura/aura.cc
-    src/includes/downloader/downloader.cc)
+    src/app/app.cc
+    src/aura/aura.cc
+    src/downloader/downloader.cc)
 
-add_executable(utool utool/main.cc src/includes/downloader/downloader.cc)
+add_executable(utool utool/main.cc src/downloader/downloader.cc)
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 

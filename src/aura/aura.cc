@@ -515,9 +515,21 @@ void App::generateCppTemplateFile(const char *argv)
 
 	if (file.is_open())
 	{
-		auto pos = MAIN_CODE.find("@");
-		std::string str{std::string("Hello, ") + projectName + std::string("\\nhappy coding journey :)\\n")};
-		MAIN_CODE.replace(pos, 1, str);
+		std::string header{"_HEADER_"};
+		std::string copyright{"_COPYRIGHT_"};
+		std::string project{"_PROJECT_"};
+		std::string cap;
+		cap.resize(projectName.length());
+		std::transform(projectName.begin(), projectName.end(), cap.begin(), ::toupper);
+		auto index = MAIN_CODE.find(header);
+		if (index != std::string::npos)
+			MAIN_CODE.replace(index, header.length(), ("#include<" + projectName + "config.h>"));
+		index = MAIN_CODE.find(copyright);
+		if (index != std::string::npos)
+			MAIN_CODE.replace(index, copyright.length(), (cap + "_COPYRIGHT"));
+		index = MAIN_CODE.find(project);
+		if (index != std::string::npos)
+			MAIN_CODE.replace(index, project.length(), "\"" + projectName + "\"");
 		file << MAIN_CODE;
 		file.close();
 	};
@@ -525,19 +537,47 @@ void App::generateCppTemplateFile(const char *argv)
 //
 void App::generateCmakeFile(const char *argv)
 {
-	std::ofstream file;
-	file.open("./" + projectName + "/CMakeLists.txt", std::ios::out);
-	if (file.is_open())
+	std::string config{(projectName + "config.h.in")};
 	{
-		std::string str(CMAKE_CODE);
-		auto index = str.find("@");
-		if (index != std::string::npos)
+		std::ofstream file;
+		std::string cap;
+		cap.resize(projectName.length());
+		std::transform(projectName.begin(), projectName.end(), cap.begin(), ::toupper);
+		file.open("./" + projectName + "/" + config, std::ios::out);
+		if (file.is_open())
 		{
-			str.replace(index, 1, projectName);
+			file << ("#define " + cap + "_VERSION_MAJOR @" + projectName + "_VERSION_MAJOR@") << std::endl;
+			file << ("#define " + cap + "_VERSION_MINOR @" + projectName + "_VERSION_MINOR@") << std::endl;
+			file << ("#define " + cap + "_VERSION_PATCH @" + projectName + "_VERSION_PATCH@") << std::endl;
+			file << ("#define " + cap + "_COMPANY" + " \"@COMPANY@\"") << std::endl;
+			file << ("#define " + cap + "_COPYRIGHT" + " \"@COPYRIGHT@\"") << std::endl;
+			file.close();
 		};
-		file << str;
-		file.close();
-	};
+	}
+	{
+
+		std::ofstream file;
+		file.open("./" + projectName + "/CMakeLists.txt", std::ios::out);
+		std::string config_in{"@config_in"};
+		std::string config_h{"@config_h"};
+		if (file.is_open())
+		{
+			std::string str(CMAKE_CODE);
+			auto index = str.find("@");
+			if (index != std::string::npos)
+			{
+				str.replace(index, 1, projectName);
+			};
+			index = str.find(config_h);
+			if (index != std::string::npos)
+				str.replace(index, config_h.length(), (projectName + "config.h"));
+			index = str.find(config_in);
+			if (index != std::string::npos)
+				str.replace(index, config_in.length(), config);
+			file << str;
+			file.close();
+		};
+	}
 }
 //
 void App::generateGitIgnoreFile()
@@ -601,8 +641,8 @@ void App::createInstaller()
 		generateLicenceFile();
 		reloadPackages();
 		if (system("cd build/Release && cpack"))
-			printf("%s[Msg]CPack added to cmake run 'cpack' command from build directory to build "
-				   "a installer :)%s\n",
+			printf("%s[Msg]CPack added to cmake run 'aura createinstaller' command again"
+				   "%s\n",
 				   GREEN,
 				   WHITE);
 	}

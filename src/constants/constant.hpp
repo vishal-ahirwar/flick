@@ -54,6 +54,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+set(COMPANY "@DeveloperName")
+string(TIMESTAMP CURRENT_YEAR "%Y")
+set(COPYRIGHT "Copyright(c) ${CURRENT_YEAR} @DeveloperName.")
+include_directories(src ${CMAKE_BINARY_DIR})
+configure_file(@config_in @config_h)
 #@find
 set(SOURCE ./src/main.cc)#add your additional source file here!
 add_executable(${PROJECT_NAME} ${SOURCE})
@@ -66,10 +71,11 @@ std::string MAIN_CODE{
     R"(
 //Auto Genrated C++ file by aura CLI
 //Copyright 2023 Vishal Ahirwar //replace it with your copyright notice!
-#include<iostream>
+#include<cstdio>
+_HEADER_
 int main(int argc,char*argv[])
 {
-    std::cout<<"@";
+    fprintf(stderr,"Project Name : %s, %s\n",_PROJECT_,_COPYRIGHT_);//This is Template Code
     return 0;
 };
 
