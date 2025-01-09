@@ -33,7 +33,7 @@ namespace CLI
             "initconan : to add conan file\n"
             "debug : to start GDB debugger\n"
             "release: to compile application in release mode or you can do this manually aura compile -DCMAKE_BUILD_TYPE=Release\n"
-            "vscode : to geenrate vscode c/c++ configuration file\n"
+            "vscode : to generate vscode c/c++ configuration file\n"
             "fix : to fix the aura installation\n%s",
             BLUE, YELLOW, AURA_VERSION_MAJOR, AURA_VERSION_MINOR, AURA_VERSION_PATCH,
             AURA_COMPANY, AURA_COPYRIGHT, CYAN, GREEN, WHITE);
