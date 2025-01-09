@@ -20,7 +20,7 @@ include(FetchContent)
 FetchContent_Declare(cpr GIT_REPOSITORY https://github.com/libcpr/cpr.git
                          GIT_TAG dec9422db3af470641f8b0d90e4b451c4daebf64) # Replace with your desired git commit from: https://github.com/libcpr/cpr/releases
 FetchContent_MakeAvailable(cpr)
-find_package(Catch2)
+
 add_executable(${PROJECT_NAME} 
     src/main.cc
     src/includes/app/app.cc
@@ -30,14 +30,6 @@ add_executable(${PROJECT_NAME}
 add_executable(utool utool/main.cc src/includes/downloader/downloader.cc)
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
-
-include(InstallRequiredSystemLibraries)
-
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/License.txt")
-set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
-set(CPACK_PACKAGE_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
-
-include(CPack)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE cpr::cpr)
 target_link_libraries(utool PRIVATE cpr::cpr)
