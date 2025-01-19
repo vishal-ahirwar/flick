@@ -56,7 +56,7 @@ set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 set(COMPANY "@DeveloperName")
 string(TIMESTAMP CURRENT_YEAR "%Y")
-set(COPYRIGHT "Copyright(c) ${CURRENT_YEAR} @DeveloperName.")
+set(COPYRIGHT "Copyright(c) ${CURRENT_YEAR} ${COMPANY}.")
 include_directories(src ${CMAKE_BINARY_DIR})
 configure_file(@config_in @config_h)
 #@find
