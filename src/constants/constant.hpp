@@ -54,16 +54,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -funroll-loops")
 set(COMPANY "@DeveloperName")
 string(TIMESTAMP CURRENT_YEAR "%Y")
 set(COPYRIGHT "Copyright(c) ${CURRENT_YEAR} ${COMPANY}.")
 include_directories(src ${CMAKE_BINARY_DIR})
 configure_file(@config_in @config_h)
-#@find
+#@find Warning: Do not remove this line
 set(SOURCE ./src/main.cc)#add your additional source file here!
 add_executable(${PROJECT_NAME} ${SOURCE})
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
-#@link
+#@link Warning: Do not remove this line
 )"};
 
 
