@@ -102,6 +102,16 @@ aura [command] projectname
 
 ---
 
+## Demo Project
+![image](https://github.com/user-attachments/assets/1d7d9e16-1575-44ca-bf29-9af117f5af60)
+![image](https://github.com/user-attachments/assets/8f00ff7b-a7c6-4e93-aecb-7dacb73e576b)
+```
+cd demo
+aura compile
+aura run
+   or
+aura build
+```
 ## Author
 
 Developed by **Vishal Ahirwar**.  
