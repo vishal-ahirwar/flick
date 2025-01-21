@@ -170,7 +170,7 @@ void App::addToPathWin()
 #ifdef WIN32
 	namespace fs = std::filesystem;
 	std::string aura{getenv(USERNAME)};
-	aura += "\\aura";
+	aura += "\\.aura";
 	std::string source{fs::current_path().string() + "\\aura.exe"};
 	std::string destination{(aura + "\\aura.exe").c_str()};
 	if (source.compare(destination) != 0)
@@ -251,7 +251,7 @@ void App::addToPathUnix()
 	namespace fs = std::filesystem;
 	std::string aura{"/home/"};
 	aura += {getenv(USERNAME)};
-	aura += "/aura";
+	aura += "/.aura";
 	std::string source{fs::current_path().string() + "/aura"};
 	std::string destination{(aura + "/aura").c_str()};
 	if (source.compare(destination) != 0)
@@ -301,7 +301,10 @@ void App::addToPathUnix()
 			newPath += ":";
 		}
 	}
-	newPath.replace(newPath.size(), 1, "");
+	if(!newPath.empty()&&newPath.back()==':')
+	{
+		newPath.pop_back();
+	}
 	if (found)
 	{
 		std::cout << "All paths from aura are in PATH\n";
@@ -350,7 +353,7 @@ void App::installEssentialTools(bool &isInstallationComplete)
 	std::string home = getenv(USERNAME);
 	if (!home.c_str())
 		return;
-	home += "\\aura";
+	home += "\\.aura";
 	Downloader::download(std::string(COMPILER_URL_64BIT), home + "\\compiler.zip");
 	Downloader::download(std::string(CMAKE_URL_64BIT), home + "\\cmake.zip");
 	Downloader::download(std::string(CONAN_URL_64BIT), home + "\\conan.zip");
@@ -383,7 +386,7 @@ void App::installEssentialTools(bool &isInstallationComplete)
 		namespace fs = std::filesystem;
 		std::string aura{"/home/"};
 		aura += {getenv(USERNAME)};
-		aura += "/aura";
+		aura += "/.aura";
 		Downloader::download(std::string(CONAN_LINUX_URL), aura + "/conan.tgz");
 		system(("tar -xvf " + aura + "/conan.tgz" + " -C " + aura).c_str());
 		system(("chmod +x " + aura + "/bin/conan").c_str());
@@ -680,11 +683,11 @@ bool App::onSetup()
 		return false;
 	std::fstream file;
 #ifdef WIN32
-	if (!fs::create_directory(home + "\\aura"))
+	if (!fs::create_directory(home + "\\.aura"))
 	{
 		printf("%saura dir alread exist%s\n", GREEN, WHITE);
 	};
-	file.open((home + "\\aura\\.cconfig").c_str(), std::ios::in);
+	file.open((home + "\\.aura\\.cconfig").c_str(), std::ios::in);
 	if (file.is_open())
 	{
 		file >> isInstallationComplete;
@@ -697,7 +700,7 @@ bool App::onSetup()
 	}
 	else
 	{
-		file.open((home + "\\aura\\.cconfig").c_str(), std::ios::out);
+		file.open((home + "\\.aura\\.cconfig").c_str(), std::ios::out);
 		if (file.is_open())
 		{
 			installEssentialTools(isInstallationComplete);
@@ -709,7 +712,7 @@ bool App::onSetup()
 	if (!isInstallationComplete)
 	{
 		installEssentialTools(isInstallationComplete);
-		file.open((home + "\\aura\\.cconfig").c_str(), std::ios::out);
+		file.open((home + "\\.aura\\.cconfig").c_str(), std::ios::out);
 		if (file.is_open())
 		{
 			file << isInstallationComplete;
@@ -720,7 +723,7 @@ bool App::onSetup()
 	};
 	return true;
 #else
-	if (!fs::create_directory(home + "/aura"))
+	if (!fs::create_directory(home + "/.aura"))
 	{
 		printf("%saura dir alread exist%s\n", GREEN, WHITE);
 	}
@@ -729,7 +732,7 @@ bool App::onSetup()
 		printf("%sCreating aura dir at %s %s\n", BLUE, home.c_str(), WHITE);
 	};
 
-	file.open((home + "/aura/.cconfig").c_str(), std::ios::in);
+	file.open((home + "/.aura/.cconfig").c_str(), std::ios::in);
 	if (file.is_open())
 	{
 		file >> isInstallationComplete;
@@ -747,7 +750,7 @@ bool App::onSetup()
 
 	installEssentialTools(isInstallationComplete);
 
-	file.open((home + std::string("/aura/.cconfig")).c_str(), std::ios::out);
+	file.open((home + std::string("/.aura/.cconfig")).c_str(), std::ios::out);
 	if (file.is_open())
 	{
 		std::cout << "writing to config file!\n";
@@ -793,9 +796,9 @@ void App::fixInstallation()
 	namespace fs = std::filesystem;
 	printf("%sreseting aura...%s\n", RED, WHITE);
 #ifdef WIN32
-	fs::remove_all((home + "\\aura"));
+	fs::remove_all((home + "\\.aura"));
 #else
-	fs::remove_all((home + "/aura"));
+	fs::remove_all((home + "/.aura"));
 #endif
 	printf("%sall clean!%s\n", RED, WHITE);
 	setup();
@@ -877,10 +880,10 @@ void App::update()
 	aura += getenv(USERNAME);
 #endif
 #ifdef WIN32
-	aura += "\\aura";
+	aura += "\\.aura";
 	std::string source{aura + "\\utool.exe"};
 #else
-	aura += "/aura";
+	aura += "/.aura";
 	std::string source{aura + "/utool"};
 #endif
 	printf("updating aura...\n");

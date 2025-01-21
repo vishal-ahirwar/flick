@@ -17,11 +17,11 @@ int main()
 {
 #ifdef WIN32
     std::string home = getenv(USERNAME);
-    home += "\\aura";
+    home += "\\.aura";
 #else
     std::string home{"/home/"};
     home += getenv(USERNAME);
-    home+="/aura";
+    home+="/.aura";
 #endif
     printf("updating aura...\n");
 #ifdef WIN32
