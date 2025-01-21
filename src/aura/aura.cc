@@ -279,7 +279,7 @@ void App::addToPathUnix()
 	{
 		if (dir.is_directory())
 		{
-			if (path.find("_internal") != std::string::npos)
+			if (dir.path().string().find("_internal") != std::string::npos)
 				continue;
 			path += dir.path().string();
 			path += ";";
