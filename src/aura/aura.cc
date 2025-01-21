@@ -298,10 +298,10 @@ void App::addToPathUnix()
 		{
 			found = false;
 			newPath += singlePath;
-			newPath += ";";
+			newPath += ":";
 		}
 	}
-
+	newPath.replace(newPath.size(), 1, "");
 	if (found)
 	{
 		std::cout << "All paths from aura are in PATH\n";
