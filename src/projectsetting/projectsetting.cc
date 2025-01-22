@@ -1,0 +1,1 @@
+#include<projectsetting/projectsetting.h>

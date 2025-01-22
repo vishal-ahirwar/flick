@@ -25,9 +25,12 @@ add_executable(${PROJECT_NAME}
     src/main.cc
     src/app/app.cc
     src/aura/aura.cc
-    src/downloader/downloader.cc)
+    src/downloader/downloader.cc
+    src/rt/rt.cc
+    src/projectsetting/projectsetting.cc
+    src/userinfo/userinfo.cc)
 
-add_executable(utool utool/main.cc src/downloader/downloader.cc)
+add_executable(utool utool/main.cc src/downloader/downloader.cc src/rt/rt.cc src/userinfo/userinfo.cc)
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 

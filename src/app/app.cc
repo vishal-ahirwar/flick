@@ -114,7 +114,7 @@ namespace CLI
                 printf("Try again with 'aura help' :(\n");
                 return 0;
             };
-            app.add(argv[2]);
+            app.addConanPackage(argv[2]);
         }
         else if (std::string(argv[1]) == std::string("reload"))
         {
@@ -125,10 +125,10 @@ namespace CLI
             app.initConan();
         }else if(std::string(argv[1])==std::string("vscode"))
         {
-            app.vscode();
+            app.vsCode();
         }else if(std::string(argv[1])==std::string("rebuild"))
         {
-            app.rebuild();
+            app.reBuild();
         }
         else
         {

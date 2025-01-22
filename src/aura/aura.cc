@@ -24,8 +24,16 @@
 
 #include <vector>
 #include <algorithm>
+#include <rt/rt.h>
 void addToConanFile(const std::string &);
 void addToCMakeFile(std::string);
+
+App::App() {
+
+};
+App::~App() {
+
+};
 
 void App::setupUnitTestingFramework()
 {
@@ -64,8 +72,6 @@ void App::setupUnitTestingFramework()
 
 void App::createNewProject(const char *argv[], int argc)
 {
-	// TODO
-	clock_t start = clock(), end = 0;
 
 	printf("%sCreating directory ....\n%s", GREEN, WHITE);
 
@@ -75,14 +81,8 @@ void App::createNewProject(const char *argv[], int argc)
 	generateConanFile();
 	generateCppTemplateFile(argv[2]);
 	generateCmakeFile(argv[2]);
-	generateauraFile(projectName);
+	generateauraFile(_project_setting._project_name);
 	generateGitIgnoreFile();
-	end = clock();
-
-	printf("%sElapsed Time : %8.2fms\nWith great power comes great responsibility\n%s",
-		   YELLOW,
-		   difftime(end, start),
-		   WHITE);
 };
 
 // TODO : add compile option
@@ -130,13 +130,13 @@ void App::run(int argc, const char **argv)
 {
 	std::string output{};
 	readauraFile(output);
-	projectName = output;
+	_project_setting._project_name = output;
 
 	std::string run{};
 	// printf("%s%s: \n%s", YELLOW, projectName.c_str(),WHITE);
 #ifdef WIN32
 	run += ".\\build\\Debug\\";
-	run += projectName;
+	run += _project_setting._project_name;
 	run += ".exe";
 #else
 	run += "./build/Debug/";
@@ -301,7 +301,7 @@ void App::addToPathUnix()
 			newPath += ":";
 		}
 	}
-	if(!newPath.empty()&&newPath.back()==':')
+	if (!newPath.empty() && newPath.back() == ':')
 	{
 		newPath.pop_back();
 	}
@@ -456,7 +456,7 @@ void App::generateauraFile(const std::string &path)
 		time_t now{time(NULL)};
 		const char *dateTime{ctime(&now)};
 
-		file << projectName << "\n";
+		file << _project_setting._project_name << "\n";
 		file << "Project created on " << dateTime << "\n";
 		printf("%sProject Creation date : %s%s", YELLOW, dateTime, WHITE);
 		file << "Note: Please don't remove or edit this file!\n";
@@ -492,7 +492,7 @@ void App::createDir(const char *argv)
 {
 	namespace fs = std::filesystem;
 	std::string cmdString{};
-	projectName = argv;
+	_project_setting._project_name = argv;
 	cmdString += argv;
 	if (fs::create_directory(cmdString.c_str()))
 	{
@@ -501,6 +501,15 @@ void App::createDir(const char *argv)
 		auto pos = cmdString.find("/");
 		cmdString.replace(pos + 1, cmdString.length() - pos, "res");
 		fs::create_directory(cmdString.c_str());
+		pos = cmdString.find("/");
+		cmdString.replace(pos + 1, cmdString.length() - pos, "external");
+		fs::create_directory(cmdString.c_str());
+		std::ofstream file(cmdString + "/help.txt");
+		if (file.is_open())
+		{
+			file << "Add your external libraries in this directory, if librarary is not available on conan";
+		};
+		file.close();
 	}
 	else
 	{
@@ -513,8 +522,8 @@ void App::generateCppTemplateFile(const char *argv)
 {
 	std::ofstream file;
 	// const std::string stdStr{argv[2]};
-	projectName = argv;
-	file.open("./" + projectName + "/src/main.cc", std::ios::out);
+	_project_setting._project_name = argv;
+	file.open("./" + _project_setting._project_name + "/src/main.cc", std::ios::out);
 
 	if (file.is_open())
 	{
@@ -522,36 +531,44 @@ void App::generateCppTemplateFile(const char *argv)
 		std::string copyright{"_COPYRIGHT_"};
 		std::string project{"_PROJECT_"};
 		std::string cap;
-		cap.resize(projectName.length());
-		std::transform(projectName.begin(), projectName.end(), cap.begin(), ::toupper);
+		cap.resize(_project_setting._project_name.length());
+		std::transform(_project_setting._project_name.begin(), _project_setting._project_name.end(), cap.begin(), ::toupper);
 		auto index = MAIN_CODE.find(header);
 		if (index != std::string::npos)
-			MAIN_CODE.replace(index, header.length(), ("#include<" + projectName + "config.h>"));
+			MAIN_CODE.replace(index, header.length(), ("#include<" + _project_setting._project_name + "config.h>"));
 		index = MAIN_CODE.find(copyright);
 		if (index != std::string::npos)
 			MAIN_CODE.replace(index, copyright.length(), (cap + "_COPYRIGHT"));
 		index = MAIN_CODE.find(project);
 		if (index != std::string::npos)
-			MAIN_CODE.replace(index, project.length(), "\"" + projectName + "\"");
+			MAIN_CODE.replace(index, project.length(), "\"" + _project_setting._project_name + "\"");
 		file << MAIN_CODE;
 		file.close();
 	};
-}
+
+	std::ofstream setup_file("./" + _project_setting._project_name + "/setup.py");
+	if (setup_file.is_open())
+	{
+		setup_file << "print('No External Library configuration added yet!')";
+	};
+	setup_file.close();
+};
+
 //
 void App::generateCmakeFile(const char *argv)
 {
-	std::string config{(projectName + "config.h.in")};
+	std::string config{(_project_setting._project_name + "config.h.in")};
 	{
 		std::ofstream file;
 		std::string cap;
-		cap.resize(projectName.length());
-		std::transform(projectName.begin(), projectName.end(), cap.begin(), ::toupper);
-		file.open("./" + projectName + "/" + config, std::ios::out);
+		cap.resize(_project_setting._project_name.length());
+		std::transform(_project_setting._project_name.begin(), _project_setting._project_name.end(), cap.begin(), ::toupper);
+		file.open("./" + _project_setting._project_name + "/" + config, std::ios::out);
 		if (file.is_open())
 		{
-			file << ("#define " + cap + "_VERSION_MAJOR @" + projectName + "_VERSION_MAJOR@") << std::endl;
-			file << ("#define " + cap + "_VERSION_MINOR @" + projectName + "_VERSION_MINOR@") << std::endl;
-			file << ("#define " + cap + "_VERSION_PATCH @" + projectName + "_VERSION_PATCH@") << std::endl;
+			file << ("#define " + cap + "_VERSION_MAJOR @" + _project_setting._project_name + "_VERSION_MAJOR@") << std::endl;
+			file << ("#define " + cap + "_VERSION_MINOR @" + _project_setting._project_name + "_VERSION_MINOR@") << std::endl;
+			file << ("#define " + cap + "_VERSION_PATCH @" + _project_setting._project_name + "_VERSION_PATCH@") << std::endl;
 			file << ("#define " + cap + "_COMPANY" + " \"@COMPANY@\"") << std::endl;
 			file << ("#define " + cap + "_COPYRIGHT" + " \"@COPYRIGHT@\"") << std::endl;
 			file.close();
@@ -560,7 +577,7 @@ void App::generateCmakeFile(const char *argv)
 	{
 
 		std::ofstream file;
-		file.open("./" + projectName + "/CMakeLists.txt", std::ios::out);
+		file.open("./" + _project_setting._project_name + "/CMakeLists.txt", std::ios::out);
 		std::string config_in{"@config_in"};
 		std::string config_h{"@config_h"};
 		if (file.is_open())
@@ -569,11 +586,11 @@ void App::generateCmakeFile(const char *argv)
 			auto index = str.find("@");
 			if (index != std::string::npos)
 			{
-				str.replace(index, 1, projectName);
+				str.replace(index, 1, _project_setting._project_name);
 			};
 			index = str.find(config_h);
 			if (index != std::string::npos)
-				str.replace(index, config_h.length(), (projectName + "config.h"));
+				str.replace(index, config_h.length(), (_project_setting._project_name + "config.h"));
 			index = str.find(config_in);
 			if (index != std::string::npos)
 				str.replace(index, config_in.length(), config);
@@ -586,7 +603,7 @@ void App::generateCmakeFile(const char *argv)
 void App::generateGitIgnoreFile()
 {
 	std::ofstream file;
-	file.open("./" + projectName + "/.gitignore", std::ios::out);
+	file.open("./" + _project_setting._project_name + "/.gitignore", std::ios::out);
 	if (file.is_open())
 	{
 		file << GITIGNORE_CODE;
@@ -614,7 +631,7 @@ void App::generateLicenceFile()
 void App::generateConanFile()
 {
 	std::ofstream file;
-	file.open("./" + projectName + "/conanfile.txt", std::ios::out);
+	file.open("./" + _project_setting._project_name + "/conanfile.txt", std::ios::out);
 	if (file.is_open())
 	{
 		file << CONAN_CODE;
@@ -904,8 +921,8 @@ void App::update()
 // TODO
 void App::debug()
 {
-	readauraFile(projectName);
-	system(("gdb ./build/Debug/" + projectName).c_str());
+	readauraFile(_project_setting._project_name);
+	system(("gdb ./build/Debug/" + _project_setting._project_name).c_str());
 };
 // TODO
 // this is actually useless for now but will add usefull stuff to it in future
@@ -995,7 +1012,7 @@ void addToCMakeFile(std::string name)
 	out.close();
 };
 // adding new packages to conanfile.txt then add recuired commands to  cmakelists.txt and reload cmakelist.txt to reconfigure project
-void App::add(const std::string &name)
+void App::addConanPackage(const std::string &name)
 {
 	std::ifstream file{"conanfile.txt"};
 	if (!file.is_open())
@@ -1049,7 +1066,7 @@ void App::initConan()
 
 // for generating vscode intelligence
 // everytime user run this command it's will override everything in c_cpp_properties.json
-void App::vscode()
+void App::vsCode()
 {
 	namespace fs = std::filesystem;
 	if (!fs::exists("setting.nn"))
@@ -1068,7 +1085,7 @@ void App::vscode()
 }
 
 // it will simply delete the whole build folder and compile the project again
-void App::rebuild()
+void App::reBuild()
 {
 	namespace fs = std::filesystem;
 	try
@@ -1086,4 +1103,27 @@ void App::rebuild()
 	}
 
 	compile();
+};
+
+void App::askUserinfo(struct UserInfo *user) {
+
+};
+
+void App::readUserInfoFromConfigFile(struct UserInfo *user) {
+
+};
+
+void App::writeUserInfoToConfigFile(struct UserInfo *user) {
+
+};
+
+void App::readProjectSettings(struct ProjectSetting *setting) {
+
+};
+void App::writeProjectSettings(struct ProjectSetting *setting) {
+
+};
+bool App::checkIfConanNeeded(void)
+{
+	return false;
 };
