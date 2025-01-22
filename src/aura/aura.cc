@@ -140,7 +140,7 @@ void App::run(int argc, const char **argv)
 	run += ".exe";
 #else
 	run += "./build/Debug/";
-	run += projectName;
+	run += _project_setting._project_name;
 #endif // WIN32
 	for (int i = 0; i < argc; ++i)
 	{
