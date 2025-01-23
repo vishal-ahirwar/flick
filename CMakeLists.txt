@@ -16,11 +16,8 @@ string(TIMESTAMP CURRENT_YEAR "%Y")
 set(COPYRIGHT "Copyright(c) ${CURRENT_YEAR} Vishal Ahirwar and all Contributors. All rights reserved.")
 include_directories(src ${CMAKE_BINARY_DIR})
 configure_file(auraConfig.h.in auraConfig.h)
-include(FetchContent)
-FetchContent_Declare(cpr GIT_REPOSITORY https://github.com/libcpr/cpr.git
-                         GIT_TAG dec9422db3af470641f8b0d90e4b451c4daebf64) # Replace with your desired git commit from: https://github.com/libcpr/cpr/releases
-FetchContent_MakeAvailable(cpr)
-
+set(cpr_DIR ${CMAKE_SOURCE_DIR}/external/cpr)
+find_package(cpr REQUIRED)
 add_executable(${PROJECT_NAME} 
     src/main.cc
     src/app/app.cc
@@ -34,8 +31,8 @@ add_executable(utool utool/main.cc src/downloader/downloader.cc src/rt/rt.cc src
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE cpr::cpr)
-target_link_libraries(utool PRIVATE cpr::cpr)
+target_link_libraries(${PROJECT_NAME} PRIVATE cpr)
+target_link_libraries(utool PRIVATE cpr)
 
 
 include(InstallRequiredSystemLibraries)
