@@ -14,3 +14,4 @@ CMakeLists.txt.user
 /cmake-build-release
 Build
 CMakeUserPresets.json
+__pycache__
