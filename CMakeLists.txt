@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 if(WIN32)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static -static-libgcc -static-libstdc++")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static -static-libgcc")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static -lstdc++fs")
 endif(WIN32)
 set(BUILD_SHARED_LIBS OFF)
@@ -16,8 +16,6 @@ string(TIMESTAMP CURRENT_YEAR "%Y")
 set(COPYRIGHT "Copyright(c) ${CURRENT_YEAR} Vishal Ahirwar and all Contributors. All rights reserved.")
 include_directories(src ${CMAKE_BINARY_DIR})
 configure_file(auraConfig.h.in auraConfig.h)
-set(cpr_DIR ${CMAKE_SOURCE_DIR}/external/cpr)
-find_package(cpr REQUIRED)
 add_executable(${PROJECT_NAME} 
     src/main.cc
     src/app/app.cc
@@ -29,15 +27,21 @@ add_executable(${PROJECT_NAME}
 
 add_executable(utool utool/main.cc src/downloader/downloader.cc src/rt/rt.cc src/userinfo/userinfo.cc)
 
+#CPR
+include(FetchContent)
+FetchContent_Declare(cpr GIT_REPOSITORY https://github.com/libcpr/cpr.git
+                         GIT_TAG 3b15fa82ea74739b574d705fea44959b58142eb8) # Replace with your desired git commit from: https://github.com/libcpr/cpr/releases
+FetchContent_MakeAvailable(cpr)
+
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE cpr)
-target_link_libraries(utool PRIVATE cpr)
+target_link_libraries(${PROJECT_NAME} PUBLIC cpr::cpr)
+target_link_libraries(utool PUBLIC cpr::cpr)
 
 
 include(InstallRequiredSystemLibraries)
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/License.txt")
 set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
-set(CPACK_PACKAGE_VENDOR "Undefined")
+set(CPACK_PACKAGE_VENDOR ${COMPANY})
 include(CPack)

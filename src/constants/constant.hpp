@@ -41,6 +41,7 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 build
+__pycache__
 )"};
 
 constexpr std::string_view CMAKE_CODE{
