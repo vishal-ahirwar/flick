@@ -1,4 +1,5 @@
-from setup import setup,system,generator
+from os import system
+generator="\"Ninja\""
 if __name__=="__main__":
     print('Compilling Project...')
     system(f"cmake -S . -B Build/Debug -DCMAKE_BUILD_TYPE=Debug -G {generator} && cmake -S . -B Build/Release -DCMAKE_BUILD_TYPE=Release -G {generator}")
