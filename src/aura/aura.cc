@@ -1108,7 +1108,7 @@ void App::initConan()
 void App::vsCode()
 {
 	namespace fs = std::filesystem;
-	if (!fs::exists("setting.nn"))
+	if (!fs::exists("build.py"))
 		return;
 	fs::exists(".vscode") ? fprintf(stdout, "%s.vscode already exist!%s\n", YELLOW, WHITE) : fs::create_directory(".vscode");
 	std::ofstream file(".vscode/c_cpp_properties.json", std::ios::out);
