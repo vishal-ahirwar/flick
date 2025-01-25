@@ -956,7 +956,7 @@ bool App::release()
 	}
 	else
 	{
-		if (system("cmake -S . -B build/Debug -DCMAKE_BUILD_TYPE=Release -G \"Ninja\""))
+		if (system("cmake -S . -B build/Release -DCMAKE_BUILD_TYPE=Release -G \"Ninja\""))
 			return false;
 		if (system("ninja -C ./build/Release"))
 			return false;
