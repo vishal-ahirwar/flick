@@ -78,10 +78,9 @@ void App::createNewProject(const char *argv[], int argc)
 	std::string cmdString{};
 	createDir(argv[2]);
 	printf("%sGenerating Code for main.c and CMakeLists.txt ....\n%s", GREEN, WHITE);
-	generateConanFile();
 	generateCppTemplateFile(argv[2]);
 	generateCmakeFile(argv[2]);
-	generateauraFile(_project_setting._project_name);
+	generateBuildFile(_project_setting._project_name);
 	generateGitIgnoreFile();
 };
 
@@ -129,7 +128,7 @@ bool App::compile(const std::string &additional_cmake_arg)
 void App::run(int argc, const char **argv)
 {
 	std::string output{};
-	readauraFile(output);
+	readBuildFile(output);
 	_project_setting._project_name = output;
 
 	std::string run{};
@@ -446,20 +445,28 @@ void App::setup()
 };
 
 // TODO
-void App::generateauraFile(const std::string &path)
+void App::generateBuildFile(const std::string &path)
 {
 	std::string newFileName{path};
-	newFileName += "/setting.nn";
+	newFileName += "/build.py";
 	std::ofstream file(newFileName.c_str(), std::ios::out);
 	if (file.is_open())
 	{
+		constexpr std::string_view project_name{"@projectName"};
+		constexpr std::string_view build_date{"@builddatetime"};
 		time_t now{time(NULL)};
-		const char *dateTime{ctime(&now)};
-
-		file << _project_setting._project_name << "\n";
-		file << "Project created on " << dateTime << "\n";
-		printf("%sProject Creation date : %s%s", YELLOW, dateTime, WHITE);
-		file << "Note: Please don't remove or edit this file!\n";
+		char *dateTime{ctime(&now)};
+		dateTime[strlen(dateTime) - 1] = '\0';
+		std::string build_py(BUILD_PY);
+		auto index = build_py.find(project_name);
+		if (index == std::string::npos)
+			return;
+		build_py.replace(index, project_name.length(), _project_setting._project_name);
+		index = build_py.find(build_date);
+		if (index == std::string::npos)
+			return;
+		build_py.replace(index, build_date.length(), dateTime);
+		file << build_py;
 		file.close();
 	}
 	else
@@ -470,14 +477,29 @@ void App::generateauraFile(const std::string &path)
 
 // TODO
 // reading project configuration file
-void App::readauraFile(std::string &output)
+void App::readBuildFile(std::string &output)
 {
-	std::ifstream file("setting.nn");
+	std::ifstream file("build.py");
 	if (file.is_open())
 	{
 		std::getline(file, output);
+		std::getline(file, output);
 		std::string dateTime{};
 		std::getline(file, dateTime);
+		auto index = output.find("=");
+		if (index == std::string::npos)
+		{
+			std::cerr << "build.py seems incorrect!\n";
+			return;
+		};
+		output = output.substr(index + 1);
+		index = dateTime.find("=");
+		if (index == std::string::npos)
+		{
+			std::cerr << "build.py seems incorrect!\n";
+			return;
+		};
+		dateTime = dateTime.substr(index + 1);
 		printf("%s[%s: %s]%s\n\n", YELLOW, output.c_str(), dateTime.c_str(), WHITE);
 		file.close();
 	}
@@ -545,13 +567,6 @@ void App::generateCppTemplateFile(const char *argv)
 		file << MAIN_CODE;
 		file.close();
 	};
-
-	std::ofstream setup_file("./" + _project_setting._project_name + "/setup.py");
-	if (setup_file.is_open())
-	{
-		setup_file << "print('No External Library configuration added yet!')";
-	};
-	setup_file.close();
 };
 
 //
@@ -921,19 +936,31 @@ void App::update()
 // TODO
 void App::debug()
 {
-	readauraFile(_project_setting._project_name);
+	readBuildFile(_project_setting._project_name);
 	system(("gdb ./build/Debug/" + _project_setting._project_name).c_str());
 };
 // TODO
 // this is actually useless for now but will add usefull stuff to it in future
 bool App::release()
 {
-	if (system("conan install . --build=missing --settings=build_type=Release"))
-		return false;
-	if (system("cmake --preset conan-release -G \"Ninja\""))
-		return false;
-	if (system("ninja -C ./build/Release"))
-		return false;
+	namespace fs = std::filesystem;
+	if (fs::exists("conanfile.txt"))
+	{
+
+		if (system("conan install . --build=missing --settings=build_type=Release"))
+			return false;
+		if (system("cmake --preset conan-release -G \"Ninja\""))
+			return false;
+		if (system("ninja -C ./build/Release"))
+			return false;
+	}
+	else
+	{
+		if (system("cmake -S . -B build/Debug -DCMAKE_BUILD_TYPE=Release -G \"Ninja\""))
+			return false;
+		if (system("ninja -C ./build/Release"))
+			return false;
+	}
 	return true;
 };
 
@@ -1017,8 +1044,10 @@ void App::addConanPackage(const std::string &name)
 	std::ifstream file{"conanfile.txt"};
 	if (!file.is_open())
 	{
-		fprintf(stderr, "%s[Error] : failed to open conanfile.txt%s", RED, WHITE);
-		return;
+		generateConanFile();
+		file.close();
+		file.clear();
+		file.open("conanfile.txt");
 	};
 	std::string line{};
 	while (std::getline(file, line))
@@ -1044,10 +1073,19 @@ void App::addConanPackage(const std::string &name)
 // installing newly added packages or reloading CMake configuration
 void App::reloadPackages()
 {
-	if (system("conan install . --build=missing --settings=build_type=Debug"))
-		return;
-	if (system("cmake --preset conan-debug -G \"Ninja\""))
-		return;
+	namespace fs = std::filesystem;
+	if (fs::exists("conanfile.txt"))
+	{
+
+		if (system("conan install . --build=missing --settings=build_type=Debug"))
+			return;
+		if (system("cmake --preset conan-debug -G \"Ninja\""))
+			return;
+	}
+	else
+	{
+		system("cmake -S . -B build/Debug -DCMAKE_BUILD_TYPE=Debug -G \"Ninja\"");
+	};
 }
 
 // for generating conan file for any CMAKE project

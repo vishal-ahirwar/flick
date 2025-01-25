@@ -35,8 +35,8 @@ public:
     static bool checkIfConanNeeded(void);
 
 private:
-    void generateauraFile(const std::string &);
-    void readauraFile(std::string &);
+    void generateBuildFile(const std::string &);
+    void readBuildFile(std::string &);
     void createDir(const char *);
     void generateCppTemplateFile(const char *);
     void generateCmakeFile(const char *);
