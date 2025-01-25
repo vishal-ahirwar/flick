@@ -1048,7 +1048,7 @@ void App::addConanPackage(const std::string &name)
 		file.close();
 		file.clear();
 		file.open("conanfile.txt");
-		reBuild();
+		std::filesystem::remove_all("build");
 	};
 	std::string line{};
 	while (std::getline(file, line))
