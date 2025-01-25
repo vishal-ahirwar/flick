@@ -1,6 +1,6 @@
 from os import system,cpu_count,path
-PROJECT_NAME:str="@projectName"#Warning : DO NOT REMOVE THIS LINE OR ADD ANYTHING ABOVE THIS LINE
-BUILD_DATE_TIME:str="@builddatetime"
+PROJECT_NAME:str="aura"#Warning : DO NOT REMOVE THIS LINE OR ADD ANYTHING ABOVE THIS LINE
+BUILD_DATE_TIME:str="????"
 GENERATOR:str="\"Ninja\""
 conan_file_exist:bool=path.exists("conanfile.txt")
 if __name__=="__main__":
