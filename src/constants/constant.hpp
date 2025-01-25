@@ -50,7 +50,7 @@ constexpr std::string_view CMAKE_CODE{
 #Copyright 2023 Vishal Ahirwar. #replace with your copyright notice.
 cmake_minimum_required(VERSION 3.6...3.31)
 project(@ VERSION 1.0.0 LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(BUILD_SHARED_LIBS OFF)
@@ -62,8 +62,8 @@ set(COPYRIGHT "Copyright(c) ${CURRENT_YEAR} ${COMPANY}.")
 include_directories(src ${CMAKE_BINARY_DIR})
 configure_file(@config_in @config_h)
 #@find Warning: Do not remove this line
-set(SOURCE ./src/main.cc)#add your additional source file here!
-add_executable(${PROJECT_NAME} ${SOURCE})
+file(GLOB SOURCES "src/*.cpp" "src/*.hpp" "src/*.hxx" "src/*.h" "src/*.cc" "src/*.cxx")
+add_executable(${PROJECT_NAME} ${SOURCES})
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 #@link Warning: Do not remove this line
 )"};
