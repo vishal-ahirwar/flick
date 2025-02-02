@@ -18,20 +18,14 @@ include_directories(src ${CMAKE_BINARY_DIR} external/json)
 add_subdirectory(external/cpr)
 add_subdirectory(external/fmt)
 configure_file(auraConfig.h.in auraConfig.h)
-add_executable(${PROJECT_NAME} 
-    src/main.cc
-    src/app/app.cc
-    src/aura/aura.cc
-    src/downloader/downloader.cc
-    src/rt/rt.cc
-    src/projectsetting/projectsetting.cc
-    src/userinfo/userinfo.cc)
+file(GLOB SOURCES "src/*.cc" "src/*/*.cc")
+add_executable(${PROJECT_NAME} ${SOURCES})
 
 add_executable(utool utool/main.cc src/downloader/downloader.cc src/rt/rt.cc src/userinfo/userinfo.cc)
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC cpr)
-target_link_libraries(utool PUBLIC cpr)
+target_link_libraries(${PROJECT_NAME} PUBLIC cpr fmt::fmt)
+target_link_libraries(utool PUBLIC cpr fmt::fmt)
 
 
 include(InstallRequiredSystemLibraries)

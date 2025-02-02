@@ -5,38 +5,12 @@
 #include <string>
 #include <stdio.h>
 #include <iostream>
-
+#include<log/log.h>
 namespace CLI
 {
     int showHelp()
     {
-        printf(
-            "%sAbout:\nLearning C/C++ and tired of creating files and folder and running .cpp,\ncompilling manually again n again\ntry this it does a lot for you \nlike creating full structured project\n"
-            "which will have CMake file, good clean folder structure,.gitignore file, and commands to \nfacilitate your most of time learning C++ without creating \n"
-            "a new project every time you want to learn a new concept in C/C++ ;)"
-            "%s\n\nversion : %d.%d.%d\nAuthor: %s\n%s\n"
-            "%s\n[Usage]: \n"
-            "aura [command] projectname\n"
-            "\n[available commands]%s\n\n"
-            "create- create a new C/C++ project [aura create projectName]\n"
-            "compile- compile the project[cd into project directory [aura compile <additional cmake args>]] ex. aura compile -DCMAKE_BUILD_TYPE=Debug\n"
-            "run- run the compiled binary make sure to compile the project before running this command\n"
-            "help-show the help wizard\n"
-            "build - compile and run the project with this single command\n"
-            "setup - this command will install a g++ compiler and cmake to your system if not already installed\n"
-            "utest : to enable unit testing{aura create test --test}\n"
-            "createinstaller : to create packged build of your application\n"
-            "update : update the aura to latest version\n"
-            "add : to add external library to your project using conan package manager ex. aura add fmt/11.0.2\n"
-            "reload : to reload the package list ex.aura reload\n"
-            "rebuild : this will remove the build directory and compile the project again\n"
-            "initconan : to add conan file\n"
-            "debug : to start GDB debugger\n"
-            "release: to compile application in release mode or you can do this manually aura compile -DCMAKE_BUILD_TYPE=Release\n"
-            "vscode : to generate vscode c/c++ configuration file\n"
-            "fix : to fix the aura installation\n%s",
-            BLUE, YELLOW, AURA_VERSION_MAJOR, AURA_VERSION_MINOR, AURA_VERSION_PATCH,
-            AURA_COMPANY, AURA_COPYRIGHT, CYAN, GREEN, WHITE);
+        Log::about();
         return 0;
     }
     int createApp(const char *argv[], int argc)
