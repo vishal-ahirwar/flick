@@ -15,7 +15,7 @@ namespace CLI
     }
     int createApp(const char *argv[], int argc)
     {
-        App app;
+        Aura aura;
         if (std::string(argv[1]) == std::string("create"))
         {
             if (argc < 3)
@@ -24,7 +24,7 @@ namespace CLI
                 return 1;
             };
 
-            app.createNewProject(argv, argc);
+            aura.createNewProject(argv, argc);
         }
         else if (std::string(argv[1]) == std::string("help"))
         {
@@ -33,23 +33,23 @@ namespace CLI
         else if (std::string(argv[1]) == std::string("compile"))
         {
             if (argc > 2)
-                app.compile(std::string(argv[2]));
+                aura.compile(std::string(argv[2]));
             else
-                app.compile();
+                aura.compile();
         }
         else if (std::string(argv[1]) == std::string("run"))
         {
-            app.run(argc - 2, argv + 2);
+            aura.run(argc - 2, argv + 2);
         }
         else if (std::string(argv[1]) == std::string("build"))
         {
-            app.build();
+            aura.build();
         }
         else if (std::string(argv[1]) == std::string("setup"))
         {
             try
             {
-                app.setup();
+                aura.setup();
             }
             catch (const std::exception &e)
             {
@@ -58,27 +58,27 @@ namespace CLI
         }
         else if (std::string(argv[1]) == std::string("createinstaller"))
         {
-            app.createInstaller();
+            aura.createInstaller();
         }
         else if (std::string(argv[1]) == std::string("utest"))
         {
-            app.test();
+            aura.test();
         }
         else if (std::string(argv[1]) == std::string("fix"))
         {
-            app.fixInstallation();
+            aura.fixInstallation();
         }
         else if (std::string(argv[1]) == std::string("update"))
         {
-            app.update();
+            aura.update();
         }
         else if (std::string(argv[1]) == std::string("debug"))
         {
-            app.debug();
+            aura.debug();
         }
         else if (std::string(argv[1]) == std::string("release"))
         {
-            app.release();
+            aura.release();
         }
         else if (std::string(argv[1]) == std::string("add"))
         {
@@ -88,21 +88,21 @@ namespace CLI
                 printf("Try again with 'aura help' :(\n");
                 return 0;
             };
-            app.addConanPackage(argv[2]);
+            aura.addConanPackage(argv[2]);
         }
         else if (std::string(argv[1]) == std::string("reload"))
         {
-            app.reloadPackages();
+            aura.reloadPackages();
         }
         else if (std::string(argv[1]) == std::string("initconan"))
         {
-            app.initConan();
+            aura.initConan();
         }else if(std::string(argv[1])==std::string("vscode"))
         {
-            app.vsCode();
+            aura.vsCode();
         }else if(std::string(argv[1])==std::string("rebuild"))
         {
-            app.reBuild();
+            aura.reBuild();
         }
         else
         {

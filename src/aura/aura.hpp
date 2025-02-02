@@ -4,7 +4,7 @@
 #include<projectsetting/projectsetting.h>
 #include<userinfo/userinfo.h>
 #include<rt/rt.h>
-class App
+class Aura
 {
 private:
     ProjectSetting _project_setting{};
@@ -53,6 +53,6 @@ private:
     friend void test();
 
 public:
-    App();
-    ~App();
+    Aura();
+    ~Aura();
 };

@@ -28,14 +28,14 @@
 void addToConanFile(const std::string &);
 void addToCMakeFile(std::string);
 
-App::App() {
+Aura::Aura() {
 
 };
-App::~App() {
+Aura::~Aura() {
 
 };
 
-void App::setupUnitTestingFramework()
+void Aura::setupUnitTestingFramework()
 {
 	namespace fs = std::filesystem;
 	auto path = fs::current_path().string() + "/tests/";
@@ -70,7 +70,7 @@ void App::setupUnitTestingFramework()
 	fprintf(stdout, "%sunit testing template code added to project run tests with : aura utest%s\n", YELLOW, WHITE);
 };
 
-void App::createNewProject(const char *argv[], int argc)
+void Aura::createNewProject(const char *argv[], int argc)
 {
 
 	printf("%sCreating directory ....\n%s", GREEN, WHITE);
@@ -85,7 +85,7 @@ void App::createNewProject(const char *argv[], int argc)
 };
 
 // TODO : add compile option
-bool App::compile(const std::string &additional_cmake_arg)
+bool Aura::compile(const std::string &additional_cmake_arg)
 {
 	// Temp Soln
 
@@ -125,7 +125,7 @@ bool App::compile(const std::string &additional_cmake_arg)
 	}
 };
 //
-void App::run(int argc, const char **argv)
+void Aura::run(int argc, const char **argv)
 {
 	std::string output{};
 	readBuildFile(output);
@@ -157,14 +157,14 @@ void App::run(int argc, const char **argv)
 }
 
 //
-void App::build()
+void Aura::build()
 {
 	this->compile();
 	this->run(0, nullptr);
 }
 
 //
-void App::addToPathWin()
+void Aura::addToPathWin()
 {
 #ifdef WIN32
 	namespace fs = std::filesystem;
@@ -245,7 +245,7 @@ void App::addToPathWin()
 #endif
 }
 //
-void App::addToPathUnix()
+void Aura::addToPathUnix()
 {
 	namespace fs = std::filesystem;
 	std::string aura{"/home/"};
@@ -330,7 +330,7 @@ void App::addToPathUnix()
 };
 
 // installing dev tools
-void App::installEssentialTools(bool &isInstallationComplete)
+void Aura::installEssentialTools(bool &isInstallationComplete)
 {
 #ifdef WIN32
 	namespace fs = std::filesystem;
@@ -439,13 +439,13 @@ void App::installEssentialTools(bool &isInstallationComplete)
 #endif
 };
 //
-void App::setup()
+void Aura::setup()
 {
 	onSetup();
 };
 
 // TODO
-void App::generateBuildFile(const std::string &path)
+void Aura::generateBuildFile(const std::string &path)
 {
 	std::string newFileName{path};
 	newFileName += "/build.py";
@@ -477,7 +477,7 @@ void App::generateBuildFile(const std::string &path)
 
 // TODO
 // reading project configuration file
-void App::readBuildFile(std::string &output)
+void Aura::readBuildFile(std::string &output)
 {
 	std::ifstream file("build.py");
 	if (file.is_open())
@@ -510,7 +510,7 @@ void App::readBuildFile(std::string &output)
 }
 
 // creating folder structure for project
-void App::createDir(const char *argv)
+void Aura::createDir(const char *argv)
 {
 	namespace fs = std::filesystem;
 	std::string cmdString{};
@@ -540,7 +540,7 @@ void App::createDir(const char *argv)
 	}
 };
 //
-void App::generateCppTemplateFile(const char *argv)
+void Aura::generateCppTemplateFile(const char *argv)
 {
 	std::ofstream file;
 	// const std::string stdStr{argv[2]};
@@ -570,7 +570,7 @@ void App::generateCppTemplateFile(const char *argv)
 };
 
 //
-void App::generateCmakeFile(const char *argv)
+void Aura::generateCmakeFile(const char *argv)
 {
 	std::string config{(_project_setting._project_name + "config.h.in")};
 	{
@@ -615,7 +615,7 @@ void App::generateCmakeFile(const char *argv)
 	}
 }
 //
-void App::generateGitIgnoreFile()
+void Aura::generateGitIgnoreFile()
 {
 	std::ofstream file;
 	file.open("./" + _project_setting._project_name + "/.gitignore", std::ios::out);
@@ -627,7 +627,7 @@ void App::generateGitIgnoreFile()
 	};
 };
 //
-void App::generateLicenceFile()
+void Aura::generateLicenceFile()
 {
 	std::ofstream out;
 	out.open("License.txt", std::ios_base::out);
@@ -643,7 +643,7 @@ void App::generateLicenceFile()
 	out.close();
 }
 //
-void App::generateConanFile()
+void Aura::generateConanFile()
 {
 	std::ofstream file;
 	file.open("./" + _project_setting._project_name + "/conanfile.txt", std::ios::out);
@@ -658,7 +658,7 @@ void App::generateConanFile()
 	};
 };
 // creating packaged build [with installer for windows] using cpack
-void App::createInstaller()
+void Aura::createInstaller()
 {
 	if (!release())
 	{
@@ -688,7 +688,7 @@ void App::createInstaller()
 };
 
 // running utest
-void App::test()
+void Aura::test()
 {
 	setupUnitTestingFramework();
 	compile();
@@ -701,7 +701,7 @@ void App::test()
 
 // TODO
 // implementation is buggy right now will fix later
-bool App::onSetup()
+bool Aura::onSetup()
 {
 	bool isInstallationComplete{false};
 	namespace fs = std::filesystem;
@@ -801,7 +801,7 @@ bool App::onSetup()
 }
 // TODO
 // remove the ~/aura and reinstall the aura again with all the tools like cmake,g++ compiler,ninja,nsis
-void App::fixInstallation()
+void Aura::fixInstallation()
 {
 	printf("%sAre you sure you "
 		   "want to "
@@ -902,7 +902,7 @@ void createProcess(const std::string &path)
 #endif
 }
 // download the utool from github if it's not already there then download the latest build from github
-void App::update()
+void Aura::update()
 {
 	namespace fs = std::filesystem;
 #ifdef WIN32
@@ -934,14 +934,14 @@ void App::update()
 	};
 };
 // TODO
-void App::debug()
+void Aura::debug()
 {
 	readBuildFile(_project_setting._project_name);
 	system(("gdb ./build/Debug/" + _project_setting._project_name).c_str());
 };
 // TODO
 // this is actually useless for now but will add usefull stuff to it in future
-bool App::release()
+bool Aura::release()
 {
 	namespace fs = std::filesystem;
 	if (fs::exists("conanfile.txt"))
@@ -1039,7 +1039,7 @@ void addToCMakeFile(std::string name)
 	out.close();
 };
 // adding new packages to conanfile.txt then add recuired commands to  cmakelists.txt and reload cmakelist.txt to reconfigure project
-void App::addConanPackage(const std::string &name)
+void Aura::addConanPackage(const std::string &name)
 {
 	std::ifstream file{"conanfile.txt"};
 	if (!file.is_open())
@@ -1072,7 +1072,7 @@ void App::addConanPackage(const std::string &name)
 };
 
 // installing newly added packages or reloading CMake configuration
-void App::reloadPackages()
+void Aura::reloadPackages()
 {
 	namespace fs = std::filesystem;
 	if (fs::exists("conanfile.txt"))
@@ -1090,7 +1090,7 @@ void App::reloadPackages()
 }
 
 // for generating conan file for any CMAKE project
-void App::initConan()
+void Aura::initConan()
 {
 	std::ifstream conan_file{"conanfile.txt"};
 	if (conan_file.is_open())
@@ -1105,7 +1105,7 @@ void App::initConan()
 
 // for generating vscode intelligence
 // everytime user run this command it's will override everything in c_cpp_properties.json
-void App::vsCode()
+void Aura::vsCode()
 {
 	namespace fs = std::filesystem;
 	if (!fs::exists("build.py"))
@@ -1124,7 +1124,7 @@ void App::vsCode()
 }
 
 // it will simply delete the whole build folder and compile the project again
-void App::reBuild()
+void Aura::reBuild()
 {
 	namespace fs = std::filesystem;
 	try
@@ -1144,25 +1144,25 @@ void App::reBuild()
 	compile();
 };
 
-void App::askUserinfo(struct UserInfo *user) {
+void Aura::askUserinfo(struct UserInfo *user) {
 
 };
 
-void App::readUserInfoFromConfigFile(struct UserInfo *user) {
+void Aura::readUserInfoFromConfigFile(struct UserInfo *user) {
 
 };
 
-void App::writeUserInfoToConfigFile(struct UserInfo *user) {
+void Aura::writeUserInfoToConfigFile(struct UserInfo *user) {
 
 };
 
-void App::readProjectSettings(struct ProjectSetting *setting) {
+void Aura::readProjectSettings(struct ProjectSetting *setting) {
 
 };
-void App::writeProjectSettings(struct ProjectSetting *setting) {
+void Aura::writeProjectSettings(struct ProjectSetting *setting) {
 
 };
-bool App::checkIfConanNeeded(void)
+bool Aura::checkIfConanNeeded(void)
 {
 	return false;
 };
