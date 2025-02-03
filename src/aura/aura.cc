@@ -892,7 +892,7 @@ void createProcess(const std::string &path)
 	else
 	{
 		// Parent process - can optionally wait for the child to finish or log the success
-		Log::log("Updater started successfully in the background.", Type::E_DISPLAY) return;
+		Log::log("Updater started successfully in the background.", Type::E_DISPLAY); return;
 	}
 #endif
 }
