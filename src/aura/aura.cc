@@ -25,6 +25,7 @@
 #include <vector>
 #include <algorithm>
 #include <rt/rt.h>
+#include <log/log.h>
 void addToConanFile(const std::string &);
 void addToCMakeFile(std::string);
 
@@ -62,26 +63,26 @@ void Aura::setupUnitTestingFramework()
 	}
 	else
 	{
-		fprintf(stderr, "%sFailed to open CMakeLists.txt%s", RED, WHITE);
+		Log::log("Failed to open CMakeLists.txt", Type::E_ERROR);
 		return;
 	};
 	file.close();
-	reloadPackages();
-	fprintf(stdout, "%sunit testing template code added to project run tests with : aura utest%s\n", YELLOW, WHITE);
+	reBuild();
+	Log::log("unit testing template code added to project run tests with : aura utest", Type::E_DISPLAY);
 };
 
 void Aura::createNewProject(const char *argv[], int argc)
 {
 
-	printf("%sCreating directory ....\n%s", GREEN, WHITE);
-
+	Log::log("Creating directory..", Type::E_DISPLAY);
 	std::string cmdString{};
 	createDir(argv[2]);
-	printf("%sGenerating Code for main.c and CMakeLists.txt ....\n%s", GREEN, WHITE);
+	Log::log("Generating Code for main.c and CMakeLists.txt..", Type::E_DISPLAY);
 	generateCppTemplateFile(argv[2]);
 	generateCmakeFile(argv[2]);
 	generateBuildFile(_project_setting._project_name);
 	generateGitIgnoreFile();
+	Log::log("Done", Type::E_DISPLAY);
 };
 
 // TODO : add compile option
@@ -95,17 +96,17 @@ bool Aura::compile(const std::string &additional_cmake_arg)
 	if (!fs::exists(fs::current_path().string() + "/build") || additional_cmake_arg.length() > 5)
 	{
 		// run cmake
-		printf("%sCompile Process has been started ....\n%s", BLUE, WHITE);
+		Log::log("Compile Process has been started...", Type::E_DISPLAY);
 		reloadPackages();
 		// run ninja
 		if (!system(("ninja -C build/Debug -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
 		{
-			printf("\n%sBUILD SUCCESSFULL%s\n", GREEN, WHITE);
+			Log::log("BUILD SUCCESSFULL", Type::E_DISPLAY);
 			return true;
 		}
 		else
 		{
-			printf("\n%sBUILD FAILED%s\n", RED, WHITE);
+			Log::log("BUILD FAILED", Type::E_ERROR);
 			return false;
 		}
 	}
@@ -114,12 +115,13 @@ bool Aura::compile(const std::string &additional_cmake_arg)
 		// run ninja
 		if (!system(("ninja -C build/Debug -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
 		{
-			printf("\n%sBUILD SUCCESSFULL%s\n", GREEN, WHITE);
+			Log::log("BUILD SUCCESSFULL", Type::E_DISPLAY);
+
 			return true;
 		}
 		else
 		{
-			printf("\n%sBUILD FAILED%s\n", RED, WHITE);
+			Log::log("BUILD FAILED", Type::E_ERROR);
 			return false;
 		}
 	}
@@ -149,10 +151,9 @@ void Aura::run(int argc, const char **argv)
 
 	if (system(run.c_str()))
 	{
-		printf("%s\n[error] Maybe You should Compile First Before run or You have Permission to "
-			   "execute program!\n%s",
-			   RED,
-			   WHITE);
+		Log::log("Maybe You should Compile First Before run or You have Permission to "
+				 "execute program!",
+				 Type::E_ERROR);
 	};
 }
 
@@ -176,7 +177,7 @@ void Aura::addToPathWin()
 	{
 		if (!fs::exists(source))
 		{
-			std::cout << "aura doesn't exist in current dir\n";
+			Log::log("aura doesn't exist in current dir", Type::E_WARNING);
 		}
 		else
 		{
@@ -187,7 +188,7 @@ void Aura::addToPathWin()
 			}
 			else
 			{
-				printf("%serror while copying aura.exe into aura directory!%s\n", RED, WHITE);
+				Log::log("error while copying aura.exe into aura directory!", Type::E_ERROR);
 			};
 		}
 	}
@@ -228,11 +229,11 @@ void Aura::addToPathWin()
 
 	if (found)
 	{
-		std::cout << "All paths from aura are in PATH\n";
+		Log::log("All paths from aura are in PATH", Type::E_DISPLAY);
 	}
 	else
 	{
-		std::cout << "Some paths from aura are missing in PATH adding these entries into path make sure to restart your shell after that\n";
+		Log::log("Some paths from aura are missing in PATH adding these entries into path make sure to restart your shell after that", Type::E_WARNING);
 		pathStream.clear();
 		pathStream.str(newPath);
 		std::string tempStr{};
@@ -257,7 +258,7 @@ void Aura::addToPathUnix()
 	{
 		if (!fs::exists(source))
 		{
-			std::cout << "aura doesn't exist in current dir\n";
+			Log::log("aura doesn't exist in current dir", Type::E_ERROR);
 		}
 		else
 		{
@@ -269,7 +270,7 @@ void Aura::addToPathUnix()
 			}
 			else
 			{
-				printf("%serror while copying aura.exe into aura directory!%s\n", RED, WHITE);
+				Log::log("error while copying aura.exe into aura directory!", Type::E_ERROR);
 			};
 		}
 	}
@@ -306,11 +307,11 @@ void Aura::addToPathUnix()
 	}
 	if (found)
 	{
-		std::cout << "All paths from aura are in PATH\n";
+		Log::log("All paths from aura are in PATH", Type::E_DISPLAY);
 	}
 	else
 	{
-		std::cout << "Some paths from aura are missing in PATH adding these entries into path make sure to restart your shell after that\n";
+		Log::log("Some paths from aura are missing in PATH adding these entries into path make sure to restart your shell after that", Type::E_WARNING);
 		pathStream.clear();
 		pathStream.str(newPath);
 		std::string tempStr{};
@@ -323,7 +324,7 @@ void Aura::addToPathUnix()
 		}
 		else
 		{
-			std::cout << "failed to open ~/.bashrc file!\n";
+			Log::log("failed to open ~/.bashrc file!\n", Type::E_ERROR);
 			return;
 		}
 	};
@@ -334,11 +335,10 @@ void Aura::installEssentialTools(bool &isInstallationComplete)
 {
 #ifdef WIN32
 	namespace fs = std::filesystem;
-	printf("%sThis will install C/C++ GCC Toolchain with cmake, ninja and conan package manager from Github,\nAre you sure you "
-		   "want to "
-		   "continue??[y/n] %s\n",
-		   YELLOW,
-		   WHITE);
+	Log::log("This will install C/C++ GCC Toolchain with cmake, ninja and conan package manager from Github,\nAre you sure you "
+			 "want to "
+			 "continue??[y/n]",
+			 Type::E_DISPLAY);
 	char c;
 	while (true)
 	{
@@ -369,7 +369,7 @@ void Aura::installEssentialTools(bool &isInstallationComplete)
 		return;
 	if (system((std::string("tar -xf ") + "\"" + home + "\\nsis.zip\"" + " -C " + "\"" + home + "\"").c_str()))
 		return;
-	printf("%sremoving downloaded archives...%s\n", RED, WHITE);
+	Log::log("removing downloaded archives...", Type::E_DISPLAY);
 	fs::remove((home + "\\compiler.zip"));
 	fs::remove((home + "\\cmake.zip"));
 	fs::remove((home + "\\conan.zip"));
@@ -471,7 +471,7 @@ void Aura::generateBuildFile(const std::string &path)
 	}
 	else
 	{
-		printf("%ssomething went wrong!\n%s", RED, WHITE);
+		Log::log("something went wrong!", Type::E_ERROR);
 	}
 }
 
@@ -489,14 +489,14 @@ void Aura::readBuildFile(std::string &output)
 		auto index = output.find("=");
 		if (index == std::string::npos)
 		{
-			std::cerr << "build.py seems incorrect!\n";
+			Log::log("build.py seems incorrect!", Type::E_ERROR);
 			return;
 		};
 		output = output.substr(index + 1);
 		index = dateTime.find("=");
 		if (index == std::string::npos)
 		{
-			std::cerr << "build.py seems incorrect!\n";
+			Log::log("build.py seems incorrect!", Type::E_ERROR);
 			return;
 		};
 		dateTime = dateTime.substr(index + 1);
@@ -505,7 +505,7 @@ void Aura::readBuildFile(std::string &output)
 	}
 	else
 	{
-		printf("%saura file setting.nn doesn't exist!\n%s", RED, WHITE);
+		Log::log("build.py doesn't exist!", Type::E_ERROR);
 	};
 }
 
@@ -535,7 +535,7 @@ void Aura::createDir(const char *argv)
 	}
 	else
 	{
-		printf("%sfailed to create dir error!%s", RED, WHITE);
+		Log::log("failed to create dir error!", Type::E_ERROR);
 		exit(0);
 	}
 };
@@ -633,10 +633,9 @@ void Aura::generateLicenceFile()
 	out.open("License.txt", std::ios_base::out);
 	if (!out.is_open())
 	{
-		printf("%s[Error]Failed to Generate License.txt, You may need to create License.txt by "
-			   "yourself :)%s",
-			   RED,
-			   WHITE);
+		Log::log("Failed to Generate License.txt, You may need to create License.txt by "
+				 "yourself :)%s",
+				 Type::E_ERROR);
 		return;
 	};
 	out << LICENSE_TEXT;
@@ -654,7 +653,7 @@ void Aura::generateConanFile()
 	}
 	else
 	{
-		printf("%s[error]Failed to generate conanfile.txt%s\n", RED, WHITE);
+		Log::log("Failed to generate conanfile.txt", Type::E_ERROR);
 	};
 };
 // creating packaged build [with installer for windows] using cpack
@@ -662,7 +661,7 @@ void Aura::createInstaller()
 {
 	if (!release())
 	{
-		fprintf(stderr, "%s[Error] : Please First fix all the errors%s", RED, WHITE);
+		Log::log("Please First fix all the errors", Type::E_ERROR);
 		return;
 	};
 	if (!system("cd build/Release && cpack"))
@@ -676,14 +675,12 @@ void Aura::createInstaller()
 		generateLicenceFile();
 		reloadPackages();
 		if (system("cd build/Release && cpack"))
-			printf("%s[Msg]CPack added to cmake run 'aura createinstaller' command again"
-				   "%s\n",
-				   GREEN,
-				   WHITE);
+			Log::log("CPack added to cmake run 'aura createinstaller' command again",
+					 Type::E_DISPLAY);
 	}
 	else
 	{
-		printf("%s[Msg]Something went wrong :(%s\n", RED, WHITE);
+		Log::log("Something went wrong :(\n", Type::E_ERROR);
 	}
 };
 
@@ -717,7 +714,7 @@ bool Aura::onSetup()
 #ifdef WIN32
 	if (!fs::create_directory(home + "\\.aura"))
 	{
-		printf("%saura dir alread exist%s\n", GREEN, WHITE);
+		Log::log(".aura dir alread exist", Type::E_WARNING);
 	};
 	file.open((home + "\\.aura\\.cconfig").c_str(), std::ios::in);
 	if (file.is_open())
@@ -726,7 +723,7 @@ bool Aura::onSetup()
 		file.close();
 		if (isInstallationComplete)
 		{
-			printf("%sCompiler is already installed if you think you messed up with aura installation please use this command aura fix %s\n", GREEN, WHITE);
+			Log::log("Compiler is already installed if you think you messed up with aura installation please use this command aura fix", Type::E_WARNING);
 			return true;
 		}
 	}
@@ -757,7 +754,7 @@ bool Aura::onSetup()
 #else
 	if (!fs::create_directory(home + "/.aura"))
 	{
-		printf("%saura dir alread exist%s\n", GREEN, WHITE);
+		Log::log(".aura dir alread exist", Type::E_WARNING);
 	}
 	else
 	{
@@ -771,13 +768,13 @@ bool Aura::onSetup()
 		file.close();
 		if (isInstallationComplete)
 		{
-			printf("%sCompiler is already installed if you think you messed up with aura installation please use this command aura fix %s\n", GREEN, WHITE);
+			Log::log("Compiler is already installed if you think you messed up with aura installation please use this command aura fix", Type::E_WARNING);
 			return true;
 		}
 	}
 	else
 	{
-		std::cout << "config file doesn't exist, creating one\n";
+		Log::log("config file doesn't exist, creating one", Type::E_ERROR);
 	};
 
 	installEssentialTools(isInstallationComplete);
@@ -785,7 +782,7 @@ bool Aura::onSetup()
 	file.open((home + std::string("/.aura/.cconfig")).c_str(), std::ios::out);
 	if (file.is_open())
 	{
-		std::cout << "writing to config file!\n";
+		Log::log("writing to config file!", Type::E_DISPLAY);
 		file << isInstallationComplete;
 		file.close();
 		std::cout << "done!\n";
@@ -793,7 +790,7 @@ bool Aura::onSetup()
 	}
 	else
 	{
-		std::cout << "failed to write config file\n";
+		Log::log("failed to write config file", E_ERROR);
 		return false;
 	};
 
@@ -803,11 +800,10 @@ bool Aura::onSetup()
 // remove the ~/aura and reinstall the aura again with all the tools like cmake,g++ compiler,ninja,nsis
 void Aura::fixInstallation()
 {
-	printf("%sAre you sure you "
-		   "want to "
-		   "continue??[y/n] %s\n",
-		   YELLOW,
-		   WHITE);
+	Log::log("Are you sure you "
+			 "want to "
+			 "continue??[y/n] %s\n",
+			 Type::E_DISPLAY);
 	char c;
 	while (true)
 	{
@@ -826,13 +822,13 @@ void Aura::fixInstallation()
 	home += getenv(USERNAME);
 #endif
 	namespace fs = std::filesystem;
-	printf("%sreseting aura...%s\n", RED, WHITE);
+	Log::log("reseting aura...", Type::E_WARNING);
 #ifdef WIN32
 	fs::remove_all((home + "\\.aura"));
 #else
 	fs::remove_all((home + "/.aura"));
 #endif
-	printf("%sall clean!%s\n", RED, WHITE);
+	Log::log("all clean!", Type::E_DISPLAY);
 	setup();
 };
 
@@ -858,28 +854,28 @@ void createProcess(const std::string &path)
 		// Close process and thread handles
 		CloseHandle(pi.hProcess);
 		CloseHandle(pi.hThread);
-		printf("%sUpdater started successfully.%s\n", GREEN, WHITE);
+		Log::log("Updater started successfully.", Type::E_DISPLAY);
 	}
 	else
 	{
-		printf("%sFailed to start updater!\n", RED, WHITE);
+		Log::log("Failed to start updater!", Type::E_ERROR);
 		if (GetLastError() == 740)
 		{
-			printf("%sPlease try run this command with administrator privileges%s\n", RED, WHITE);
+			Log::log("Please try run this command with administrator privileges%s\n", Type::E_WARNING);
 		}
 		else
 		{
-			printf("%sunkown error occured!%s\n", RED, WHITE);
+			Log::log("unkown error occured!", Type::E_ERROR);
 		};
 	}
 #else
-	printf("%sImpementation is still in development for linux%s\n", BLUE, WHITE);
+	Log::log("Impementation is still in development for linux", Type::E_WARNING);
 	// Linux implementation using fork() and exec()
 	pid_t pid = fork(); // Create a new process
 
 	if (pid < 0)
 	{
-		std::cerr << "Fork failed!" << std::endl;
+		Log::log("Fork failed!", Type::E_ERROR);
 		return;
 	}
 
@@ -889,15 +885,14 @@ void createProcess(const std::string &path)
 		// Execute the update tool
 		if (execlp(path.c_str(), path.c_str(), (char *)NULL) == -1)
 		{
-			printf("Failed to start update tool\n");
+			Log::log("Failed to start update tool", Type::E_ERROR);
 			return;
 		};
 	}
 	else
 	{
 		// Parent process - can optionally wait for the child to finish or log the success
-		std::cout << "Updater started successfully in the background." << std::endl;
-		return;
+		Log::log("Updater started successfully in the background.", Type::E_DISPLAY) return;
 	}
 #endif
 }
@@ -918,7 +913,7 @@ void Aura::update()
 	aura += "/.aura";
 	std::string source{aura + "/utool"};
 #endif
-	printf("updating aura...\n");
+	Log::log("updating aura...", Type::E_DISPLAY);
 	std::cout << source << "\n";
 	if (fs::exists(source)) // if utool is present in ~/aura directory then start the utool if not download the utool first
 	{
@@ -937,6 +932,8 @@ void Aura::update()
 void Aura::debug()
 {
 	readBuildFile(_project_setting._project_name);
+	if (!compile())
+		return;
 	system(("gdb ./build/Debug/" + _project_setting._project_name).c_str());
 };
 // TODO
@@ -970,8 +967,11 @@ void addToConanFile(const std::string &name)
 	std::ifstream in("conanfile.txt");
 	if (!in.is_open()) // checking if conanfile.txt presents or not
 	{
-		fprintf(stderr, "%s[error]Failed to open conanfile.txt, try aura initconan%s\n", RED, WHITE);
-		return;
+		Aura aura;
+		in.close();
+		in.clear();
+		aura.initConan();
+		in.open("conanfile.txt");
 	};
 	std::vector<std::string> lines{};
 	std::string line{};
@@ -1000,7 +1000,7 @@ void addToCMakeFile(std::string name)
 	std::ifstream in("CMakeLists.txt");
 	if (!in.is_open())
 	{
-		printf("%s[error]Failed to open CMakeLists.txt%s\n", RED, WHITE);
+		Log::log("Failed to open CMakeLists.txt", Type::E_ERROR);
 		return;
 	};
 	std::vector<std::string> lines{};
@@ -1110,7 +1110,10 @@ void Aura::vsCode()
 	namespace fs = std::filesystem;
 	if (!fs::exists("build.py"))
 		return;
-	fs::exists(".vscode") ? fprintf(stdout, "%s.vscode already exist!%s\n", YELLOW, WHITE) : fs::create_directory(".vscode");
+	if (fs::exists(".vscode"))
+		Log::log(".vscode already exist!", Type::E_WARNING);
+	else
+		fs::create_directory(".vscode");
 	std::ofstream file(".vscode/c_cpp_properties.json", std::ios::out);
 	if (file.is_open())
 	{
@@ -1118,7 +1121,7 @@ void Aura::vsCode()
 	}
 	else
 	{
-		fprintf(stderr, "%sfailed to create .vscode/c_cpp_properties.json%s\n", RED, WHITE);
+		Log::log("failed to create .vscode/c_cpp_properties.json", Type::E_ERROR);
 	}
 	file.close();
 }

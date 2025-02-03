@@ -21,7 +21,7 @@ configure_file(auraConfig.h.in auraConfig.h)
 file(GLOB SOURCES "src/*.cc" "src/*/*.cc")
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-add_executable(utool utool/main.cc src/downloader/downloader.cc src/rt/rt.cc src/userinfo/userinfo.cc)
+add_executable(utool utool/main.cc src/downloader/downloader.cc src/rt/rt.cc src/userinfo/userinfo.cc ./src/log/log.cc)
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC cpr fmt::fmt)
