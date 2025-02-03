@@ -790,7 +790,7 @@ bool Aura::onSetup()
 	}
 	else
 	{
-		Log::log("failed to write config file", E_ERROR);
+		Log::log("failed to write config file", Type::E_ERROR);
 		return false;
 	};
 
