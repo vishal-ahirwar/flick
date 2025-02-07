@@ -9,17 +9,17 @@ void Log::log(const std::string_view &msg, Type e_type)
     {
     case Type::E_DISPLAY:
     {
-        fmt::print(fmt::emphasis::faint | fmt::fg(fmt::color::ghost_white), "[Display] {}\n", msg);
+        fmt::print(fmt::fg(fmt::color::ghost_white), "[Display] {}\n", msg);
         break;
     };
     case Type::E_WARNING:
     {
-        fmt::print(fmt::emphasis::faint | fmt::fg(fmt::color::yellow), "[Warning] {}\n", msg);
+        fmt::print(fmt::fg(fmt::color::yellow), "[Warning] {}\n", msg);
         break;
     };
     case Type::E_ERROR:
     {
-        fmt::print(fmt::emphasis::faint | fmt::fg(fmt::color::crimson), "[Error] {}\n", msg);
+        fmt::print(fmt::fg(fmt::color::crimson), "[Error] {}\n", msg);
         break;
     };
     };

@@ -160,7 +160,7 @@ constexpr std::string_view VSCODE_CONFIG{R"(   {
 constexpr std::string_view VIM_CONFIG{R"()"};
 
 #ifdef WIN32
-constexpr std::string_view COMPILER_URL_64BIT{"https://github.com/cristianadam/mingw-builds/releases/download/v12.1.0-rev0/x86_64-12.1.0-release-posix-seh-rt_v10-rev0.7z"};
+constexpr std::string_view COMPILER_URL_64BIT{"https://github.com/mstorsjo/llvm-mingw/releases/download/20250114/llvm-mingw-20250114-ucrt-x86_64.zip"};
 
 constexpr std::string_view CMAKE_URL_64BIT{"https://github.com/Kitware/CMake/releases/download/v3.31.2/cmake-3.31.2-windows-x86_64.zip"};
 
