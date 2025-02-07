@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <rt/rt.h>
 #include <log/log.h>
+
 void addToConanFile(const std::string &);
 void addToCMakeFile(std::string);
 
@@ -380,6 +381,9 @@ void Aura::installEssentialTools(bool &isInstallationComplete)
 #else
 #define DISTRO_INFO "/etc/os-release"
 	// Todo :read the file and u will know what ditro user running ;)
+	auto addToPath = [&]() {
+		Log::log("Make sure to add llvm to your PATH;look into /usr/lib/llvm* ",Type::E_WARNING);
+	}; //TODO: add LLVM to path
 	try
 	{
 		namespace fs = std::filesystem;
@@ -416,15 +420,18 @@ void Aura::installEssentialTools(bool &isInstallationComplete)
 		std::cout << GREEN << "Development OS Distro/Parent Distro : " << distro_name << WHITE << "\n";
 		if (distro_name.find("debian") != std::string::npos || distro_name.find("ubuntu") != std::string::npos)
 		{
-			system("sudo apt install g++ cmake git");
+			system("sudo apt install llvm cmake git ninja-build");
+			addToPath();
 		}
 		else if (distro_name.find("arch") != std::string::npos)
 		{
-			system("pacman -Sy g++ cmake git");
+			system("pacman -Sy llvm cmake git ninja-build");
+			addToPath();
 		}
 		else if (distro_name.find("fedora") != std::string::npos || distro_name.find("rhel") != std::string::npos)
 		{
-			system("sudo dnf install g++ cmake git");
+			system("sudo dnf install llvm cmake git ninja-build");
+			addToPath();
 		};
 
 		file.close();
@@ -892,7 +899,8 @@ void createProcess(const std::string &path)
 	else
 	{
 		// Parent process - can optionally wait for the child to finish or log the success
-		Log::log("Updater started successfully in the background.", Type::E_DISPLAY); return;
+		Log::log("Updater started successfully in the background.", Type::E_DISPLAY);
+		return;
 	}
 #endif
 }
