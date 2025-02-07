@@ -3,30 +3,35 @@ project(aura VERSION 2.5.0)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-if(WIN32)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static -static-libgcc -static-libstdc++")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static -static-libgcc")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static -lstdc++fs")
-endif(WIN32)
+
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -funroll-loops")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 set(COMPANY "Vishal ahirwar")
 string(TIMESTAMP CURRENT_YEAR "%Y")
 set(COPYRIGHT "Copyright(c) ${CURRENT_YEAR} Vishal Ahirwar and all Contributors. All rights reserved.")
-include_directories(src ${CMAKE_BINARY_DIR} external/json)
-add_subdirectory(external/cpr)
-add_subdirectory(external/fmt)
+
+
+include_directories(src ${CMAKE_BINARY_DIR} external/json ${CMAKE_SOURCE_DIR}/external/cpr/install/include)
+set(cpr_DIR ${CMAKE_SOURCE_DIR}/external/cpr)
+set(fmt_DIR ${CMAKE_SOURCE_DIR}/external/fmt/install/lib/cmake/fmt)
+find_package(cpr REQUIRED)
+find_package(fmt REQUIRED)
+
 configure_file(auraConfig.h.in auraConfig.h)
 file(GLOB SOURCES "src/*.cc" "src/*/*.cc")
 add_executable(${PROJECT_NAME} ${SOURCES})
-
 add_executable(utool utool/main.cc src/downloader/downloader.cc src/rt/rt.cc src/userinfo/userinfo.cc ./src/log/log.cc)
+
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC cpr fmt::fmt)
-target_link_libraries(utool PUBLIC cpr fmt::fmt)
+target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/external/cpr/install/lib)
+target_link_directories(utool PUBLIC ${CMAKE_SOURCE_DIR}/external/cpr/install/lib)
 
+target_link_libraries(${PROJECT_NAME} PUBLIC cpr fmt::fmt curl z ws2_32 bcrypt crypt32)
+target_link_libraries(utool PUBLIC cpr fmt::fmt curl z ws2_32 bcrypt crypt32)
 
 include(InstallRequiredSystemLibraries)
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/License.txt")

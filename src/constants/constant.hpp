@@ -41,6 +41,7 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 build
+install
 __pycache__
 )"};
 
@@ -73,7 +74,7 @@ std::string MAIN_CODE{
     R"(
 //Auto Genrated C++ file by aura CLI
 //Copyright 2023 Vishal Ahirwar //replace it with your copyright notice!
-#include<cstdio>
+#include<iostream>
 _HEADER_
 int main(int argc,char*argv[])
 {
@@ -150,8 +151,8 @@ constexpr std::string_view VSCODE_CONFIG{R"(   {
                    "_UNICODE"
                ],
                "windowsSdkVersion": "10.0.22621.0",
-               "cStandard": "c17",
-               "cppStandard": "c++17",
+               "cStandard": "c20",
+               "cppStandard": "c++20",
                "intelliSenseMode": "windows-gcc-x64"
            }
        ],
