@@ -13,6 +13,14 @@ set(COMPANY "Vishal ahirwar")
 string(TIMESTAMP CURRENT_YEAR "%Y")
 set(COPYRIGHT "Copyright(c) ${CURRENT_YEAR} Vishal Ahirwar and all Contributors. All rights reserved.")
 
+# Check if the compiler is Clang
+if(NOT CMAKE_C_COMPILER_ID STREQUAL "Clang")
+    message(FATAL_ERROR "This project requires Clang as the compiler. Please set Clang as the compiler.")
+endif()
+
+if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    message(FATAL_ERROR "This project requires Clang as the compiler. Please set Clang as the compiler.")
+endif()
 
 include_directories(src ${CMAKE_BINARY_DIR} external/json ${CMAKE_SOURCE_DIR}/external/cpr/install/include)
 set(cpr_DIR ${CMAKE_SOURCE_DIR}/external/cpr)
