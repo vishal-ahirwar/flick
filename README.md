@@ -1,8 +1,6 @@
 ---
 
 # Aura
-[![Build Status](https://github.com/vishal-ahirwar/aura/actions/workflows/cmake-multi-platform.yml/badge.svg?event=push)]()
-[![Version](https://img.shields.io/badge/version-2.3.0-blue.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![image](https://github.com/user-attachments/assets/2a9185af-493d-404b-b42d-facb2f952e8b)
 
