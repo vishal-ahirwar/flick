@@ -3,6 +3,7 @@ project(aura VERSION 2.5.0)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_COMPILER_WORKS 1)
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 set(BUILD_SHARED_LIBS OFF)
@@ -37,10 +38,14 @@ install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 
 target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/external/cpr/install/lib)
 target_link_directories(utool PUBLIC ${CMAKE_SOURCE_DIR}/external/cpr/install/lib)
-
+if(WIN32)
 target_link_libraries(${PROJECT_NAME} PUBLIC cpr fmt::fmt curl z ws2_32 bcrypt crypt32)
 target_link_libraries(utool PUBLIC cpr fmt::fmt curl z ws2_32 bcrypt crypt32)
-
+else()
+find_package(OpenSSL REQUIRED)
+target_link_libraries(${PROJECT_NAME} PUBLIC cpr fmt::fmt curl z ssl crypto )
+target_link_libraries(utool PUBLIC cpr fmt::fmt curl z   ssl crypto)
+endif()
 include(InstallRequiredSystemLibraries)
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/License.txt")
 set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
