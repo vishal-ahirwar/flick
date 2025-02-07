@@ -4,6 +4,7 @@
 [![Build Status](https://github.com/vishal-ahirwar/aura/actions/workflows/cmake-multi-platform.yml/badge.svg?event=push)]()
 [![Version](https://img.shields.io/badge/version-2.3.0-blue.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![image](https://github.com/user-attachments/assets/2a9185af-493d-404b-b42d-facb2f952e8b)
 
 **Aura** is a powerful tool for C/C++ learners, designed to streamline the process of setting up and managing projects. With Aura, you can focus on learning and coding instead of dealing with repetitive tasks like creating folders, writing CMake files, or compiling manually.
 
@@ -63,13 +64,12 @@ Ensure the following tools are installed on your system:
 
 2. Build and install:
    - **Linux**:
-     ```bash
-     ./build.sh
-     sudo make install
+     ```
+     python3 build.py
      ```
    - **Windows**:
      ```batch
-     build.bat
+     python3 build.py
      ```
 
 ---
@@ -111,6 +111,8 @@ aura compile
 aura run
    or
 aura build
+  or
+python3 build.py
 ```
 ## Author
 
