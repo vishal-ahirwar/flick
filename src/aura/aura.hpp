@@ -22,9 +22,6 @@ public:
     void update();
     void debug();
     bool release();
-    void addConanPackage(const std::string &);
-    void reloadPackages();
-    void initConan();
     void vsCode();
     void reBuild();
     static void askUserinfo(struct UserInfo *user);
@@ -43,7 +40,6 @@ private:
     void generateGitIgnoreFile();
     void setupUnitTestingFramework();
     void generateLicenceFile();
-    void generateConanFile();
 
 private:
     bool onSetup();

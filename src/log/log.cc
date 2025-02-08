@@ -101,24 +101,9 @@ void Log::about()
                "Update Aura to the latest version.\n");
 
     fmt::print(fmt::fg(fmt::color::yellow),
-               "  add            - ");
-    fmt::print(fmt::fg(fmt::color::white_smoke),
-               "Add an external library using Conan package manager. Example: aura add fmt/11.0.2\n");
-
-    fmt::print(fmt::fg(fmt::color::yellow),
-               "  reload         - ");
-    fmt::print(fmt::fg(fmt::color::white_smoke),
-               "Reload the package list. Example: aura reload\n");
-
-    fmt::print(fmt::fg(fmt::color::yellow),
                "  rebuild        - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
                "Remove the build directory and recompile the project.\n");
-
-    fmt::print(fmt::fg(fmt::color::yellow),
-               "  initconan      - ");
-    fmt::print(fmt::fg(fmt::color::white_smoke),
-               "Add a Conan file.\n");
 
     fmt::print(fmt::fg(fmt::color::yellow),
                "  debug          - ");

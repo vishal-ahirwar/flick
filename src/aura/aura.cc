@@ -27,10 +27,6 @@
 #include <rt/rt.h>
 #include <log/log.h>
 
-
-void addToConanFile(const std::string &);
-void addToCMakeFile(std::string);
-
 Aura::Aura() {
 
 };
@@ -54,7 +50,6 @@ void Aura::setupUnitTestingFramework()
 		testFile << TEST_CXX_CODE;
 		testFile.close();
 	};
-	addToConanFile("catch2/3.7.1");
 	std::ofstream file{"./CMakeLists.txt", std::ios::app};
 	if (file.is_open())
 	{
@@ -99,7 +94,6 @@ bool Aura::compile(const std::string &additional_cmake_arg)
 	{
 		// run cmake
 		Log::log("Compile Process has been started...", Type::E_DISPLAY);
-		reloadPackages();
 		// run ninja
 		if (!system(("ninja -C build/Debug -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
 		{
@@ -321,7 +315,7 @@ void Aura::addToPathUnix()
 		std::fstream file(bashrc.c_str(), std::ios::app);
 		if (file.is_open())
 		{
-			file << "export PATH=$PATH:" << newPath << "\n";
+			file << "export PATH=\"$PATH:" << newPath << "\"\n";
 			file.close();
 		}
 		else
@@ -357,15 +351,12 @@ void Aura::installEssentialTools(bool &isInstallationComplete)
 	home += "\\.aura";
 	Downloader::download(std::string(COMPILER_URL_64BIT), home + "\\compiler.zip");
 	Downloader::download(std::string(CMAKE_URL_64BIT), home + "\\cmake.zip");
-	Downloader::download(std::string(CONAN_URL_64BIT), home + "\\conan.zip");
 	Downloader::download(std::string(NINJA_URL_64BIT), home + "\\ninja.zip");
 	Downloader::download(std::string(NSIS_URL), home + "\\nsis.zip");
 	printf("%sunzipping file at %s%s\n", BLUE, home.c_str(), WHITE);
 	if (system((std::string("tar -xf ") + "\"" + home + "\\compiler.zip\"" + " -C " + "\"" + home + "\"").c_str()))
 		return;
 	if (system((std::string("tar -xf ") + "\"" + home + "\\cmake.zip\"" + " -C " + "\"" + home + "\"").c_str()))
-		return;
-	if (system((std::string("tar -xf ") + "\"" + home + "\\conan.zip\"" + " -C " + "\"" + home + "\"").c_str()))
 		return;
 	if (system((std::string("tar -xf ") + "\"" + home + "\\ninja.zip\"" + " -C " + "\"" + home + "\"").c_str()))
 		return;
@@ -374,41 +365,16 @@ void Aura::installEssentialTools(bool &isInstallationComplete)
 	Log::log("removing downloaded archives...", Type::E_DISPLAY);
 	fs::remove((home + "\\compiler.zip"));
 	fs::remove((home + "\\cmake.zip"));
-	fs::remove((home + "\\conan.zip"));
 	fs::remove((home + "\\ninja.zip"));
 	fs::remove((home + "\\nsis.zip"));
 	isInstallationComplete = true;
 	addToPathWin();
 #else
 #define DISTRO_INFO "/etc/os-release"
-	// Todo :read the file and u will know what ditro user running ;)
-	auto addToPath = [&]()
-	{
-		Log::log("Make sure to add llvm to your PATH;look into /usr/lib/llvm* ", Type::E_WARNING);
-	}; // TODO: add LLVM to path
-	try
-	{
-		namespace fs = std::filesystem;
-		std::string aura{"/home/"};
-		aura += {getenv(USERNAME)};
-		aura += "/.aura";
-		Downloader::download(std::string(CONAN_URL_64BIT), aura + "/conan.tgz");
-		Downloader::download(std::string(COMPILER_URL_64BIT), aura + "/compiler.xz");
-		Downloader::download(std::string(NINJA_URL_64BIT),aura+"/ninja.zip");
-		system(("tar -xvf " + aura + "/conan.tgz" + " -C " + aura).c_str());
-		system(("tar -xvf " + aura + "/compiler.xz" + " -C " + aura).c_str());
-		system(("tar -xvf " + aura + "/ninja.zip" + " -C " + aura).c_str());
-		system(("chmod +x " + aura + "/bin/conan").c_str());
-		fs::remove(aura + "/conan.tgz");
-		fs::remove(aura + "/compiler.xz");
-		fs::remove(aura + "/compiler.zip");
-		addToPathUnix();
-		isInstallationComplete = true;
-	}
-	catch (std::exception &e)
-	{
-		printf("%sError : %s\nmake sure you have root privileges  to run this command%s\n", RED, e.what(), WHITE);
-	};
+
+	Log::log("Install C++ clang Compiler and build tools using ex.[ubuntu]sudo apt install git ninja-build cmake clang clang-tools", Type::E_WARNING);
+	addToPathUnix();
+	isInstallationComplete = true;
 
 #endif
 };
@@ -616,20 +582,7 @@ void Aura::generateLicenceFile()
 	out.close();
 }
 //
-void Aura::generateConanFile()
-{
-	std::ofstream file;
-	file.open("./" + _project_setting._project_name + "/conanfile.txt", std::ios::out);
-	if (file.is_open())
-	{
-		file << CONAN_CODE;
-		file.close();
-	}
-	else
-	{
-		Log::log("Failed to generate conanfile.txt", Type::E_ERROR);
-	};
-};
+
 // creating packaged build [with installer for windows] using cpack
 void Aura::createInstaller()
 {
@@ -647,7 +600,6 @@ void Aura::createInstaller()
 		file << CPACK_CODE;
 		file.close();
 		generateLicenceFile();
-		reloadPackages();
 		if (system("cd build/Release && cpack"))
 			Log::log("CPack added to cmake run 'aura createinstaller' command again",
 					 Type::E_DISPLAY);
@@ -936,36 +888,6 @@ bool Aura::release()
 	return true;
 };
 
-// writing to conanfile.txt without checking if the package is already in conanfile.txt, for that checks are in add() method
-void addToConanFile(const std::string &name)
-{
-	std::ifstream in("conanfile.txt");
-	if (!in.is_open()) // checking if conanfile.txt presents or not
-	{
-		Aura aura;
-		in.close();
-		in.clear();
-		aura.initConan();
-		in.open("conanfile.txt");
-	};
-	std::vector<std::string> lines{};
-	std::string line{};
-	while (std::getline(in, line)) // reading whole conanfile.txt line by line in vector so we can easily update the conanfile.txt at a particular line
-	{
-		lines.push_back(line);
-	};
-	in.close();
-	lines.insert(lines.begin() + 1, name);
-	std::ofstream out("conanfile.txt");
-	if (!out.is_open())
-		return;
-	for (const auto &l : lines) // writing back to file the updated contents
-	{
-		out << l << "\n";
-	};
-	out.close();
-}
-
 void addToCMakeFile(std::string name)
 {
 	auto index = name.find("/");
@@ -1014,69 +936,9 @@ void addToCMakeFile(std::string name)
 	out.close();
 };
 // adding new packages to conanfile.txt then add recuired commands to  cmakelists.txt and reload cmakelist.txt to reconfigure project
-void Aura::addConanPackage(const std::string &name)
-{
-	std::ifstream file{"conanfile.txt"};
-	if (!file.is_open())
-	{
-		generateConanFile();
-		file.close();
-		file.clear();
-		file.open("conanfile.txt");
-		std::filesystem::remove_all("build");
-	};
-	std::string line{};
-	while (std::getline(file, line))
-	{
-		if (line.find(name) != std::string::npos) // if name is already in conanfile.txt don't add it again ;)
-		{
-			fprintf(stderr, "%s%s is already in conanfile.txt%s\n", YELLOW, name.c_str(), WHITE);
-			return;
-		}
-	};
-	file.close();
-	addToConanFile(name); // add to conanfile then install if install fails don't add it to cmakelists.txt
-	if (system("conan install . --build=missing --settings=build_type=Debug"))
-	{
-		fprintf(stderr, "%s[Error] : Failed to install %s package\n%s", RED, name.c_str(), WHITE);
-		return;
-	}
-	printf("%s[Msg] : %s added to conanfile.txt and installed successfully%s\n", GREEN, name.c_str(), WHITE);
-	addToCMakeFile(name);
-	reloadPackages();
-};
 
-// installing newly added packages or reloading CMake configuration
-void Aura::reloadPackages()
-{
-	namespace fs = std::filesystem;
-	if (fs::exists("conanfile.txt"))
-	{
 
-		if (system("conan install . --build=missing --settings=build_type=Debug"))
-			return;
-		if (system("cmake --preset conan-debug -G \"Ninja\""))
-			return;
-	}
-	else
-	{
-		system("cmake -S . -B build/Debug -DCMAKE_BUILD_TYPE=Debug -G \"Ninja\"");
-	};
-}
 
-// for generating conan file for any CMAKE project
-void Aura::initConan()
-{
-	std::ifstream conan_file{"conanfile.txt"};
-	if (conan_file.is_open())
-	{
-		fprintf(stderr, "%sconanfile.txt already exist! you should try aura reload%s\n", RED, WHITE);
-		conan_file.close();
-		return;
-	};
-	generateConanFile();
-	reloadPackages();
-}
 
 // for generating vscode intelligence
 // everytime user run this command it's will override everything in c_cpp_properties.json

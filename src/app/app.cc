@@ -80,24 +80,7 @@ namespace CLI
         {
             aura.release();
         }
-        else if (std::string(argv[1]) == std::string("add"))
-        {
-            if (argc < 3)
-            {
-                printf("%s[Error] Invalid Command !%s\n", RED, WHITE);
-                printf("Try again with 'aura help' :(\n");
-                return 0;
-            };
-            aura.addConanPackage(argv[2]);
-        }
-        else if (std::string(argv[1]) == std::string("reload"))
-        {
-            aura.reloadPackages();
-        }
-        else if (std::string(argv[1]) == std::string("initconan"))
-        {
-            aura.initConan();
-        }else if(std::string(argv[1])==std::string("vscode"))
+        else if(std::string(argv[1])==std::string("vscode"))
         {
             aura.vsCode();
         }else if(std::string(argv[1])==std::string("rebuild"))

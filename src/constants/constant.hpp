@@ -167,8 +167,5 @@ constexpr std::string_view NSIS_URL{"https://cyfuture.dl.sourceforge.net/project
 #else
 constexpr std::string_view UPDATER_URL{"https://github.com/vishal-ahirwar/aura/releases/latest/download/utool"};
 constexpr std::string_view CONAN_URL_64BIT{"https://github.com/conan-io/conan/releases/download/2.11.0/conan-2.11.0-linux-x86_64.tgz"};
-constexpr std::string_view COMPILER_URL_64BIT{"https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/LLVM-19.1.7-Linux-X64.tar.xz"};
-constexpr std::string_view CMAKE_URL_64BIT{"https://github.com/Kitware/CMake/releases/download/v3.31.5/cmake-3.31.5-linux-x86_64.tar.gz"};
-constexpr std::string_view NINJA_URL_64BIT{"https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-linux.zip"};
 #endif
 #endif
