@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <rt/rt.h>
 #include <log/log.h>
+#include "aura.hpp"
 
 Aura::Aura() {
 
@@ -79,14 +80,14 @@ void Aura::createNewProject(const char *argv[], int argc)
 	generateCmakeFile(argv[2]);
 	generateBuildFile(_project_setting._project_name);
 	generateGitIgnoreFile();
-	Log::log("Done", Type::E_DISPLAY);
+	Log::log("happy Coding :)", Type::E_DISPLAY);
 };
 
-bool executeCMake(const std::string&additional_cmake_arg)
+bool executeCMake(const std::string &additional_cmake_arg)
 {
-	std::string cmd{"cmake -S . "};
-	cmd+=additional_cmake_arg;
-	return system(cmd.c_str())==0;	
+	std::string cmd{"cmake -S . -G \"Ninja\" "};
+	cmd += additional_cmake_arg;
+	return system(cmd.c_str()) == 0;
 };
 
 // TODO : add compile option
@@ -95,15 +96,15 @@ bool Aura::compile(const std::string &additional_cmake_arg)
 	// Temp Soln
 
 	namespace fs = std::filesystem;
-	std::string cpu_threads{std::to_string(std::thread::hardware_concurrency())};
+	std::string cpu_threads{std::to_string(std::thread::hardware_concurrency() - 1)};
 	printf("%sThreads in use: %s%s\n", YELLOW, cpu_threads.c_str(), WHITE);
-	if (!fs::exists(fs::current_path().string() + "/build") || additional_cmake_arg.length() > 5)
+	if (!fs::exists(fs::current_path().string() + "/build/debug") || additional_cmake_arg.length() > 5)
 	{
 		// run cmake
 		Log::log("Compile Process has been started...", Type::E_DISPLAY);
-		executeCMake(std::string("-B"))//TODO
+		executeCMake(std::string("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug ") + additional_cmake_arg); // TODO
 		// run ninja
-		if (!system(("ninja -C build/Debug -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
+		if (!system(("ninja -C build/debug -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL", Type::E_DISPLAY);
 			return true;
@@ -117,7 +118,7 @@ bool Aura::compile(const std::string &additional_cmake_arg)
 	else
 	{
 		// run ninja
-		if (!system(("ninja -C build/Debug -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
+		if (!system(("ninja -C build/debug -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL", Type::E_DISPLAY);
 
@@ -140,11 +141,11 @@ void Aura::run(int argc, const char **argv)
 	std::string run{};
 	// printf("%s%s: \n%s", YELLOW, projectName.c_str(),WHITE);
 #ifdef WIN32
-	run += ".\\build\\Debug\\";
+	run += ".\\build\\debug\\";
 	run += _project_setting._project_name;
 	run += ".exe";
 #else
-	run += "./build/Debug/";
+	run += "./build/debug/";
 	run += _project_setting._project_name;
 #endif // WIN32
 	for (int i = 0; i < argc; ++i)
@@ -164,7 +165,8 @@ void Aura::run(int argc, const char **argv)
 //
 void Aura::build()
 {
-	this->compile();
+	if (!this->compile())
+		return;
 	this->run(0, nullptr);
 }
 
@@ -493,7 +495,7 @@ void Aura::generateCppTemplateFile(const char *argv)
 	std::ofstream file;
 	// const std::string stdStr{argv[2]};
 	_project_setting._project_name = argv;
-	file.open("./" + _project_setting._project_name + "/src/main.cc", std::ios::out);
+	file.open("./" + _project_setting._project_name + "/src/main.cxx", std::ios::out);
 
 	if (file.is_open())
 	{
@@ -594,12 +596,17 @@ void Aura::generateLicenceFile()
 // creating packaged build [with installer for windows] using cpack
 void Aura::createInstaller()
 {
+	if (!executeCMake("-Bbuild/release -DCMAKE_BUILD_TYPE=Release "))
+	{
+		Log::log("Please First fix all the errors", Type::E_ERROR);
+		return;
+	}
 	if (!release())
 	{
 		Log::log("Please First fix all the errors", Type::E_ERROR);
 		return;
 	};
-	if (!system("cd build/Release && cpack"))
+	if (!system("cd build/release && cpack"))
 		return;
 	std::ofstream file;
 	file.open("CMakeLists.txt", std::ios::app);
@@ -608,7 +615,7 @@ void Aura::createInstaller()
 		file << CPACK_CODE;
 		file.close();
 		generateLicenceFile();
-		if (system("cd build/Release && cpack"))
+		if (system("cd build/release && cpack"))
 			Log::log("CPack added to cmake run 'aura createinstaller' command again",
 					 Type::E_DISPLAY);
 	}
@@ -624,9 +631,9 @@ void Aura::test()
 	setupUnitTestingFramework();
 	compile();
 #ifdef WIN32
-	system(".\\build\\Debug\\tests.exe");
+	system(".\\build\\debug\\tests.exe");
 #else
-	system("./build/Debug/tests");
+	system("./build/debug/tests");
 #endif
 };
 
@@ -869,22 +876,23 @@ void Aura::debug()
 	readBuildFile(_project_setting._project_name);
 	if (!compile())
 		return;
-	system(("gdb ./build/Debug/" + _project_setting._project_name).c_str());
+	system(("lldb ./build/debug/" + _project_setting._project_name).c_str());
 };
 // TODO
 // this is actually useless for now but will add usefull stuff to it in future
-bool Aura::release(const std::string&additional_cmake_arg)
+bool Aura::release(const std::string &additional_cmake_arg)
 {
 
 	namespace fs = std::filesystem;
-	std::string cpu_threads{std::to_string(std::thread::hardware_concurrency())};
+	std::string cpu_threads{std::to_string(std::thread::hardware_concurrency() - 1)};
 	printf("%sThreads in use: %s%s\n", YELLOW, cpu_threads.c_str(), WHITE);
-	if (!fs::exists(fs::current_path().string() + "/build") || additional_cmake_arg.length() > 5)
+	if (!fs::exists(fs::current_path().string() + "/build/release") || additional_cmake_arg.length() > 5)
 	{
 		// run cmake
 		Log::log("Compile Process has been started...", Type::E_DISPLAY);
+		executeCMake(std::string("-Bbuild/release -DCMAKE_BUILD_TYPE=Release ") + additional_cmake_arg); // TODO
 		// run ninja
-		if (!system(("ninja -C build/Release -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
+		if (!system(("ninja -C build/release -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL", Type::E_DISPLAY);
 			return true;
@@ -898,7 +906,7 @@ bool Aura::release(const std::string&additional_cmake_arg)
 	else
 	{
 		// run ninja
-		if (!system(("ninja -C build/Release -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
+		if (!system(("ninja -C build/release -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL", Type::E_DISPLAY);
 
@@ -991,19 +999,19 @@ void Aura::reBuild()
 	namespace fs = std::filesystem;
 	try
 	{
-		if (fs::exists("./build"))
-		{
-			fs::remove_all("./build");
-		}
-		/* code */
-	}
-	catch (const std::exception &e)
-	{
-		std::cerr << e.what() << '\n';
-		return;
-	}
 
-	compile();
+		fs::remove_all("build");
+		executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug");
+		compile();
+	}
+	catch (std::exception &e)
+	{
+		Log::log(e.what(), Type::E_ERROR);
+	};
+};
+
+void Aura::buildDeps() {
+	// building cmake external libraries
 };
 
 void Aura::askUserinfo(struct UserInfo *user) {

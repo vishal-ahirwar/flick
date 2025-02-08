@@ -2,22 +2,21 @@
 #define _CONSTANT_
 #include <string>
 constexpr std::string_view LICENSE_TEXT{R"(
-Copyright(C)<YEAR> <COPYRIGHT_HOLDER>.
+Copyright (c) @_YEAR_, @_OWNER_
+All rights reserved.
 
-Permission is hereby granted, free of charge,
-to any person obtaining a copy of this software and associated documentation files (the “Software”),
-to deal in the Software without restriction, including without limitation the rights to use, copy,
-modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
-and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
-INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE)"};
+1. Redistributions of source code must retain the above copyright notice, this list of conditions, and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions, and the following disclaimer in the documentation or other materials provided with the distribution.
+3. Neither the name of the [organization] nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+)"};
 
 constexpr std::string_view CPACK_CODE{R"(
 include(InstallRequiredSystemLibraries)
@@ -48,9 +47,9 @@ __pycache__
 constexpr std::string_view CMAKE_CODE{
     R"(
 #Auto Genrated CMake file by aura CLI
-#Copyright 2023 Vishal Ahirwar. #replace with your copyright notice.
+#@COPYRIGHT
 cmake_minimum_required(VERSION 3.6...3.31)
-project(@ VERSION 1.0.0 LANGUAGES CXX)
+project(@name VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -63,7 +62,7 @@ set(COPYRIGHT "Copyright(c) ${CURRENT_YEAR} ${COMPANY}.")
 include_directories(src ${CMAKE_BINARY_DIR})
 configure_file(@config_in @config_h)
 #@find Warning: Do not remove this line
-file(GLOB SOURCES "src/*.cpp" "src/*.hpp" "src/*.hxx" "src/*.h" "src/*.cc" "src/*.cxx")
+file(GLOB SOURCES "src/*.cxx")
 add_executable(${PROJECT_NAME} ${SOURCES})
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 #@link Warning: Do not remove this line
@@ -72,12 +71,13 @@ install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 std::string MAIN_CODE{
     R"(
 //Auto Genrated C++ file by aura CLI
-//Copyright 2023 Vishal Ahirwar //replace it with your copyright notice!
+//@COPYRIGHT
 #include<iostream>
 _HEADER_
 int main(int argc,char*argv[])
 {
-    fprintf(stderr,"Project Name : %s, %s\n",_PROJECT_,_COPYRIGHT_);//This is Template Code
+    std::cerr<<"Hello, "<<_PROJECT_<<std::endl;
+    std::cerr<<_COPYRIGHT_<<std::endl;
     return 0;
 };
 
@@ -97,48 +97,24 @@ TEST_CASE("Factorials are computed", "[factorial]")
     REQUIRE(Factorial(2) == 2);
     REQUIRE(Factorial(5) == 120);
 })"};
-constexpr std::string_view CONAN_CODE{R"([requires]
 
-[generators]
-CMakeDeps
-CMakeToolchain
-[layout]
-cmake_layout
-)"};
-
+// temp will be using json for config
 constexpr std::string_view BUILD_PY{
     R"(from os import system,cpu_count,path
 PROJECT_NAME:str="@projectName"
 BUILD_DATE_TIME:str="@builddatetime"
 #Warning : DO NOT REMOVE THIS LINE OR ADD ANYTHING ABOVE EVEN IMPORT SHOULD GO BELOW THIS LINE
 GENERATOR:str="\"Ninja\""
-conan_file_exist:bool=path.exists("conanfile.txt")
-if __name__=="__main__":
-    if not conan_file_exist:
-        print('Compilling Project...')
-        if not system(f"ninja -C build/Debug -j{cpu_count()}") and not system(f"ninja -C build/Release -j{cpu_count()}"):
-            exit(0)
-        if not system(f"cmake -S . -B build/Debug -DCMAKE_BUILD_TYPE=Debug -G {GENERATOR} && cmake -S . -B build/Release -DCMAKE_BUILD_TYPE=Release -G {GENERATOR}"):
-            system(f"ninja -C build/Debug -j{cpu_count()}") and not system(f"ninja -C build/Release -j{cpu_count()}")
-
-    else:
-        print('Compilling Project...')
-        if not system(f"ninja -C build/Debug -j{cpu_count()}") and not system(f"ninja -C build/Release -j{cpu_count()}"):
-            exit(0)
-        if not system("conan install . --build=missing --settings=build_type=Debug"):
-            if not system(f"cmake --preset conan-debug -G {GENERATOR}"):
-                if not system("conan install . --build=missing --settings=build_type=Release"):
-                    if not system(f"cmake --preset conan-release -G {GENERATOR}"):
-                        system(f"ninja -C build/Debug -j{cpu_count()}") and not system(f"ninja -C build/Release -j{cpu_count()}")
-                        print("Done")
-        else:
-            print("failed!")
 )"};
-constexpr std::string_view VSCODE_CONFIG{R"(   {
+
+constexpr std::string_view VIM_CONFIG{R"()"};
+
+#ifdef WIN32
+constexpr std::string_view VSCODE_CONFIG{R"(    {
        "configurations": [
            {
-               "name": "Win32",
-               "compileCommands": "${workspaceFolder}/build/Debug/compile_commands.json",
+               "name": "Windows OS",
+               "compileCommands": "${workspaceFolder}/build/debug/compile_commands.json",
                "includePath": [
                    "${workspaceFolder}/**"
                ],
@@ -148,24 +124,40 @@ constexpr std::string_view VSCODE_CONFIG{R"(   {
                    "_UNICODE"
                ],
                "windowsSdkVersion": "10.0.22621.0",
-               "cStandard": "c20",
+               "cStandard": "gnu23",
                "cppStandard": "c++20",
-               "intelliSenseMode": "windows-gcc-x64"
+               "intelliSenseMode": "windows-clang-x86"
            }
        ],
        "version": 4
    })"};
-constexpr std::string_view VIM_CONFIG{R"()"};
 
-#ifdef WIN32
 constexpr std::string_view COMPILER_URL_64BIT{"https://github.com/mstorsjo/llvm-mingw/releases/download/20250114/llvm-mingw-20250114-ucrt-x86_64.zip"};
 constexpr std::string_view CMAKE_URL_64BIT{"https://github.com/Kitware/CMake/releases/download/v3.31.2/cmake-3.31.2-windows-x86_64.zip"};
 constexpr std::string_view UPDATER_URL{"https://github.com/vishal-ahirwar/aura/releases/latest/download/utool.exe"};
-constexpr std::string_view CONAN_URL_64BIT{"https://github.com/conan-io/conan/releases/download/2.11.0/conan-2.11.0-windows-x86_64.zip"};
 constexpr std::string_view NINJA_URL_64BIT{"https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-win.zip"};
 constexpr std::string_view NSIS_URL{"https://cyfuture.dl.sourceforge.net/project/nsis/NSIS%203/3.10/nsis-3.10.zip?viasf=1"}; // TODO
 #else
+constexpr std::string_view VSCODE_CONFIG{R"(     {
+       "configurations": [
+           {
+               "name": "Linux OS",
+               "compileCommands": "${workspaceFolder}/build/debug/compile_commands.json",
+               "includePath": [
+                   "${workspaceFolder}/**"
+               ],
+               "defines": [
+                   "_DEBUG",
+                   "UNICODE",
+                   "_UNICODE"
+               ],
+               "cStandard": "gnu23",
+               "cppStandard": "c++20",
+               "intelliSenseMode": "linux-clang-x64"
+           }
+       ],
+       "version": 4
+   })"};
 constexpr std::string_view UPDATER_URL{"https://github.com/vishal-ahirwar/aura/releases/latest/download/utool"};
-constexpr std::string_view CONAN_URL_64BIT{"https://github.com/conan-io/conan/releases/download/2.11.0/conan-2.11.0-linux-x86_64.tgz"};
 #endif
 #endif

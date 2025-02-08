@@ -24,6 +24,7 @@ public:
     bool release(const std::string&additional_cmake_arg="");
     void vsCode();
     void reBuild();
+    void buildDeps();
     static void askUserinfo(struct UserInfo *user);
     static void readUserInfoFromConfigFile(UserInfo *user);
     static void writeUserInfoToConfigFile(UserInfo *user);
