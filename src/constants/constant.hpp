@@ -69,7 +69,6 @@ install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 #@link Warning: Do not remove this line
 )"};
 
-
 std::string MAIN_CODE{
     R"(
 //Auto Genrated C++ file by aura CLI
@@ -107,8 +106,7 @@ CMakeToolchain
 cmake_layout
 )"};
 
-constexpr std::string_view BUILD_PY
-{
+constexpr std::string_view BUILD_PY{
     R"(from os import system,cpu_count,path
 PROJECT_NAME:str="@projectName"
 BUILD_DATE_TIME:str="@builddatetime"
@@ -135,8 +133,7 @@ if __name__=="__main__":
                         print("Done")
         else:
             print("failed!")
-)"
-};
+)"};
 constexpr std::string_view VSCODE_CONFIG{R"(   {
        "configurations": [
            {
@@ -162,20 +159,16 @@ constexpr std::string_view VIM_CONFIG{R"()"};
 
 #ifdef WIN32
 constexpr std::string_view COMPILER_URL_64BIT{"https://github.com/mstorsjo/llvm-mingw/releases/download/20250114/llvm-mingw-20250114-ucrt-x86_64.zip"};
-
 constexpr std::string_view CMAKE_URL_64BIT{"https://github.com/Kitware/CMake/releases/download/v3.31.2/cmake-3.31.2-windows-x86_64.zip"};
-
 constexpr std::string_view UPDATER_URL{"https://github.com/vishal-ahirwar/aura/releases/latest/download/utool.exe"};
-
 constexpr std::string_view CONAN_URL_64BIT{"https://github.com/conan-io/conan/releases/download/2.11.0/conan-2.11.0-windows-x86_64.zip"};
-
 constexpr std::string_view NINJA_URL_64BIT{"https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-win.zip"};
-
-constexpr std::string_view NSIS_URL{"https://cyfuture.dl.sourceforge.net/project/nsis/NSIS%203/3.10/nsis-3.10.zip?viasf=1"};//TODO
-
+constexpr std::string_view NSIS_URL{"https://cyfuture.dl.sourceforge.net/project/nsis/NSIS%203/3.10/nsis-3.10.zip?viasf=1"}; // TODO
 #else
-constexpr std::string_view UPDATER_URL{"https://github.com/vishal-ahirwar/aura/releases/latest/download/utool"
-};
-constexpr std::string_view CONAN_LINUX_URL{"https://github.com/conan-io/conan/releases/download/2.11.0/conan-2.11.0-linux-x86_64.tgz"};
+constexpr std::string_view UPDATER_URL{"https://github.com/vishal-ahirwar/aura/releases/latest/download/utool"};
+constexpr std::string_view CONAN_URL_64BIT{"https://github.com/conan-io/conan/releases/download/2.11.0/conan-2.11.0-linux-x86_64.tgz"};
+constexpr std::string_view COMPILER_URL_64BIT{"https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/LLVM-19.1.7-Linux-X64.tar.xz"};
+constexpr std::string_view CMAKE_URL_64BIT{"https://github.com/Kitware/CMake/releases/download/v3.31.5/cmake-3.31.5-linux-x86_64.tar.gz"};
+constexpr std::string_view NINJA_URL_64BIT{"https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-linux.zip"};
 #endif
 #endif

@@ -27,6 +27,7 @@
 #include <rt/rt.h>
 #include <log/log.h>
 
+
 void addToConanFile(const std::string &);
 void addToCMakeFile(std::string);
 
@@ -381,61 +382,27 @@ void Aura::installEssentialTools(bool &isInstallationComplete)
 #else
 #define DISTRO_INFO "/etc/os-release"
 	// Todo :read the file and u will know what ditro user running ;)
-	auto addToPath = [&]() {
-		Log::log("Make sure to add llvm to your PATH;look into /usr/lib/llvm* ",Type::E_WARNING);
-	}; //TODO: add LLVM to path
+	auto addToPath = [&]()
+	{
+		Log::log("Make sure to add llvm to your PATH;look into /usr/lib/llvm* ", Type::E_WARNING);
+	}; // TODO: add LLVM to path
 	try
 	{
 		namespace fs = std::filesystem;
 		std::string aura{"/home/"};
 		aura += {getenv(USERNAME)};
 		aura += "/.aura";
-		Downloader::download(std::string(CONAN_LINUX_URL), aura + "/conan.tgz");
+		Downloader::download(std::string(CONAN_URL_64BIT), aura + "/conan.tgz");
+		Downloader::download(std::string(COMPILER_URL_64BIT), aura + "/compiler.xz");
+		Downloader::download(std::string(NINJA_URL_64BIT),aura+"/ninja.zip");
 		system(("tar -xvf " + aura + "/conan.tgz" + " -C " + aura).c_str());
+		system(("tar -xvf " + aura + "/compiler.xz" + " -C " + aura).c_str());
+		system(("tar -xvf " + aura + "/ninja.zip" + " -C " + aura).c_str());
 		system(("chmod +x " + aura + "/bin/conan").c_str());
+		fs::remove(aura + "/conan.tgz");
+		fs::remove(aura + "/compiler.xz");
+		fs::remove(aura + "/compiler.zip");
 		addToPathUnix();
-		std::ifstream file(DISTRO_INFO);
-		if (!file.is_open())
-			return;
-		std::string distro_name{};
-		while (std::getline(file, distro_name))
-		{
-			if (distro_name.find("ID_LIKE") != std::string::npos)
-				break;
-		};
-		if (distro_name.find("ID_LIKE") == std::string::npos)
-		{
-			file.clear();
-			file.seekg(0, file.beg);
-			while (std::getline(file, distro_name))
-			{
-				if (distro_name.length() > 0 && distro_name.substr(0, 2) == "ID")
-					break;
-			};
-		}
-		auto index = distro_name.find("=");
-		if (index == std::string::npos)
-			return;
-		distro_name = distro_name.substr(++index, distro_name.length());
-		std::cout << GREEN << "Development OS Distro/Parent Distro : " << distro_name << WHITE << "\n";
-		if (distro_name.find("debian") != std::string::npos || distro_name.find("ubuntu") != std::string::npos)
-		{
-			system("sudo apt install llvm cmake git ninja-build");
-			addToPath();
-		}
-		else if (distro_name.find("arch") != std::string::npos)
-		{
-			system("pacman -Sy llvm cmake git ninja-build");
-			addToPath();
-		}
-		else if (distro_name.find("fedora") != std::string::npos || distro_name.find("rhel") != std::string::npos)
-		{
-			system("sudo dnf install llvm cmake git ninja-build");
-			addToPath();
-		};
-
-		file.close();
-
 		isInstallationComplete = true;
 	}
 	catch (std::exception &e)

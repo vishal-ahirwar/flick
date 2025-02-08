@@ -11,5 +11,5 @@ RT::~RT()
 {
     _end=std::chrono::high_resolution_clock::now();
     std::chrono::duration<double>elaped_time{_end-_start};
-    fmt::print(fmt::emphasis::faint|fmt::fg(fmt::color::cornflower_blue),"Time taken by {} {:.2f}s\n",_msg.c_str(),elaped_time.count());
+    fmt::print(fmt::fg(fmt::color::light_green)|fmt::emphasis::bold,"Time taken by {} {:.2f}s\n",_msg.c_str(),elaped_time.count());
 };
