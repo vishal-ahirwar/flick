@@ -82,6 +82,13 @@ void Aura::createNewProject(const char *argv[], int argc)
 	Log::log("Done", Type::E_DISPLAY);
 };
 
+bool executeCMake(const std::string&additional_cmake_arg)
+{
+	std::string cmd{"cmake -S . "};
+	cmd+=additional_cmake_arg;
+	return system(cmd.c_str())==0;	
+};
+
 // TODO : add compile option
 bool Aura::compile(const std::string &additional_cmake_arg)
 {
@@ -94,6 +101,7 @@ bool Aura::compile(const std::string &additional_cmake_arg)
 	{
 		// run cmake
 		Log::log("Compile Process has been started...", Type::E_DISPLAY);
+		executeCMake(std::string("-B"))//TODO
 		// run ninja
 		if (!system(("ninja -C build/Debug -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
 		{
@@ -865,27 +873,44 @@ void Aura::debug()
 };
 // TODO
 // this is actually useless for now but will add usefull stuff to it in future
-bool Aura::release()
+bool Aura::release(const std::string&additional_cmake_arg)
 {
-	namespace fs = std::filesystem;
-	if (fs::exists("conanfile.txt"))
-	{
 
-		if (system("conan install . --build=missing --settings=build_type=Release"))
+	namespace fs = std::filesystem;
+	std::string cpu_threads{std::to_string(std::thread::hardware_concurrency())};
+	printf("%sThreads in use: %s%s\n", YELLOW, cpu_threads.c_str(), WHITE);
+	if (!fs::exists(fs::current_path().string() + "/build") || additional_cmake_arg.length() > 5)
+	{
+		// run cmake
+		Log::log("Compile Process has been started...", Type::E_DISPLAY);
+		// run ninja
+		if (!system(("ninja -C build/Release -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
+		{
+			Log::log("BUILD SUCCESSFULL", Type::E_DISPLAY);
+			return true;
+		}
+		else
+		{
+			Log::log("BUILD FAILED", Type::E_ERROR);
 			return false;
-		if (system("cmake --preset conan-release -G \"Ninja\""))
-			return false;
-		if (system("ninja -C ./build/Release"))
-			return false;
+		}
 	}
 	else
 	{
-		if (system("cmake -S . -B build/Release -DCMAKE_BUILD_TYPE=Release -G \"Ninja\""))
+		// run ninja
+		if (!system(("ninja -C build/Release -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
+		{
+			Log::log("BUILD SUCCESSFULL", Type::E_DISPLAY);
+
+			return true;
+		}
+		else
+		{
+			Log::log("BUILD FAILED", Type::E_ERROR);
 			return false;
-		if (system("ninja -C ./build/Release"))
-			return false;
+		}
 	}
-	return true;
+	return false;
 };
 
 void addToCMakeFile(std::string name)
@@ -936,9 +961,6 @@ void addToCMakeFile(std::string name)
 	out.close();
 };
 // adding new packages to conanfile.txt then add recuired commands to  cmakelists.txt and reload cmakelist.txt to reconfigure project
-
-
-
 
 // for generating vscode intelligence
 // everytime user run this command it's will override everything in c_cpp_properties.json

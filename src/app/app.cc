@@ -78,6 +78,9 @@ namespace CLI
         }
         else if (std::string(argv[1]) == std::string("release"))
         {
+            if (argc > 2)
+            aura.release(std::string(argv[2]));
+        else
             aura.release();
         }
         else if(std::string(argv[1])==std::string("vscode"))

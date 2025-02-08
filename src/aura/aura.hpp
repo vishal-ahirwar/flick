@@ -21,7 +21,7 @@ public:
     void fixInstallation();
     void update();
     void debug();
-    bool release();
+    bool release(const std::string&additional_cmake_arg="");
     void vsCode();
     void reBuild();
     static void askUserinfo(struct UserInfo *user);
