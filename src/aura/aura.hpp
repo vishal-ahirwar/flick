@@ -4,6 +4,7 @@
 #include<projectsetting/projectsetting.h>
 #include<userinfo/userinfo.h>
 #include<rt/rt.h>
+#include<vector>
 class Aura
 {
 private:
@@ -11,7 +12,7 @@ private:
     UserInfo _user_info{};
     RT _rt{"Aura"};
 public:
-    void createNewProject(const char *argv[], int);
+    void createNewProject();
     bool compile(const std::string &additional_cmake_arg = "");
     void run(int, const char **);
     void build();
@@ -21,7 +22,7 @@ public:
     void fixInstallation();
     void update();
     void debug();
-    bool release(const std::string&additional_cmake_arg="");
+    bool release();
     void vsCode();
     void reBuild();
     void buildDeps();
@@ -32,11 +33,11 @@ public:
     static void writeProjectSettings(ProjectSetting *setting);
 
 private:
-    void generateBuildFile(const std::string &);
-    void readBuildFile(std::string &);
-    void createDir(const char *);
-    void generateCppTemplateFile(const char *);
-    void generateCmakeFile(const char *);
+
+    void readBuildFile();
+    void createDir();
+    void generateCppTemplateFile();
+    void generateCmakeFile();
     void generateGitIgnoreFile();
     void setupUnitTestingFramework();
     void generateLicenceFile();
@@ -49,6 +50,6 @@ private:
     friend void test();
 
 public:
-    Aura();
+    Aura(const std::vector<std::string>&args={});
     ~Aura();
 };

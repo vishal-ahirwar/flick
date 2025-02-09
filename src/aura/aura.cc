@@ -14,7 +14,7 @@
 #include <downloader/downloader.h>
 #include <rt/rt.h>
 #include <log/log.h>
-
+#include <json.hpp>
 #ifdef WIN32
 #include <windows.h>
 #define USERNAME "USERPROFILE"
@@ -24,7 +24,7 @@
 #define USERNAME "USER"
 #endif
 
-Aura::Aura()
+Aura::Aura(const std::vector<std::string>&args)
 {
 	readProjectSettings(&this->_project_setting);
 	readUserInfoFromConfigFile(&this->_user_info);
@@ -67,16 +67,15 @@ void Aura::setupUnitTestingFramework()
 	Log::log("unit testing template code added to project run tests with : aura utest", Type::E_DISPLAY);
 };
 
-void Aura::createNewProject(const char *argv[], int argc)
+void Aura::createNewProject()
 {
 
 	Log::log("Creating directory..", Type::E_DISPLAY);
 	std::string cmdString{};
-	createDir(argv[2]);
+	createDir();
 	Log::log("Generating Code for main.c and CMakeLists.txt..", Type::E_DISPLAY);
-	generateCppTemplateFile(argv[2]);
-	generateCmakeFile(argv[2]);
-	generateBuildFile(_project_setting._project_name);
+	generateCppTemplateFile();
+	generateCmakeFile();
 	generateGitIgnoreFile();
 	Log::log("happy Coding :)", Type::E_DISPLAY);
 };
@@ -132,19 +131,16 @@ bool Aura::compile(const std::string &additional_cmake_arg)
 //
 void Aura::run(int argc, const char **argv)
 {
-	std::string output{};
-	readBuildFile(output);
-	_project_setting._project_name = output;
-
+	readBuildFile();
 	std::string run{};
 	// printf("%s%s: \n%s", YELLOW, projectName.c_str(),WHITE);
 #ifdef WIN32
 	run += ".\\build\\debug\\";
-	run += _project_setting._project_name;
+	run += _project_setting.getProjectName();
 	run += ".exe";
 #else
 	run += "./build/debug/";
-	run += _project_setting._project_name;
+	run += _project_setting.getProjectName();
 #endif // WIN32
 	for (int i = 0; i < argc; ++i)
 	{
@@ -392,78 +388,21 @@ void Aura::setup()
 	onSetup();
 };
 
-// TODO
-void Aura::generateBuildFile(const std::string &path)
-{
-	std::string newFileName{path};
-	newFileName += "/build.py";
-	std::ofstream file(newFileName.c_str(), std::ios::out);
-	if (file.is_open())
-	{
-		constexpr std::string_view project_name{"@projectName"};
-		constexpr std::string_view build_date{"@builddatetime"};
-		time_t now{time(NULL)};
-		char *dateTime{ctime(&now)};
-		dateTime[strlen(dateTime) - 1] = '\0';
-		std::string build_py(BUILD_PY);
-		auto index = build_py.find(project_name);
-		if (index == std::string::npos)
-			return;
-		build_py.replace(index, project_name.length(), _project_setting._project_name);
-		index = build_py.find(build_date);
-		if (index == std::string::npos)
-			return;
-		build_py.replace(index, build_date.length(), dateTime);
-		file << build_py;
-		file.close();
-	}
-	else
-	{
-		Log::log("something went wrong!", Type::E_ERROR);
-	}
-}
 
 // TODO
 // reading project configuration file
-void Aura::readBuildFile(std::string &output)
+void Aura::readBuildFile()
 {
-	std::ifstream file("build.py");
-	if (file.is_open())
-	{
-		std::getline(file, output);
-		std::getline(file, output);
-		std::string dateTime{};
-		std::getline(file, dateTime);
-		auto index = output.find("=");
-		if (index == std::string::npos)
-		{
-			Log::log("build.py seems incorrect!", Type::E_ERROR);
-			return;
-		};
-		output = output.substr(index + 1);
-		index = dateTime.find("=");
-		if (index == std::string::npos)
-		{
-			Log::log("build.py seems incorrect!", Type::E_ERROR);
-			return;
-		};
-		dateTime = dateTime.substr(index + 1);
-		printf("%s[%s: %s]%s\n\n", YELLOW, output.c_str(), dateTime.c_str(), WHITE);
-		file.close();
-	}
-	else
-	{
-		Log::log("build.py doesn't exist!", Type::E_ERROR);
-	};
-}
+	ProjectSetting setting;
+	readProjectSettings(&setting);
+};
 
 // creating folder structure for project
-void Aura::createDir(const char *argv)
+void Aura::createDir()
 {
 	namespace fs = std::filesystem;
 	std::string cmdString{};
-	_project_setting._project_name = argv;
-	cmdString += argv;
+	cmdString += _project_setting.getProjectName();
 	if (fs::create_directory(cmdString.c_str()))
 	{
 		cmdString += "/src";
@@ -488,12 +427,10 @@ void Aura::createDir(const char *argv)
 	}
 };
 //
-void Aura::generateCppTemplateFile(const char *argv)
+void Aura::generateCppTemplateFile()
 {
 	std::ofstream file;
-	// const std::string stdStr{argv[2]};
-	_project_setting._project_name = argv;
-	file.open("./" + _project_setting._project_name + "/src/main.cxx", std::ios::out);
+	file.open("./" + _project_setting.getProjectName() + "/src/main.cxx", std::ios::out);
 
 	if (file.is_open())
 	{
@@ -502,17 +439,17 @@ void Aura::generateCppTemplateFile(const char *argv)
 		std::string_view project{"_PROJECT_"};
 		std::string_view comment{"@COPYRIGHT"};
 		std::string cap;
-		cap.resize(_project_setting._project_name.length());
-		std::transform(_project_setting._project_name.begin(), _project_setting._project_name.end(), cap.begin(), ::toupper);
+		cap.resize(_project_setting.getProjectName().length());
+		std::transform(_project_setting.getProjectName().begin(), _project_setting.getProjectName().end(), cap.begin(), ::toupper);
 		auto index = MAIN_CODE.find(header);
 		if (index != std::string::npos)
-			MAIN_CODE.replace(index, header.length(), ("#include<" + _project_setting._project_name + "config.h>"));
+			MAIN_CODE.replace(index, header.length(), ("#include<" + _project_setting.getProjectName() + "config.h>"));
 		index = MAIN_CODE.find(copyright);
 		if (index != std::string::npos)
 			MAIN_CODE.replace(index, copyright.length(), (cap + "_COPYRIGHT"));
 		index = MAIN_CODE.find(project);
 		if (index != std::string::npos)
-			MAIN_CODE.replace(index, project.length(), "\"" + _project_setting._project_name + "\"");
+			MAIN_CODE.replace(index, project.length(), "\"" + _project_setting.getProjectName() + "\"");
 		index = MAIN_CODE.find(comment);
 		if (index != std::string::npos)
 			MAIN_CODE.replace(index, comment.length(), _user_info.getUserName());
@@ -522,20 +459,20 @@ void Aura::generateCppTemplateFile(const char *argv)
 };
 
 //
-void Aura::generateCmakeFile(const char *argv)
+void Aura::generateCmakeFile()
 {
-	std::string config{(_project_setting._project_name + "config.h.in")};
+	std::string config{(_project_setting.getProjectName() + "config.h.in")};
 	{
 		std::ofstream file;
 		std::string cap;
-		cap.resize(_project_setting._project_name.length());
-		std::transform(_project_setting._project_name.begin(), _project_setting._project_name.end(), cap.begin(), ::toupper);
-		file.open("./" + _project_setting._project_name + "/" + config, std::ios::out);
+		cap.resize(_project_setting.getProjectName().length());
+		std::transform(_project_setting.getProjectName().begin(), _project_setting.getProjectName().end(), cap.begin(), ::toupper);
+		file.open("./" + _project_setting.getProjectName() + "/" + config, std::ios::out);
 		if (file.is_open())
 		{
-			file << ("#define " + cap + "_VERSION_MAJOR @" + _project_setting._project_name + "_VERSION_MAJOR@") << std::endl;
-			file << ("#define " + cap + "_VERSION_MINOR @" + _project_setting._project_name + "_VERSION_MINOR@") << std::endl;
-			file << ("#define " + cap + "_VERSION_PATCH @" + _project_setting._project_name + "_VERSION_PATCH@") << std::endl;
+			file << ("#define " + cap + "_VERSION_MAJOR @" + _project_setting.getProjectName() + "_VERSION_MAJOR@") << std::endl;
+			file << ("#define " + cap + "_VERSION_MINOR @" + _project_setting.getProjectName() + "_VERSION_MINOR@") << std::endl;
+			file << ("#define " + cap + "_VERSION_PATCH @" + _project_setting.getProjectName() + "_VERSION_PATCH@") << std::endl;
 			file << ("#define " + cap + "_COMPANY" + " \"@COMPANY@\"") << std::endl;
 			file << ("#define " + cap + "_COPYRIGHT" + " \"@COPYRIGHT@\"") << std::endl;
 			file.close();
@@ -544,7 +481,7 @@ void Aura::generateCmakeFile(const char *argv)
 	{
 
 		std::ofstream file;
-		file.open("./" + _project_setting._project_name + "/CMakeLists.txt", std::ios::out);
+		file.open("./" + _project_setting.getProjectName() + "/CMakeLists.txt", std::ios::out);
 		constexpr std::string_view config_in{"@config_in"};
 		constexpr std::string_view config_h{"@config_h"};
 		constexpr std::string_view comment{"@COPYRIGHT"};
@@ -556,20 +493,20 @@ void Aura::generateCmakeFile(const char *argv)
 			auto index = str.find(_name);
 			if (index != std::string::npos)
 			{
-				str.replace(index, _name.size(), _project_setting._project_name);
+				str.replace(index, _name.size(), _project_setting.getProjectName());
 			};
 			index = str.find(config_h);
 			if (index != std::string::npos)
-				str.replace(index, config_h.length(), (_project_setting._project_name + "config.h"));
+				str.replace(index, config_h.length(), (_project_setting.getProjectName() + "config.h"));
 			index = str.find(config_in);
 			if (index != std::string::npos)
 				str.replace(index, config_in.length(), config);
 			index = str.find(comment);
 			if (index != std::string::npos)
 				str.replace(index, comment.length(), _user_info.getUserName());
-			index=str.find(developer);
-			if(index!=std::string::npos)
-				str.replace(index,developer.length(),_user_info.getUserName());
+			index = str.find(developer);
+			if (index != std::string::npos)
+				str.replace(index, developer.length(), _user_info.getUserName());
 			file << str;
 			file.close();
 		};
@@ -579,7 +516,7 @@ void Aura::generateCmakeFile(const char *argv)
 void Aura::generateGitIgnoreFile()
 {
 	std::ofstream file;
-	file.open("./" + _project_setting._project_name + "/.gitignore", std::ios::out);
+	file.open("./" + _project_setting.getProjectName() + "/.gitignore", std::ios::out);
 	if (file.is_open())
 	{
 		file << GITIGNORE_CODE;
@@ -894,24 +831,24 @@ void Aura::update()
 // TODO
 void Aura::debug()
 {
-	readBuildFile(_project_setting._project_name);
+	readBuildFile();
 	if (!compile())
 		return;
-	system(("lldb ./build/debug/" + _project_setting._project_name).c_str());
+	system(("lldb ./build/debug/" + _project_setting.getProjectName()).c_str());
 };
 // TODO
 // this is actually useless for now but will add usefull stuff to it in future
-bool Aura::release(const std::string &additional_cmake_arg)
+bool Aura::release()
 {
 
 	namespace fs = std::filesystem;
 	std::string cpu_threads{std::to_string(std::thread::hardware_concurrency() - 1)};
 	printf("%sThreads in use: %s%s\n", YELLOW, cpu_threads.c_str(), WHITE);
-	if (!fs::exists(fs::current_path().string() + "/build/release") || additional_cmake_arg.length() > 5)
+	if (!fs::exists(fs::current_path().string() + "/build/release"))
 	{
 		// run cmake
 		Log::log("Compile Process has been started...", Type::E_DISPLAY);
-		executeCMake(std::string("-Bbuild/release -DCMAKE_BUILD_TYPE=Release ") + additional_cmake_arg); // TODO
+		executeCMake(std::string("-Bbuild/release -DCMAKE_BUILD_TYPE=Release ") + _project_setting.getCMakeArgs()); // TODO
 		// run ninja
 		if (!system(("ninja -C build/release -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
 		{
@@ -996,7 +933,7 @@ void addToCMakeFile(std::string name)
 void Aura::vsCode()
 {
 	namespace fs = std::filesystem;
-	if (!fs::exists("build.py"))
+	if (!fs::exists("config.json"))
 		return;
 	if (fs::exists(".vscode"))
 		Log::log(".vscode already exist!", Type::E_WARNING);
@@ -1047,8 +984,25 @@ void Aura::writeUserInfoToConfigFile(struct UserInfo *user) {
 
 };
 
-void Aura::readProjectSettings(struct ProjectSetting *setting) {
-
+void Aura::readProjectSettings(struct ProjectSetting *setting)
+{
+	nlohmann::json file;
+	std::ifstream in{"config.json"};
+	if (!in.is_open())
+	{
+		Log::log("Failed to read config.json", Type::E_ERROR);
+		exit(0);
+	};
+	in >> file;
+	try
+	{
+		setting->set(file["projectName"], file["developerName"], file["date"], file["cmakeArgs"]);
+	}
+	catch (...)
+	{
+		Log::log("config.json seems wrong!", Type::E_WARNING);
+	};
+	Log::log(setting->getProjectName(), Type::E_DISPLAY);
 };
 void Aura::writeProjectSettings(struct ProjectSetting *setting) {
 

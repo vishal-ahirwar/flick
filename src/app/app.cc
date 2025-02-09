@@ -15,7 +15,12 @@ namespace CLI
     }
     int createApp(const char *argv[], int argc)
     {
-        Aura aura;
+        std::vector<std::string>args;
+        for(int i=0;i<argc;++i)
+        {
+            args.push_back(argv[0]);
+        };
+        Aura aura{args};
         if (std::string(argv[1]) == std::string("create"))
         {
             if (argc < 3)
@@ -24,7 +29,7 @@ namespace CLI
                 return 1;
             };
 
-            aura.createNewProject(argv, argc);
+            aura.createNewProject();
         }
         else if (std::string(argv[1]) == std::string("help"))
         {
@@ -78,9 +83,6 @@ namespace CLI
         }
         else if (std::string(argv[1]) == std::string("release"))
         {
-            if (argc > 2)
-            aura.release(std::string(argv[2]));
-        else
             aura.release();
         }
         else if(std::string(argv[1])==std::string("vscode"))
