@@ -4,6 +4,9 @@
 class UserInfo
 {
     std::string _user_name{};
+    public:
+    UserInfo();
+    std::string getUserName()const;
 };
 
 #endif

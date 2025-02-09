@@ -1,35 +1,33 @@
-#include <aura/aura.hpp>
-#include <constants/colors.hpp>
 #include <thread>
-#include <constants/constant.hpp>
 #include <ctime>
 #include <filesystem>
 #include <fstream>
-#include <stdio.h>
 #include <string.h>
 #include <iostream>
+#include <vector>
+#include <algorithm>
+#include <format>
+#include <chrono>
+#include <aura/aura.hpp>
+#include <constants/colors.hpp>
+#include <constants/constant.hpp>
+#include <downloader/downloader.h>
+#include <rt/rt.h>
+#include <log/log.h>
+
 #ifdef WIN32
 #include <windows.h>
+#define USERNAME "USERPROFILE"
 #endif
 #ifndef WIN32
 #include <unistd.h>
-#endif
-#include <downloader/downloader.h>
-
-#ifdef WIN32
-#define USERNAME "USERPROFILE"
-#else
 #define USERNAME "USER"
 #endif
 
-#include <vector>
-#include <algorithm>
-#include <rt/rt.h>
-#include <log/log.h>
-#include "aura.hpp"
-
-Aura::Aura() {
-
+Aura::Aura()
+{
+	readProjectSettings(&this->_project_setting);
+	readUserInfoFromConfigFile(&this->_user_info);
 };
 Aura::~Aura() {
 
@@ -256,7 +254,7 @@ void Aura::addToPathUnix()
 {
 	namespace fs = std::filesystem;
 	std::string aura{"/home/"};
-	aura += {getenv(USERNAME)};
+	aura += getenv(USERNAME);
 	aura += "/.aura";
 	std::string source{fs::current_path().string() + "/aura"};
 	std::string destination{(aura + "/aura").c_str()};
@@ -341,7 +339,7 @@ void Aura::installEssentialTools(bool &isInstallationComplete)
 {
 #ifdef WIN32
 	namespace fs = std::filesystem;
-	Log::log("This will install C/C++ GCC Toolchain with cmake, ninja and conan package manager from Github,\nAre you sure you "
+	Log::log("This will install C/C++ Clang Toolchain with cmake and ninja from Github,\nAre you sure you "
 			 "want to "
 			 "continue??[y/n]",
 			 Type::E_DISPLAY);
@@ -499,9 +497,10 @@ void Aura::generateCppTemplateFile(const char *argv)
 
 	if (file.is_open())
 	{
-		std::string header{"_HEADER_"};
-		std::string copyright{"_COPYRIGHT_"};
-		std::string project{"_PROJECT_"};
+		std::string_view header{"_HEADER_"};
+		std::string_view copyright{"_COPYRIGHT_"};
+		std::string_view project{"_PROJECT_"};
+		std::string_view comment{"@COPYRIGHT"};
 		std::string cap;
 		cap.resize(_project_setting._project_name.length());
 		std::transform(_project_setting._project_name.begin(), _project_setting._project_name.end(), cap.begin(), ::toupper);
@@ -514,6 +513,9 @@ void Aura::generateCppTemplateFile(const char *argv)
 		index = MAIN_CODE.find(project);
 		if (index != std::string::npos)
 			MAIN_CODE.replace(index, project.length(), "\"" + _project_setting._project_name + "\"");
+		index = MAIN_CODE.find(comment);
+		if (index != std::string::npos)
+			MAIN_CODE.replace(index, comment.length(), _user_info.getUserName());
 		file << MAIN_CODE;
 		file.close();
 	};
@@ -543,15 +545,18 @@ void Aura::generateCmakeFile(const char *argv)
 
 		std::ofstream file;
 		file.open("./" + _project_setting._project_name + "/CMakeLists.txt", std::ios::out);
-		std::string config_in{"@config_in"};
-		std::string config_h{"@config_h"};
+		constexpr std::string_view config_in{"@config_in"};
+		constexpr std::string_view config_h{"@config_h"};
+		constexpr std::string_view comment{"@COPYRIGHT"};
+		constexpr std::string_view developer{"@DeveloperName"};
 		if (file.is_open())
 		{
+			constexpr std::string_view _name{"@name"};
 			std::string str(CMAKE_CODE);
-			auto index = str.find("@");
+			auto index = str.find(_name);
 			if (index != std::string::npos)
 			{
-				str.replace(index, 1, _project_setting._project_name);
+				str.replace(index, _name.size(), _project_setting._project_name);
 			};
 			index = str.find(config_h);
 			if (index != std::string::npos)
@@ -559,6 +564,12 @@ void Aura::generateCmakeFile(const char *argv)
 			index = str.find(config_in);
 			if (index != std::string::npos)
 				str.replace(index, config_in.length(), config);
+			index = str.find(comment);
+			if (index != std::string::npos)
+				str.replace(index, comment.length(), _user_info.getUserName());
+			index=str.find(developer);
+			if(index!=std::string::npos)
+				str.replace(index,developer.length(),_user_info.getUserName());
 			file << str;
 			file.close();
 		};
@@ -588,7 +599,17 @@ void Aura::generateLicenceFile()
 				 Type::E_ERROR);
 		return;
 	};
-	out << LICENSE_TEXT;
+	std::string _licence{LICENSE_TEXT};
+	// TODO
+	constexpr std::string_view year{"@_YEAR_"};
+	constexpr std::string_view name{"@_OWNER_"};
+	auto index = _licence.find(year);
+	if (index != std::string::npos)
+		_licence.replace(index, year.length(), std::format("{:%Y}", std::chrono::system_clock::now()));
+	index = _licence.find(name);
+	if (index != std::string::npos)
+		_licence.replace(index, name.length(), _user_info.getUserName());
+	out << _licence;
 	out.close();
 }
 //
@@ -1031,8 +1052,4 @@ void Aura::readProjectSettings(struct ProjectSetting *setting) {
 };
 void Aura::writeProjectSettings(struct ProjectSetting *setting) {
 
-};
-bool Aura::checkIfConanNeeded(void)
-{
-	return false;
 };

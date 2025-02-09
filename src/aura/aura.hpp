@@ -30,7 +30,6 @@ public:
     static void writeUserInfoToConfigFile(UserInfo *user);
     static void readProjectSettings(ProjectSetting *setting);
     static void writeProjectSettings(ProjectSetting *setting);
-    static bool checkIfConanNeeded(void);
 
 private:
     void generateBuildFile(const std::string &);
