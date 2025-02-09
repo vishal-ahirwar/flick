@@ -1,7 +1,7 @@
 ---
-
 # Aura
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+
 ![image](https://github.com/user-attachments/assets/2a9185af-493d-404b-b42d-facb2f952e8b)
 
 **Aura** is a powerful tool for C/C++ learners, designed to streamline the process of setting up and managing projects. With Aura, you can focus on learning and coding instead of dealing with repetitive tasks like creating folders, writing CMake files, or compiling manually.
