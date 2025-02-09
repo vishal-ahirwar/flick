@@ -24,7 +24,7 @@
 #define USERNAME "USER"
 #endif
 
-Aura::Aura(const std::vector<std::string>&args)
+Aura::Aura(const std::vector<std::string> &args)
 {
 	readProjectSettings(&this->_project_setting);
 	readUserInfoFromConfigFile(&this->_user_info);
@@ -387,7 +387,6 @@ void Aura::setup()
 {
 	onSetup();
 };
-
 
 // TODO
 // reading project configuration file
@@ -996,7 +995,13 @@ void Aura::readProjectSettings(struct ProjectSetting *setting)
 	in >> file;
 	try
 	{
-		setting->set(file["projectName"], file["developerName"], file["date"], file["cmakeArgs"]);
+		std::string cmake_args{};
+		for (auto args : file["cmakeArgs"])
+		{
+			cmake_args += " ";
+			cmake_args += args;
+		};
+		setting->set(file["projectName"], file["developerName"], file["date"], cmake_args);
 	}
 	catch (...)
 	{
