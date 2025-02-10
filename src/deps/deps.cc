@@ -42,7 +42,7 @@ bool Deps::buildDeps()
     _setting.read();
     if (!fs::exists(external_dir))
     {
-        Log::log("Error: External directory not found!", Type::E_ERROR);
+        Log::log("External directory not found!", Type::E_ERROR);
         return false;
     }
 
