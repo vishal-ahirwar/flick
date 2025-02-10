@@ -80,6 +80,9 @@ namespace CLI
         else if (args.at(1) == "gen")
         {
             aura.rcmake();
+        }else if(args.at(1)=="builddeps")
+        {
+            aura.buildDeps();
         }
         else
         {

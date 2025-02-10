@@ -15,6 +15,7 @@
 #include <rt/rt.h>
 #include <log/log.h>
 #include <json.hpp>
+#include <deps/deps.h>
 #ifdef WIN32
 #include <windows.h>
 #define USERNAME "USERPROFILE"
@@ -37,7 +38,7 @@ Aura::Aura(const std::vector<std::string> &args)
 		_project_setting.set(_args.at(2), _user_info.getUserName(), date, "");
 		return;
 	};
-	if (cmd != "setup" && cmd != "fix" && cmd != "update")
+	if (cmd != "setup" && cmd != "fix" && cmd != "update"&&cmd!="builddeps")
 		readProjectSettings(&this->_project_setting);
 };
 Aura::~Aura() {
@@ -89,6 +90,8 @@ void Aura::createNewProject()
 	generateCmakeFile();
 	generateGitIgnoreFile();
 	writeProjectSettings(&_project_setting);
+	Deps deps;
+	deps.getSetting().write();
 	Log::log("happy Coding :)", Type::E_DISPLAY);
 };
 
@@ -977,6 +980,8 @@ void Aura::rcmake()
 };
 void Aura::buildDeps() {
 	// building cmake external libraries
+	Deps deps;
+	deps.buildDeps();
 };
 
 void Aura::askUserinfo(UserInfo *user) {

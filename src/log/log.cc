@@ -78,7 +78,10 @@ void Log::about()
                "  build          - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
                "Compile and run the project with a single command.\n");
-
+    fmt::print(fmt::fg(fmt::color::yellow),
+               "  builddeps      - ");
+    fmt::print(fmt::fg(fmt::color::white_smoke),
+               "build all the external libraries present in external directory and install them.\n");
     fmt::print(fmt::fg(fmt::color::yellow),
                "  setup          - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
@@ -104,7 +107,7 @@ void Log::about()
     fmt::print(fmt::fg(fmt::color::white_smoke),
                "Remove the build directory and recompile the project.\n");
     fmt::print(fmt::fg(fmt::color::yellow),
-               "  gen         - ");
+               "  gen            - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
                "Only run cmake again to generate cmake files\n");
     fmt::print(fmt::fg(fmt::color::yellow),
