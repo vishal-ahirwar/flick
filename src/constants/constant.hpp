@@ -56,7 +56,14 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -march=native -funroll-loops")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -fno-omit-frame-pointer -fno-inline")
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+	message("Clang detected")
+	add_compile_options(-Wall -Wextra -pedantic -pedantic-errors
+		-Wconversion -Wno-deprecated-declarations -Wuninitialized
+		-Wold-style-cast -Wshadow -Wzero-as-null-pointer-constant
+		-Wno-mismatched-tags -Wimplicit-fallthrough -Wno-pragmas
+		-Wno-sign-conversion -Werror=implicit-fallthrough)
+endif()
 if(NOT DEFINED COMPANY)
     set(COMPANY "@DeveloperName")
 endif()
