@@ -52,8 +52,8 @@ bool Deps::buildDeps()
             Log::log("Building: " + libName, Type::E_DISPLAY);
 
             fs::create_directory(buildDir);
-            std::string cmakeCmd = "cmake -S " + libPath + " -B " + buildDir +" -G \"Ninja\""+" -DCMAKE_INSTALL_PREFIX=" + std::string(install_dir);
-            std::string buildCmd = "cmake --build " + buildDir + " --target install";
+            std::string cmakeCmd = "cmake -S " + libPath + " -B " + buildDir +" -G \"Ninja\" "+_setting.getCMakeArgs();
+            std::string buildCmd = "cmake --build " + buildDir + " --target install --parallel";
 
             if (std::system(cmakeCmd.c_str()) != 0 || std::system(buildCmd.c_str()) != 0)
             {
