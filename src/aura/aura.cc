@@ -35,6 +35,7 @@ Aura::Aura(const std::vector<std::string> &args)
 	{
 		std::time_t now = std::time(nullptr);
 		std::string date{std::ctime(&now)};
+		date.pop_back();
 		_project_setting.set(_args.at(2), _user_info.getUserName(), date, "");
 		return;
 	};
@@ -91,7 +92,7 @@ void Aura::createNewProject()
 	generateGitIgnoreFile();
 	writeProjectSettings(&_project_setting);
 	Deps deps;
-	deps.getSetting().write();
+	deps.getSetting().write(_project_setting.getProjectName());
 	Log::log("happy Coding :)", Type::E_DISPLAY);
 };
 
@@ -417,12 +418,6 @@ void Aura::createDir()
 		pos = cmdString.find("/");
 		cmdString.replace(pos + 1, cmdString.length() - pos, "external");
 		fs::create_directory(cmdString.c_str());
-		std::ofstream file(cmdString + "/help.txt");
-		if (file.is_open())
-		{
-			file << "Add your external libraries in this directory, if librarary is not available on conan";
-		};
-		file.close();
 	}
 	else
 	{
@@ -465,13 +460,13 @@ void Aura::generateCppTemplateFile()
 //
 void Aura::generateCmakeFile()
 {
-	std::string config{(_project_setting.getProjectName() + "config.h.in")};
+	std::string config{(_project_setting.getProjectName() + "/res/config.h.in")};
 	{
 		std::ofstream file;
 		std::string cap;
 		cap.resize(_project_setting.getProjectName().length());
 		std::transform(_project_setting.getProjectName().begin(), _project_setting.getProjectName().end(), cap.begin(), ::toupper);
-		file.open("./" + _project_setting.getProjectName() + "/" + config, std::ios::out);
+		file.open(config, std::ios::out);
 		if (file.is_open())
 		{
 			file << ("#define " + cap + "_VERSION_MAJOR @" + _project_setting.getProjectName() + "_VERSION_MAJOR@") << std::endl;
@@ -504,7 +499,7 @@ void Aura::generateCmakeFile()
 				str.replace(index, config_h.length(), (_project_setting.getProjectName() + "config.h"));
 			index = str.find(config_in);
 			if (index != std::string::npos)
-				str.replace(index, config_in.length(), config);
+				str.replace(index, config_in.length(), "res/config.h.in");
 			index = str.find(comment);
 			if (index != std::string::npos)
 				str.replace(index, comment.length(), _user_info.getUserName());
@@ -1041,7 +1036,7 @@ void Aura::writeProjectSettings(ProjectSetting *setting)
 	file["projectName"] = setting->getProjectName();
 	file["developerName"] = setting->getDeveloperName();
 	file["build"] = setting->getBuildDate();
-	file["cmakeArgs"] = nlohmann::json::array();
+	file["cmakeArgs"] = nlohmann::json::array({"-DCOMPANY=\"Your name\""});
 
 	std::ofstream out{setting->getProjectName() + "/config.json"};
 	if (!out.is_open())

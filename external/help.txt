@@ -1,1 +1,0 @@
-Add your external libraries in this directory, if librarary is not available on conan

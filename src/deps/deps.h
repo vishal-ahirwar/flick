@@ -13,7 +13,7 @@ public:
     void set(const std::string &cmake_args);
     std::string getCMakeArgs() const;
     void read();
-    void write();
+    void write(const std::string&project_name);
 };
 class Deps
 {
