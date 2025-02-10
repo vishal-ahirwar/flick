@@ -12,6 +12,11 @@ void DepsSetting::read()
 
 {
     std::ifstream in{std::string(deps_json)};
+    if (!in.is_open())
+    {
+        Log::log("deps.json doesn't exist in external aborting!", Type::E_ERROR);
+        exit(0);
+    };
     nlohmann::json data;
     in >> data;
     if (data.contains("cmakeArgs"))
@@ -25,9 +30,9 @@ void DepsSetting::read()
 
 void DepsSetting::write(const std::string &project_name)
 {
-    std::ofstream out{project_name +"/"+std::string(deps_json)};
+    std::ofstream out{project_name + "/" + std::string(deps_json)};
     nlohmann::json data;
-    data["cmakeArgs"] = nlohmann::json::array({"-DBUILD_SHARED_LIBS=OFF", "-DCMAKE_INSTALL_PREFIX=" + std::string(install_dir)});
+    data["cmakeArgs"] = nlohmann::json::array({"-DBUILD_SHARED_LIBS=OFF", "-DCMAKE_INSTALL_PREFIX=external/install"});
     out << data;
     out.close();
 };
@@ -43,7 +48,7 @@ bool Deps::buildDeps()
 
     for (const auto &entry : fs::directory_iterator(external_dir))
     {
-        if (entry.is_directory()&&entry.path().filename().string()!="install")
+        if (entry.is_directory() && entry.path().filename().string() != "install")
         {
             std::string libPath = entry.path().string();
             std::string buildDir = libPath + "/build";
@@ -52,7 +57,7 @@ bool Deps::buildDeps()
             Log::log("Building: " + libName, Type::E_DISPLAY);
 
             fs::create_directory(buildDir);
-            std::string cmakeCmd = "cmake -S " + libPath + " -B " + buildDir +" -G \"Ninja\" "+_setting.getCMakeArgs();
+            std::string cmakeCmd = "cmake -S " + libPath + " -B " + buildDir + " -G \"Ninja\" " + _setting.getCMakeArgs();
             std::string buildCmd = "cmake --build " + buildDir + " --target install --parallel";
 
             if (std::system(cmakeCmd.c_str()) != 0 || std::system(buildCmd.c_str()) != 0)
