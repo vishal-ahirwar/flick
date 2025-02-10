@@ -11,10 +11,11 @@ private:
     ProjectSetting _project_setting{};
     UserInfo _user_info{};
     RT _rt{"Aura"};
+    std::vector<std::string>_args{};
 public:
     void createNewProject();
-    bool compile(const std::string &additional_cmake_arg = "");
-    void run(int, const char **);
+    bool compile();
+    void run();
     void build();
     void setup();
     void createInstaller();
@@ -25,6 +26,7 @@ public:
     bool release();
     void vsCode();
     void reBuild();
+    void rcmake();
     void buildDeps();
     static void askUserinfo(struct UserInfo *user);
     static void readUserInfoFromConfigFile(UserInfo *user);
@@ -33,8 +35,6 @@ public:
     static void writeProjectSettings(ProjectSetting *setting);
 
 private:
-
-    void readBuildFile();
     void createDir();
     void generateCppTemplateFile();
     void generateCmakeFile();
@@ -48,7 +48,7 @@ private:
     void addToPathUnix();
     void addToPathWin();
     friend void test();
-
+    bool executeCMake(const std::string&);
 public:
     Aura(const std::vector<std::string>&args={});
     ~Aura();

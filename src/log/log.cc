@@ -9,17 +9,17 @@ void Log::log(const std::string_view &msg, Type e_type)
     {
     case Type::E_DISPLAY:
     {
-        fmt::print(fmt::fg(fmt::color::light_green)|fmt::emphasis::bold, "[Display] {}\n", msg);
+        fmt::print(fmt::fg(fmt::color::light_green) | fmt::emphasis::bold, "[Display] {}\n", msg);
         break;
     };
     case Type::E_WARNING:
     {
-        fmt::print(fmt::fg(fmt::color::yellow)|fmt::emphasis::bold, "[Warning] {}\n", msg);
+        fmt::print(fmt::fg(fmt::color::yellow) | fmt::emphasis::bold, "[Warning] {}\n", msg);
         break;
     };
     case Type::E_ERROR:
     {
-        fmt::print(fmt::fg(fmt::color::crimson)|fmt::emphasis::bold, "[Error] {}\n", msg);
+        fmt::print(fmt::fg(fmt::color::crimson) | fmt::emphasis::bold, "[Error] {}\n", msg);
         break;
     };
     };
@@ -62,8 +62,7 @@ void Log::about()
     fmt::print(fmt::fg(fmt::color::yellow),
                "  compile        - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
-               "Compile the project. Usage: cd into project directory and run 'aura compile <additional cmake args>'\n"
-               "                  Example: aura compile -DCMAKE_BUILD_TYPE=Debug\n");
+               "Compile the project. Usage: cd into project directory and run 'aura compile'\n");
 
     fmt::print(fmt::fg(fmt::color::yellow),
                "  run            - ");
@@ -83,7 +82,7 @@ void Log::about()
     fmt::print(fmt::fg(fmt::color::yellow),
                "  setup          - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
-               "Install a g++ compiler and CMake if not already installed.\n");
+               "Install a llvm-clang toolchain, ninja and CMake if not already installed.\n");
 
     fmt::print(fmt::fg(fmt::color::yellow),
                "  utest          - ");
@@ -104,16 +103,19 @@ void Log::about()
                "  rebuild        - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
                "Remove the build directory and recompile the project.\n");
-
+    fmt::print(fmt::fg(fmt::color::yellow),
+               "  rcmake         - ");
+    fmt::print(fmt::fg(fmt::color::white_smoke),
+               "Only run cmake again to generate cmake files\n");
     fmt::print(fmt::fg(fmt::color::yellow),
                "  debug          - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
-               "Start the GDB debugger.\n");
+               "Compile in Debug mode and Start the lldb debugger.\n");
 
     fmt::print(fmt::fg(fmt::color::yellow),
                "  release        - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
-               "Compile in release mode. You can also use: aura compile -DCMAKE_BUILD_TYPE=Release\n");
+               "Compile in release mode.\n");
 
     fmt::print(fmt::fg(fmt::color::yellow),
                "  vscode         - ");

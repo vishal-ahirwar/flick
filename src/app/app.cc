@@ -3,9 +3,7 @@
 #include <aura/aura.hpp>
 #include <auraConfig.h>
 #include <string>
-#include <stdio.h>
-#include <iostream>
-#include<log/log.h>
+#include <log/log.h>
 namespace CLI
 {
     int showHelp()
@@ -13,44 +11,30 @@ namespace CLI
         Log::about();
         return 0;
     }
-    int createApp(const char *argv[], int argc)
+    int createApp(const std::vector<std::string> &args)
     {
-        std::vector<std::string>args;
-        for(int i=0;i<argc;++i)
-        {
-            args.push_back(argv[0]);
-        };
         Aura aura{args};
-        if (std::string(argv[1]) == std::string("create"))
+        if (args.at(1) == "create")
         {
-            if (argc < 3)
-            {
-                printf("[Error]Project name can't be null!\n");
-                return 1;
-            };
-
             aura.createNewProject();
         }
-        else if (std::string(argv[1]) == std::string("help"))
+        else if (args.at(1) == ("help"))
         {
             CLI::showHelp();
         }
-        else if (std::string(argv[1]) == std::string("compile"))
+        else if (args.at(1) == ("compile"))
         {
-            if (argc > 2)
-                aura.compile(std::string(argv[2]));
-            else
-                aura.compile();
+            aura.compile();
         }
-        else if (std::string(argv[1]) == std::string("run"))
+        else if (args.at(1) == ("run"))
         {
-            aura.run(argc - 2, argv + 2);
+            aura.run();
         }
-        else if (std::string(argv[1]) == std::string("build"))
+        else if (args.at(1) == ("build"))
         {
             aura.build();
         }
-        else if (std::string(argv[1]) == std::string("setup"))
+        else if (args.at(1) == ("setup"))
         {
             try
             {
@@ -58,39 +42,43 @@ namespace CLI
             }
             catch (const std::exception &e)
             {
-                std::cerr << e.what() << '\n';
+                Log::log(e.what(), Type::E_ERROR);
             }
         }
-        else if (std::string(argv[1]) == std::string("createinstaller"))
+        else if (args.at(1) == ("createinstaller"))
         {
             aura.createInstaller();
         }
-        else if (std::string(argv[1]) == std::string("utest"))
+        else if (args.at(1) == ("utest"))
         {
             aura.test();
         }
-        else if (std::string(argv[1]) == std::string("fix"))
+        else if (args.at(1) == ("fix"))
         {
             aura.fixInstallation();
         }
-        else if (std::string(argv[1]) == std::string("update"))
+        else if (args.at(1) == ("update"))
         {
             aura.update();
         }
-        else if (std::string(argv[1]) == std::string("debug"))
+        else if (args.at(1) == ("debug"))
         {
             aura.debug();
         }
-        else if (std::string(argv[1]) == std::string("release"))
+        else if (args.at(1) == ("release"))
         {
             aura.release();
         }
-        else if(std::string(argv[1])==std::string("vscode"))
+        else if (args.at(1) == ("vscode"))
         {
             aura.vsCode();
-        }else if(std::string(argv[1])==std::string("rebuild"))
+        }
+        else if (args.at(1) == ("rbuild"))
         {
             aura.reBuild();
+        }else if(args.at(1)=="rcmake")
+        {
+            aura.rcmake();
         }
         else
         {

@@ -55,7 +55,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -funroll-loops")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -march=native -funroll-loops")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -fno-omit-frame-pointer -fno-inline")
 set(COMPANY "@DeveloperName")
 string(TIMESTAMP CURRENT_YEAR "%Y")
 set(COPYRIGHT "Copyright(c) ${CURRENT_YEAR} ${COMPANY}.")
@@ -78,6 +79,13 @@ int main(int argc,char*argv[])
 {
     std::cerr<<"Hello, "<<_PROJECT_<<std::endl;
     std::cerr<<_COPYRIGHT_<<std::endl;
+    if(argc<2)return 0;
+    std::cerr<<"Args: ";
+    for(int i=1;i<argc;++i)
+    {
+        std::cerr<<argv[i]<<" ";
+    };
+    std::cerr<<std::endl;
     return 0;
 };
 
@@ -98,14 +106,6 @@ TEST_CASE("Factorials are computed", "[factorial]")
     REQUIRE(Factorial(5) == 120);
 })"};
 
-// temp will be using json for config
-constexpr std::string_view BUILD_PY{
-    R"(from os import system,cpu_count,path
-PROJECT_NAME:str="@projectName"
-BUILD_DATE_TIME:str="@builddatetime"
-#Warning : DO NOT REMOVE THIS LINE OR ADD ANYTHING ABOVE EVEN IMPORT SHOULD GO BELOW THIS LINE
-GENERATOR:str="\"Ninja\""
-)"};
 
 constexpr std::string_view VIM_CONFIG{R"()"};
 

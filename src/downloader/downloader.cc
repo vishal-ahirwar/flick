@@ -26,10 +26,10 @@ void Downloader::download(const std::string &url, const std::string &outputFileP
         outputFile.write(response.text.c_str(), response.text.size());
         outputFile.close();
 
-        fmt::print(fmt::emphasis::faint | fmt::fg(fmt::color::alice_blue), "\nfile downloaded and saved as {}\n", outputFilePath);
+        fmt::print(fmt::fg(fmt::color::light_green)|fmt::emphasis::bold, "\nfile downloaded and saved as {}\n", outputFilePath);
     }
     else
     {
-        fmt::print(fmt::emphasis::faint | fmt::fg(fmt::color::alice_blue), "\nFailed to download file. Status code:{}\n ", response.status_code);
+        fmt::print(fmt::fg(fmt::color::light_green)|fmt::emphasis::bold, "\nFailed to download file. Status code:{}\n ", response.status_code);
     }
 }

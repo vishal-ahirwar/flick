@@ -21,13 +21,22 @@
 #endif
 #ifndef WIN32
 #include <unistd.h>
+#include "aura.hpp"
 #define USERNAME "USER"
 #endif
 
 Aura::Aura(const std::vector<std::string> &args)
 {
-	readProjectSettings(&this->_project_setting);
+	_args = args;
 	readUserInfoFromConfigFile(&this->_user_info);
+	if (args.at(1) == "create")
+	{
+		std::time_t now = std::time(nullptr);
+		std::string date{std::ctime(&now)};
+		_project_setting.set(_args.at(2), _user_info.getUserName(), date, "");
+		return;
+	}
+	readProjectSettings(&this->_project_setting);
 };
 Aura::~Aura() {
 
@@ -73,14 +82,15 @@ void Aura::createNewProject()
 	Log::log("Creating directory..", Type::E_DISPLAY);
 	std::string cmdString{};
 	createDir();
-	Log::log("Generating Code for main.c and CMakeLists.txt..", Type::E_DISPLAY);
+	Log::log("Generating Code for main.cxx and CMakeLists.txt..", Type::E_DISPLAY);
 	generateCppTemplateFile();
 	generateCmakeFile();
 	generateGitIgnoreFile();
+	writeProjectSettings(&_project_setting);
 	Log::log("happy Coding :)", Type::E_DISPLAY);
 };
 
-bool executeCMake(const std::string &additional_cmake_arg)
+bool Aura::executeCMake(const std::string &additional_cmake_arg)
 {
 	std::string cmd{"cmake -S . -G \"Ninja\" "};
 	cmd += additional_cmake_arg;
@@ -88,18 +98,18 @@ bool executeCMake(const std::string &additional_cmake_arg)
 };
 
 // TODO : add compile option
-bool Aura::compile(const std::string &additional_cmake_arg)
+bool Aura::compile()
 {
 	// Temp Soln
 
 	namespace fs = std::filesystem;
 	std::string cpu_threads{std::to_string(std::thread::hardware_concurrency() - 1)};
 	printf("%sThreads in use: %s%s\n", YELLOW, cpu_threads.c_str(), WHITE);
-	if (!fs::exists(fs::current_path().string() + "/build/debug") || additional_cmake_arg.length() > 5)
+	if (!fs::exists(fs::current_path().string() + "/build/debug"))
 	{
 		// run cmake
 		Log::log("Compile Process has been started...", Type::E_DISPLAY);
-		executeCMake(std::string("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug ") + additional_cmake_arg); // TODO
+		executeCMake(std::string("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug ") + _project_setting.getCMakeArgs()); // TODO
 		// run ninja
 		if (!system(("ninja -C build/debug -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
 		{
@@ -129,9 +139,8 @@ bool Aura::compile(const std::string &additional_cmake_arg)
 	}
 };
 //
-void Aura::run(int argc, const char **argv)
+void Aura::run()
 {
-	readBuildFile();
 	std::string run{};
 	// printf("%s%s: \n%s", YELLOW, projectName.c_str(),WHITE);
 #ifdef WIN32
@@ -142,12 +151,11 @@ void Aura::run(int argc, const char **argv)
 	run += "./build/debug/";
 	run += _project_setting.getProjectName();
 #endif // WIN32
-	for (int i = 0; i < argc; ++i)
+	for (int i = 2; i < _args.size(); ++i)
 	{
 		run += " ";
-		run += argv[i];
-	};
-
+		run += _args.at(i);
+	}
 	if (system(run.c_str()))
 	{
 		Log::log("Maybe You should Compile First Before run or You have Permission to "
@@ -161,7 +169,7 @@ void Aura::build()
 {
 	if (!this->compile())
 		return;
-	this->run(0, nullptr);
+	this->run();
 }
 
 //
@@ -388,14 +396,6 @@ void Aura::setup()
 	onSetup();
 };
 
-// TODO
-// reading project configuration file
-void Aura::readBuildFile()
-{
-	ProjectSetting setting;
-	readProjectSettings(&setting);
-};
-
 // creating folder structure for project
 void Aura::createDir()
 {
@@ -553,7 +553,7 @@ void Aura::generateLicenceFile()
 // creating packaged build [with installer for windows] using cpack
 void Aura::createInstaller()
 {
-	if (!executeCMake("-Bbuild/release -DCMAKE_BUILD_TYPE=Release "))
+	if (!executeCMake("-Bbuild/release -DCMAKE_BUILD_TYPE=Release " + _project_setting.getCMakeArgs()))
 	{
 		Log::log("Please First fix all the errors", Type::E_ERROR);
 		return;
@@ -830,10 +830,13 @@ void Aura::update()
 // TODO
 void Aura::debug()
 {
-	readBuildFile();
 	if (!compile())
 		return;
+#ifdef WIN32
+	system(("lldb ./build/debug/" + _project_setting.getProjectName() + ".exe").c_str());
+#else
 	system(("lldb ./build/debug/" + _project_setting.getProjectName()).c_str());
+#endif
 };
 // TODO
 // this is actually useless for now but will add usefull stuff to it in future
@@ -956,9 +959,8 @@ void Aura::reBuild()
 	namespace fs = std::filesystem;
 	try
 	{
-
 		fs::remove_all("build");
-		executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug");
+		executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug"+_project_setting.getCMakeArgs());
 		compile();
 	}
 	catch (std::exception &e)
@@ -967,23 +969,27 @@ void Aura::reBuild()
 	};
 };
 
+void Aura::rcmake()
+{
+	executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug"+_project_setting.getCMakeArgs());
+};
 void Aura::buildDeps() {
 	// building cmake external libraries
 };
 
-void Aura::askUserinfo(struct UserInfo *user) {
+void Aura::askUserinfo(UserInfo *user) {
 
 };
 
-void Aura::readUserInfoFromConfigFile(struct UserInfo *user) {
+void Aura::readUserInfoFromConfigFile(UserInfo *user) {
 
 };
 
-void Aura::writeUserInfoToConfigFile(struct UserInfo *user) {
+void Aura::writeUserInfoToConfigFile(UserInfo *user) {
 
 };
 
-void Aura::readProjectSettings(struct ProjectSetting *setting)
+void Aura::readProjectSettings(ProjectSetting *setting)
 {
 	nlohmann::json file;
 	std::ifstream in{"config.json"};
@@ -996,19 +1002,55 @@ void Aura::readProjectSettings(struct ProjectSetting *setting)
 	try
 	{
 		std::string cmake_args{};
-		for (auto args : file["cmakeArgs"])
+		std::string project_name{file.contains("projectName") ? file["projectName"] : "None"};
+		std::string developer_name{file.contains("developerName") ? file["developerName"] : "None"};
+		std::string build_date{file.contains("date") ? file["date"] : "0.0.0"};
+		if (file.contains("cmakeArgs"))
 		{
-			cmake_args += " ";
-			cmake_args += args;
-		};
-		setting->set(file["projectName"], file["developerName"], file["date"], cmake_args);
+
+			for (auto args : file["cmakeArgs"])
+			{
+				cmake_args += " ";
+				cmake_args += args;
+			};
+			Log::log(cmake_args, Type::E_WARNING);
+		}
+		else
+		{
+			Log::log("No CMake args", Type::E_DISPLAY);
+		}
+		setting->set(project_name, developer_name, build_date, cmake_args);
 	}
 	catch (...)
 	{
 		Log::log("config.json seems wrong!", Type::E_WARNING);
 	};
-	Log::log(setting->getProjectName(), Type::E_DISPLAY);
 };
-void Aura::writeProjectSettings(struct ProjectSetting *setting) {
+void Aura::writeProjectSettings(ProjectSetting *setting)
+{
+	if (!setting)
+		return;
 
-};
+	nlohmann::json file;
+	file["projectName"] = setting->getProjectName();
+	file["developerName"] = setting->getDeveloperName();
+	file["build"] = setting->getBuildDate();
+	file["cmakeArgs"] = nlohmann::json::array();
+
+	std::ofstream out{setting->getProjectName() + "/config.json"};
+	if (!out.is_open())
+	{
+		Log::log("Failed to generate config.json!", Type::E_ERROR);
+		return;
+	}
+
+	out << file.dump(4); // Indented JSON for readability
+	if (!out.good())
+	{
+		Log::log("Failed to write to config.json!", Type::E_ERROR);
+		return;
+	}
+
+	out.close();
+	Log::log("Generating config.json", Type::E_DISPLAY);
+}
