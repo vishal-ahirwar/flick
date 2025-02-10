@@ -28,15 +28,17 @@
 Aura::Aura(const std::vector<std::string> &args)
 {
 	_args = args;
+	std::string cmd{args.at(1)};
 	readUserInfoFromConfigFile(&this->_user_info);
-	if (args.at(1) == "create")
+	if (cmd == "create")
 	{
 		std::time_t now = std::time(nullptr);
 		std::string date{std::ctime(&now)};
 		_project_setting.set(_args.at(2), _user_info.getUserName(), date, "");
 		return;
-	}
-	readProjectSettings(&this->_project_setting);
+	};
+	if (cmd != "setup" && cmd != "fix" && cmd != "update")
+		readProjectSettings(&this->_project_setting);
 };
 Aura::~Aura() {
 
@@ -700,7 +702,7 @@ void Aura::fixInstallation()
 {
 	Log::log("Are you sure you "
 			 "want to "
-			 "continue??[y/n] %s\n",
+			 "continue??[y/n]\n",
 			 Type::E_DISPLAY);
 	char c;
 	while (true)
@@ -960,7 +962,7 @@ void Aura::reBuild()
 	try
 	{
 		fs::remove_all("build");
-		executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug"+_project_setting.getCMakeArgs());
+		executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug" + _project_setting.getCMakeArgs());
 		compile();
 	}
 	catch (std::exception &e)
@@ -971,7 +973,7 @@ void Aura::reBuild()
 
 void Aura::rcmake()
 {
-	executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug"+_project_setting.getCMakeArgs());
+	executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug" + _project_setting.getCMakeArgs());
 };
 void Aura::buildDeps() {
 	// building cmake external libraries
@@ -1013,7 +1015,6 @@ void Aura::readProjectSettings(ProjectSetting *setting)
 				cmake_args += " ";
 				cmake_args += args;
 			};
-			Log::log(cmake_args, Type::E_WARNING);
 		}
 		else
 		{

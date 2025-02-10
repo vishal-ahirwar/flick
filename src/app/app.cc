@@ -73,10 +73,11 @@ namespace CLI
         {
             aura.vsCode();
         }
-        else if (args.at(1) == ("rbuild"))
+        else if (args.at(1) == ("rebuild"))
         {
             aura.reBuild();
-        }else if(args.at(1)=="rcmake")
+        }
+        else if (args.at(1) == "gen")
         {
             aura.rcmake();
         }

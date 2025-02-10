@@ -1,7 +1,6 @@
 {
     "build": "Mon Feb 10 17:25:49 2025\n",
     "cmakeArgs": [
-        "-DCOMPANY=\"Hello\""
     ],
     "developerName": "Vishal Ahirwar",
     "projectName": "aura"
