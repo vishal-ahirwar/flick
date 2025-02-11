@@ -23,12 +23,8 @@ if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     message(FATAL_ERROR "This project requires Clang as the compiler. Please set Clang as the compiler.")
 endif()
 
-include_directories(src ${CMAKE_BINARY_DIR} external/json ${CMAKE_SOURCE_DIR}/external/cpr/install/include)
-set(cpr_DIR ${CMAKE_SOURCE_DIR}/external/cpr)
-set(fmt_DIR ${CMAKE_SOURCE_DIR}/external/fmt/install/lib/cmake/fmt)
-find_package(cpr REQUIRED)
+include_directories(src ${CMAKE_BINARY_DIR} external/json ${CMAKE_SOURCE_DIR}/external/install/include)
 find_package(fmt REQUIRED)
-
 configure_file(res/auraConfig.h.in auraConfig.h)
 file(GLOB SOURCES "src/*.cc" "src/*/*.cc")
 add_executable(${PROJECT_NAME} ${SOURCES})
@@ -36,8 +32,8 @@ add_executable(utool utool/main.cc src/downloader/downloader.cc src/rt/rt.cc src
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 
-target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/external/cpr/install/lib)
-target_link_directories(utool PUBLIC ${CMAKE_SOURCE_DIR}/external/cpr/install/lib)
+target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/external/install/lib)
+target_link_directories(utool PUBLIC ${CMAKE_SOURCE_DIR}/external/install/lib)
 if(WIN32)
 target_link_libraries(${PROJECT_NAME} PUBLIC cpr fmt::fmt curl z ws2_32 bcrypt crypt32)
 target_link_libraries(utool PUBLIC cpr fmt::fmt curl z ws2_32 bcrypt crypt32)
