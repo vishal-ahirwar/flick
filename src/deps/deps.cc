@@ -6,7 +6,7 @@
 #include <sstream>
 #include <vector>
 #include <thread>
-constexpr std::string_view CONFIG_CMAKE_ARGS{"-DCMAKE_INSTALL_PREFIX=external/install -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang"};
+constexpr std::string_view CONFIG_CMAKE_ARGS{"-DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang"};
 namespace fs = std::filesystem;
 void DepsSetting::set(const std::string &cmake_args)
 {
@@ -66,18 +66,27 @@ bool Deps::buildDeps()
 
     for (const auto &entry : fs::directory_iterator(external_dir))
     {
-        if (entry.is_directory() && entry.path().filename().string() != "install" && entry.path().filename().string() != "build")
+        if (entry.is_directory())
         {
+            bool is_cmake_present{false};
+            for (const auto &cmake_file : fs::directory_iterator(entry.path()))
+                if (!cmake_file.is_directory() && cmake_file.path().filename().string() == "CMakeLists.txt")
+                {
+                    is_cmake_present = true;
+                    break;
+                };
+            if (!is_cmake_present)
+                continue;
             std::string libPath = entry.path().string();
             std::string buildDir = libPath + "/build";
             std::string libName = entry.path().filename().string();
-
+            std::string installDir = libPath + "/install";
             Log::log("Building: " + libName, Type::E_DISPLAY);
 
             fs::create_directory(buildDir);
             std::string cmakeCmd = "cmake -S " + libPath + " -B " + buildDir + " -G \"Ninja\" " + _deps_setting.getCMakeArgs();
             std::string buildCmd = "ninja -C " + buildDir + " -j" + std::to_string(std::thread::hardware_concurrency() - 1);
-            std::string installCmd = "cmake --install " + buildDir + " ";
+            std::string installCmd = "cmake --install " + buildDir + " --prefix=" + installDir;
             if (std::system(cmakeCmd.c_str()) != 0 || std::system(buildCmd.c_str()) != 0 || std::system(installCmd.c_str()) != 0)
             {
                 Log::log("Failed to build " + libName, Type::E_ERROR);
@@ -104,13 +113,14 @@ DepsSetting &Deps::getSetting()
 bool Deps::updateConfig(const std::string &lib_name)
 {
     _project_setting.readConfig();
-    std::string lib_config_path{"-D" + lib_name + "_DIR=" + "external/install/lib/cmake/" + lib_name};
+    const std::string libdir{"-D" + lib_name + "_DIR="};
+    std::string lib_config_path{libdir + "external/" + lib_name + "/install/lib/cmake/" + lib_name};
     std::istringstream ss{_project_setting.getCMakeArgs()};
     std::string cmake_arg{};
     bool is_in_config{false};
     while (std::getline(ss, cmake_arg, ' '))
     {
-        if (cmake_arg.find(lib_config_path) != std::string::npos)
+        if (cmake_arg.find(libdir) != std::string::npos)
         {
             is_in_config = true;
             break;

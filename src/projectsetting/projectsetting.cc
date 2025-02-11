@@ -48,9 +48,11 @@ bool ProjectSetting::readConfig()
         std::string cmake_args{};
         for (auto &arg : data["cmakeArgs"])
         {
-            cmake_args += " ";
+            if (!cmake_args.empty())
+                cmake_args += " ";
             cmake_args += arg;
         };
+        cmake_args=" "+cmake_args;
         set(data["projectName"], data["developerName"], data["build"], cmake_args);
     }
     catch (...)

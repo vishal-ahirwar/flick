@@ -2,7 +2,11 @@
     "build": "Tue Feb 11 16:06:35 2025",
     "cmakeArgs": [
         "-DBUILD_SHARED_LIBS=OFF",
-        "-Dfmt_DIR=external/install/lib/cmake/fmt"
+        "-Dfmt_DIR=external/fmt/install/lib/cmake/fmt",
+        "-Dcpr_lib_dir=external/cpr/install/lib",
+        "-Dcpr_include_dir=external/cpr/install/include",
+        "-Djson=external/json",
+        "-Dcpr_DIR=external/cpr/install/lib/cmake/cpr"
     ],
     "developerName": "None",
     "projectName": "aura"
