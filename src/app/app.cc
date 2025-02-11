@@ -77,7 +77,7 @@ namespace CLI
         {
             aura.reBuild();
         }
-        else if (args.at(1) == "refresh")
+        else if (args.at(1) == "ref")
         {
             aura.refresh();
         }

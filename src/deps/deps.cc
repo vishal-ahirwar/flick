@@ -85,8 +85,10 @@ bool Deps::buildDeps()
             }
             else
             {
-                updateConfig(libName);
-                updateCMakeFile(libName);
+                if (updateConfig(libName))
+                    Log::log("adding " + libName + " to config.json", Type::E_DISPLAY);
+                if (updateCMakeFile(libName))
+                    Log::log("adding " + libName + " to CMakeLists.txt", Type::E_DISPLAY);
             }
         }
     }
@@ -102,11 +104,74 @@ DepsSetting &Deps::getSetting()
 bool Deps::updateConfig(const std::string &lib_name)
 {
     _project_setting.readConfig();
-    _project_setting.writeConfig();
-    return true;
+    std::string lib_config_path{"-D" + lib_name + "_DIR=" + "external/install/lib/cmake/" + lib_name};
+    std::istringstream ss{_project_setting.getCMakeArgs()};
+    std::string cmake_arg{};
+    bool is_in_config{false};
+    while (std::getline(ss, cmake_arg, ' '))
+    {
+        if (cmake_arg.find(lib_config_path) != std::string::npos)
+        {
+            is_in_config = true;
+            break;
+        }
+    };
+    if (!is_in_config)
+    {
+        _project_setting.set(_project_setting.getProjectName(), _project_setting.getDeveloperName(), _project_setting.getBuildDate(), _project_setting.getCMakeArgs() + " " + lib_config_path);
+        _project_setting.writeConfig();
+        return true;
+    }
+    return false;
 }
 
 bool Deps::updateCMakeFile(const std::string &lib_name)
 {
-    return false;
+    std::ifstream in("CMakeLists.txt");
+    if (!in.is_open())
+    {
+        Log::log("Failed to open CMakeLists.txt", Type::E_ERROR);
+        return false;
+    };
+    std::vector<std::string> lines{};
+    std::string line{};
+    while (std::getline(in, line)) // reading whole file in vector to easily update the file
+    {
+        if (line.find(lib_name) != std::string::npos)
+        {
+            in.close();
+            return false;
+        };
+        lines.push_back(line);
+    };
+    in.close();
+    auto pos = lines.size() - 1;
+    for (int i = 0; i < lines.size(); ++i)
+    {
+        if (lines[i].find("#@find") != std::string::npos)
+        {
+            pos = ++i; // add the find_package(name) after this line
+            break;
+        };
+    };
+    lines.insert(lines.begin() + pos, "find_package(" + lib_name + " REQUIRED)"); // NOTE
+    for (int i = 0; i < lines.size(); ++i)
+    {
+        if (lines[i].find("@link") != std::string::npos)
+        {
+            pos = ++i; // add the target_link_libraries(${PROJECT_NAME} after this line
+            break;
+        }
+    };
+    lines.insert(lines.begin() + pos, "target_link_libraries(${PROJECT_NAME} " + lib_name + "::" + lib_name + ")"); // NOTE
+    std::ofstream out("CMakeLists.txt");
+    if (!out.is_open())
+        return false;
+    for (const auto &l : lines) // writing back to file the updated contents
+    {
+        out << l << "\n";
+    };
+    out.close();
+
+    return true;
 }

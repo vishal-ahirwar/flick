@@ -878,56 +878,6 @@ bool Aura::release()
 	}
 	return false;
 };
-
-void addToCMakeFile(std::string name)
-{
-	auto index = name.find("/");
-	name = name.substr(0, index); // extracting package name from conan format string like fmt/1.2.0 there the package name is fmt
-
-	std::transform(name.begin(), name.end(), name.begin(), ::tolower); // this may not work for all packages downloaded from conan
-	std::ifstream in("CMakeLists.txt");
-	if (!in.is_open())
-	{
-		Log::log("Failed to open CMakeLists.txt", Type::E_ERROR);
-		return;
-	};
-	std::vector<std::string> lines{};
-	std::string line{};
-	while (std::getline(in, line)) // reading whole file in vector to easily update the file
-	{
-		lines.push_back(line);
-	};
-	in.close();
-	auto pos = lines.size() - 1;
-	for (int i = 0; i < lines.size(); ++i)
-	{
-		if (lines[i].find("#@find") != std::string::npos)
-		{
-			pos = ++i; // add the find_package(name) after this line
-			break;
-		};
-	};
-	lines.insert(lines.begin() + pos, "find_package(" + name + " REQUIRED)"); // NOTE
-	for (int i = 0; i < lines.size(); ++i)
-	{
-		if (lines[i].find("@link") != std::string::npos)
-		{
-			pos = ++i; // add the target_link_libraries(${PROJECT_NAME} after this line
-			break;
-		}
-	};
-	lines.insert(lines.begin() + pos, "target_link_libraries(${PROJECT_NAME} " + name + "::" + name + ")"); // NOTE
-	std::ofstream out("CMakeLists.txt");
-	if (!out.is_open())
-		return;
-	for (const auto &l : lines) // writing back to file the updated contents
-	{
-		out << l << "\n";
-	};
-	out.close();
-};
-// adding new packages to conanfile.txt then add recuired commands to  cmakelists.txt and reload cmakelist.txt to reconfigure project
-
 // for generating vscode intelligence
 // everytime user run this command it's will override everything in c_cpp_properties.json
 void Aura::vsCode()

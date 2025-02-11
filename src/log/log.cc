@@ -107,7 +107,7 @@ void Log::about()
     fmt::print(fmt::fg(fmt::color::white_smoke),
                "Remove the build directory and recompile the project.\n");
     fmt::print(fmt::fg(fmt::color::yellow),
-               "  refresh        - ");
+               "  ref            - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
                "Only run cmake again to generate cmake files\n");
     fmt::print(fmt::fg(fmt::color::yellow),
