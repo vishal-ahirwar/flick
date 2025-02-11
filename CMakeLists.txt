@@ -29,7 +29,7 @@ set(fmt_DIR ${CMAKE_SOURCE_DIR}/external/fmt/install/lib/cmake/fmt)
 find_package(cpr REQUIRED)
 find_package(fmt REQUIRED)
 
-configure_file(auraConfig.h.in auraConfig.h)
+configure_file(res/auraConfig.h.in auraConfig.h)
 file(GLOB SOURCES "src/*.cc" "src/*/*.cc")
 add_executable(${PROJECT_NAME} ${SOURCES})
 add_executable(utool utool/main.cc src/downloader/downloader.cc src/rt/rt.cc src/userinfo/userinfo.cc ./src/log/log.cc)
