@@ -1,7 +1,8 @@
 {
-    "build": "Mon Feb 10 17:25:49 2025\n",
+    "build": "Tue Feb 11 16:06:35 2025",
     "cmakeArgs": [
+        "-DBUILD_SHARED_LIBS=OFF"
     ],
-    "developerName": "Vishal Ahirwar",
+    "developerName": "None",
     "projectName": "aura"
 }

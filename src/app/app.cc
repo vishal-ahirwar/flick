@@ -77,10 +77,11 @@ namespace CLI
         {
             aura.reBuild();
         }
-        else if (args.at(1) == "gen")
+        else if (args.at(1) == "refresh")
         {
-            aura.rcmake();
-        }else if(args.at(1)=="builddeps")
+            aura.refresh();
+        }
+        else if (args.at(1) == "builddeps")
         {
             aura.buildDeps();
         }

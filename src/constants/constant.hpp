@@ -57,7 +57,7 @@ set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -march=native -funroll-loops")
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-	message("Clang detected")
+	message(STATUS "Clang detected")
 	add_compile_options(-Wall -Wextra -pedantic -pedantic-errors
 		-Wconversion -Wno-deprecated-declarations -Wuninitialized
 		-Wold-style-cast -Wshadow -Wzero-as-null-pointer-constant
@@ -99,7 +99,7 @@ int main(int argc,char*argv[])
 };
 
 )"};
-
+constexpr std::string_view CONFIG_CMAKE_ARGS{"-DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang"};
 constexpr std::string_view TEST_CXX_CODE{R"(
 #include <catch2/catch_test_macros.hpp>
 
@@ -114,7 +114,6 @@ TEST_CASE("Factorials are computed", "[factorial]")
     REQUIRE(Factorial(2) == 2);
     REQUIRE(Factorial(5) == 120);
 })"};
-
 
 constexpr std::string_view VIM_CONFIG{R"()"};
 

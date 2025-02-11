@@ -25,7 +25,7 @@
 #include "aura.hpp"
 #define USERNAME "USER"
 #endif
-
+namespace fs = std::filesystem;
 Aura::Aura(const std::vector<std::string> &args)
 {
 	_args = args;
@@ -36,10 +36,10 @@ Aura::Aura(const std::vector<std::string> &args)
 		std::time_t now = std::time(nullptr);
 		std::string date{std::ctime(&now)};
 		date.pop_back();
-		_project_setting.set(_args.at(2), _user_info.getUserName(), date, "");
+		_project_setting.set(_args.at(2), _user_info.getUserName(), date,std::string(CONFIG_CMAKE_ARGS));
 		return;
 	};
-	if (cmd != "setup" && cmd != "fix" && cmd != "update"&&cmd!="builddeps")
+	if (cmd != "setup" && cmd != "fix" && cmd != "update" && cmd != "builddeps")
 		readProjectSettings(&this->_project_setting);
 };
 Aura::~Aura() {
@@ -91,8 +91,6 @@ void Aura::createNewProject()
 	generateCmakeFile();
 	generateGitIgnoreFile();
 	writeProjectSettings(&_project_setting);
-	Deps deps;
-	deps.getSetting().write(_project_setting.getProjectName());
 	Log::log("happy Coding :)", Type::E_DISPLAY);
 };
 
@@ -969,11 +967,14 @@ void Aura::reBuild()
 	};
 };
 
-void Aura::rcmake()
+void Aura::refresh()
 {
 	executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug" + _project_setting.getCMakeArgs());
+	if (fs::exists("build/release"))
+		executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Release" + _project_setting.getCMakeArgs());
 };
-void Aura::buildDeps() {
+void Aura::buildDeps()
+{
 	// building cmake external libraries
 	Deps deps;
 	deps.buildDeps();
@@ -993,65 +994,20 @@ void Aura::writeUserInfoToConfigFile(UserInfo *user) {
 
 void Aura::readProjectSettings(ProjectSetting *setting)
 {
-	nlohmann::json file;
-	std::ifstream in{"config.json"};
-	if (!in.is_open())
+	if (!setting)
+		return;
+	if(!setting->readConfig())
 	{
-		Log::log("Failed to read config.json", Type::E_ERROR);
+		Log::log("Failed to read config file",Type::E_ERROR);
 		exit(0);
-	};
-	in >> file;
-	try
-	{
-		std::string cmake_args{};
-		std::string project_name{file.contains("projectName") ? file["projectName"] : "None"};
-		std::string developer_name{file.contains("developerName") ? file["developerName"] : "None"};
-		std::string build_date{file.contains("date") ? file["date"] : "0.0.0"};
-		if (file.contains("cmakeArgs"))
-		{
-
-			for (auto args : file["cmakeArgs"])
-			{
-				cmake_args += " ";
-				cmake_args += args;
-			};
-		}
-		else
-		{
-			Log::log("No CMake args", Type::E_DISPLAY);
-		}
-		setting->set(project_name, developer_name, build_date, cmake_args);
-	}
-	catch (...)
-	{
-		Log::log("config.json seems wrong!", Type::E_WARNING);
 	};
 };
 void Aura::writeProjectSettings(ProjectSetting *setting)
 {
 	if (!setting)
 		return;
-
-	nlohmann::json file;
-	file["projectName"] = setting->getProjectName();
-	file["developerName"] = setting->getDeveloperName();
-	file["build"] = setting->getBuildDate();
-	file["cmakeArgs"] = nlohmann::json::array({"-DCOMPANY=\"Your name\""});
-
-	std::ofstream out{setting->getProjectName() + "/config.json"};
-	if (!out.is_open())
-	{
-		Log::log("Failed to generate config.json!", Type::E_ERROR);
-		return;
-	}
-
-	out << file.dump(4); // Indented JSON for readability
-	if (!out.good())
-	{
-		Log::log("Failed to write to config.json!", Type::E_ERROR);
-		return;
-	}
-
-	out.close();
+	setting->writeConfig(setting->getProjectName() + "/");
 	Log::log("Generating config.json", Type::E_DISPLAY);
-}
+	Deps deps{};
+	deps.getSetting().write(setting->getProjectName());
+};

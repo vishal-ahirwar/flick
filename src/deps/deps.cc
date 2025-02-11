@@ -3,19 +3,28 @@
 #include <fstream>
 #include <log/log.h>
 #include <filesystem>
+#include <sstream>
+#include <vector>
+
+constexpr std::string_view CONFIG_CMAKE_ARGS{"-DCMAKE_INSTALL_PREFIX=external/install -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang"};
 namespace fs = std::filesystem;
+void DepsSetting::set(const std::string &cmake_args)
+{
+    if (_cmake_args != cmake_args)
+        _cmake_args = cmake_args;
+}
 std::string DepsSetting::getCMakeArgs() const
+
 {
     return _cmake_args;
 }
-void DepsSetting::read()
-
+bool DepsSetting::read()
 {
     std::ifstream in{std::string(deps_json)};
     if (!in.is_open())
     {
         Log::log("deps.json doesn't exist in external aborting!", Type::E_ERROR);
-        exit(0);
+        return false;
     };
     nlohmann::json data;
     in >> data;
@@ -26,20 +35,29 @@ void DepsSetting::read()
             _cmake_args += args;
         };
     in.close();
+    return true;
 }
 
 void DepsSetting::write(const std::string &project_name)
 {
     std::ofstream out{project_name + "/" + std::string(deps_json)};
+    Log::log("Generating deps.json", Type::E_DISPLAY);
     nlohmann::json data;
-    data["cmakeArgs"] = nlohmann::json::array({"-DBUILD_SHARED_LIBS=OFF", "-DCMAKE_INSTALL_PREFIX=external/install"});
+    std::istringstream ss{std::string(CONFIG_CMAKE_ARGS)};
+    std::string arg{};
+    std::vector<std::string> args{};
+    while (std::getline(ss, arg, ' '))
+    {
+        args.push_back(arg);
+    };
+    data["cmakeArgs"] = args;
     out << data;
     out.close();
 };
 
 bool Deps::buildDeps()
 {
-    _setting.read();
+    _deps_setting.read();
     if (!fs::exists(external_dir))
     {
         Log::log("External directory not found!", Type::E_ERROR);
@@ -57,13 +75,18 @@ bool Deps::buildDeps()
             Log::log("Building: " + libName, Type::E_DISPLAY);
 
             fs::create_directory(buildDir);
-            std::string cmakeCmd = "cmake -S " + libPath + " -B " + buildDir + " -G \"Ninja\" " + _setting.getCMakeArgs();
+            std::string cmakeCmd = "cmake -S " + libPath + " -B " + buildDir + " -G \"Ninja\" " + _deps_setting.getCMakeArgs();
             std::string buildCmd = "cmake --build " + buildDir + " --target install --parallel";
 
             if (std::system(cmakeCmd.c_str()) != 0 || std::system(buildCmd.c_str()) != 0)
             {
                 Log::log("Failed to build " + libName, Type::E_ERROR);
                 continue;
+            }
+            else
+            {
+                updateConfig(libName);
+                updateCMakeFile(libName);
             }
         }
     }
@@ -73,5 +96,17 @@ bool Deps::buildDeps()
 DepsSetting &Deps::getSetting()
 {
     // TODO: insert return statement here
-    return _setting;
+    return _deps_setting;
 };
+
+bool Deps::updateConfig(const std::string &lib_name)
+{
+    _project_setting.readConfig();
+    _project_setting.writeConfig();
+    return true;
+}
+
+bool Deps::updateCMakeFile(const std::string &lib_name)
+{
+    return false;
+}

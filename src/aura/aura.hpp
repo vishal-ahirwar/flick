@@ -26,7 +26,7 @@ public:
     bool release();
     void vsCode();
     void reBuild();
-    void rcmake();
+    void refresh();
     void buildDeps();
     static void askUserinfo(struct UserInfo *user);
     static void readUserInfoFromConfigFile(UserInfo *user);
