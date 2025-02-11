@@ -5,7 +5,7 @@
 #include <filesystem>
 #include <sstream>
 #include <vector>
-
+#include <thread>
 constexpr std::string_view CONFIG_CMAKE_ARGS{"-DCMAKE_INSTALL_PREFIX=external/install -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang"};
 namespace fs = std::filesystem;
 void DepsSetting::set(const std::string &cmake_args)
@@ -66,19 +66,19 @@ bool Deps::buildDeps()
 
     for (const auto &entry : fs::directory_iterator(external_dir))
     {
-        if (entry.is_directory() && entry.path().filename().string() != "install")
+        if (entry.is_directory() && entry.path().filename().string() != "install" && entry.path().filename().string()!="build")
         {
             std::string libPath = entry.path().string();
-            std::string buildDir = libPath + "/build";
+            std::string buildDir = std::string(external_dir) + "/build";
             std::string libName = entry.path().filename().string();
 
             Log::log("Building: " + libName, Type::E_DISPLAY);
 
             fs::create_directory(buildDir);
             std::string cmakeCmd = "cmake -S " + libPath + " -B " + buildDir + " -G \"Ninja\" " + _deps_setting.getCMakeArgs();
-            std::string buildCmd = "cmake --build " + buildDir + " --target install --parallel";
-
-            if (std::system(cmakeCmd.c_str()) != 0 || std::system(buildCmd.c_str()) != 0)
+            std::string buildCmd = "ninja -C " + buildDir + " -j" + std::to_string(std::thread::hardware_concurrency() - 1);
+            std::string installCmd = "cmake --install " + buildDir + " ";
+            if (std::system(cmakeCmd.c_str()) != 0 || std::system(buildCmd.c_str()) != 0 ||std::system(installCmd.c_str())!=0)
             {
                 Log::log("Failed to build " + libName, Type::E_ERROR);
                 continue;
