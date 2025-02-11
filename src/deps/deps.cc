@@ -66,10 +66,10 @@ bool Deps::buildDeps()
 
     for (const auto &entry : fs::directory_iterator(external_dir))
     {
-        if (entry.is_directory() && entry.path().filename().string() != "install" && entry.path().filename().string()!="build")
+        if (entry.is_directory() && entry.path().filename().string() != "install" && entry.path().filename().string() != "build")
         {
             std::string libPath = entry.path().string();
-            std::string buildDir = std::string(external_dir) + "/build";
+            std::string buildDir = libPath + "/build";
             std::string libName = entry.path().filename().string();
 
             Log::log("Building: " + libName, Type::E_DISPLAY);
@@ -78,7 +78,7 @@ bool Deps::buildDeps()
             std::string cmakeCmd = "cmake -S " + libPath + " -B " + buildDir + " -G \"Ninja\" " + _deps_setting.getCMakeArgs();
             std::string buildCmd = "ninja -C " + buildDir + " -j" + std::to_string(std::thread::hardware_concurrency() - 1);
             std::string installCmd = "cmake --install " + buildDir + " ";
-            if (std::system(cmakeCmd.c_str()) != 0 || std::system(buildCmd.c_str()) != 0 ||std::system(installCmd.c_str())!=0)
+            if (std::system(cmakeCmd.c_str()) != 0 || std::system(buildCmd.c_str()) != 0 || std::system(installCmd.c_str()) != 0)
             {
                 Log::log("Failed to build " + libName, Type::E_ERROR);
                 continue;

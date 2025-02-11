@@ -1,8 +1,1 @@
-{
-    "build": "Tue Feb 11 16:06:35 2025",
-    "cmakeArgs": [
-        "-DBUILD_SHARED_LIBS=OFF"
-    ],
-    "developerName": "None",
-    "projectName": "aura"
-}
+{"build":"Tue Feb 11 16:06:35 2025","cmakeArgs":["","","-DBUILD_SHARED_LIBS=OFF","-Dcpr_DIR=external/install/lib/cmake/cpr","-Dfmt_DIR=external/install/lib/cmake/fmt"],"developerName":"None","projectName":"aura"}
