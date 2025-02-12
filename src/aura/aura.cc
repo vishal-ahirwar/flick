@@ -908,7 +908,7 @@ void Aura::reBuild()
 	try
 	{
 		fs::remove_all("build");
-		executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug" + _project_setting.getCMakeArgs());
+		executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug " + _project_setting.getCMakeArgs());
 		compile();
 	}
 	catch (std::exception &e)
@@ -919,9 +919,9 @@ void Aura::reBuild()
 
 void Aura::refresh()
 {
-	executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug" + _project_setting.getCMakeArgs());
+	executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug " + _project_setting.getCMakeArgs());
 	if (fs::exists("build/release"))
-		executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Release" + _project_setting.getCMakeArgs());
+		executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Release " + _project_setting.getCMakeArgs());
 };
 void Aura::buildDeps()
 {

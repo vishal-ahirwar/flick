@@ -52,7 +52,6 @@ bool ProjectSetting::readConfig()
                 cmake_args += " ";
             cmake_args += arg;
         };
-        cmake_args=" "+cmake_args;
         set(data["projectName"], data["developerName"], data["build"], cmake_args);
     }
     catch (...)
