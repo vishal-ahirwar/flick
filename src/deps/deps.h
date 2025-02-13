@@ -2,6 +2,7 @@
 #include <string_view>
 #include <string>
 #include<projectsetting/projectsetting.h>
+#include<vector>
 
 constexpr std::string_view external_dir{"external"};
 constexpr std::string_view config_json{"config.json"};
@@ -22,8 +23,10 @@ class Deps
     ProjectSetting _project_setting{};
 public:
     bool buildDeps();
+    bool addDeps(const std::string&url);
     DepsSetting& getSetting();
     private:
-    bool updateConfig(const std::string&lib_name);
+    bool updateConfig(const std::string&lib_name,const std::string&lib_path);
     bool updateCMakeFile(const std::string&lib_name);
+    void findCMakeConfig(const std::string&root,std::vector<std::string>&configs);
 };

@@ -4,8 +4,8 @@
 #include <log/log.h>
 #include <filesystem>
 #include <sstream>
-#include <vector>
 #include <thread>
+
 constexpr std::string_view CONFIG_CMAKE_ARGS{"-DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang"};
 namespace fs = std::filesystem;
 void DepsSetting::set(const std::string &cmake_args)
@@ -94,10 +94,16 @@ bool Deps::buildDeps()
             }
             else
             {
-                if (updateConfig(libName))
-                    Log::log("adding " + libName + " to config.json", Type::E_DISPLAY);
-                if (updateCMakeFile(libName))
-                    Log::log("adding " + libName + " to CMakeLists.txt", Type::E_DISPLAY);
+                std::vector<std::string> configs{};
+                findCMakeConfig(installDir, configs);
+                for (const std::string &config : configs)
+                {
+
+                    if (updateConfig(config,installDir))
+                        Log::log("adding " + config + " to config.json", Type::E_DISPLAY);
+                    if (updateCMakeFile(config))
+                        Log::log("adding " + config + " to CMakeLists.txt", Type::E_DISPLAY);
+                }
             }
         }
     }
@@ -110,11 +116,16 @@ DepsSetting &Deps::getSetting()
     return _deps_setting;
 };
 
-bool Deps::updateConfig(const std::string &lib_name)
+bool Deps::addDeps(const std::string &url)
+{
+    return !url.empty() && system(("cd external && git clone " + url).c_str()) == 0;
+};
+
+bool Deps::updateConfig(const std::string &lib_name, const std::string &lib_path)
 {
     _project_setting.readConfig();
     const std::string libdir{"-D" + lib_name + "_DIR="};
-    std::string lib_config_path{libdir + "external/" + lib_name + "/install/lib/cmake/" + lib_name};
+    std::string lib_config_path{libdir + lib_path + "/lib/cmake/" + lib_name};
     std::istringstream ss{_project_setting.getCMakeArgs()};
     std::string cmake_arg{};
     bool is_in_config{false};
@@ -185,3 +196,14 @@ bool Deps::updateCMakeFile(const std::string &lib_name)
 
     return true;
 }
+
+void Deps::findCMakeConfig(const std::string &root, std::vector<std::string> &configs)
+{
+    for (const auto &lib_path : fs::directory_iterator(root + "/lib/cmake"))
+    {
+        if (lib_path.is_directory())
+        {
+            configs.push_back(lib_path.path().filename().string());
+        };
+    };
+};

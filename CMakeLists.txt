@@ -5,9 +5,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_COMPILER_WORKS 1)
 
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 set(BUILD_SHARED_LIBS OFF)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -funroll-loops")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static -static-libgcc -static-libstdc++ -lc++ -lc++abi")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -funroll-loops -stdlib=libc++")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(COMPANY "Vishal ahirwar")
@@ -24,6 +24,7 @@ if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif()
 
 include_directories(src ${CMAKE_BINARY_DIR} ${cpr_include_dir} ${json})
+#@find
 find_package(fmt REQUIRED)
 configure_file(res/auraConfig.h.in auraConfig.h)
 file(GLOB SOURCES "src/*.cc" "src/*/*.cc")
@@ -31,7 +32,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 add_executable(utool utool/main.cc src/downloader/downloader.cc src/rt/rt.cc src/userinfo/userinfo.cc ./src/log/log.cc)
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
-
+#@link
 target_link_directories(${PROJECT_NAME} PUBLIC ${cpr_lib_dir})
 target_link_directories(utool PUBLIC ${cpr_lib_dir})
 if(WIN32)

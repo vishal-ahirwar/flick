@@ -85,6 +85,10 @@ namespace CLI
         {
             aura.buildDeps();
         }
+        else if (args.at(1) == "adddeps")
+        {
+            aura.addDeps();
+        }
         else
         {
             printf("%s[Error] Invalid Command !%s\n", RED, WHITE);

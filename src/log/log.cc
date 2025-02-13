@@ -83,6 +83,10 @@ void Log::about()
     fmt::print(fmt::fg(fmt::color::white_smoke),
                "build all the external libraries present in external directory and install them.\n");
     fmt::print(fmt::fg(fmt::color::yellow),
+               "  adddeps        - ");
+    fmt::print(fmt::fg(fmt::color::white_smoke),
+               "clone github repo in external directory and build it\n");
+    fmt::print(fmt::fg(fmt::color::yellow),
                "  setup          - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
                "Install a llvm-clang toolchain, ninja and CMake if not already installed.\n");

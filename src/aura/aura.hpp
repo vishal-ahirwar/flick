@@ -28,6 +28,7 @@ public:
     void reBuild();
     void refresh();
     void buildDeps();
+    void addDeps();
     static void askUserinfo(struct UserInfo *user);
     static void readUserInfoFromConfigFile(UserInfo *user);
     static void writeUserInfoToConfigFile(UserInfo *user);

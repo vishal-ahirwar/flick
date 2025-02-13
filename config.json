@@ -6,7 +6,8 @@
         "-Dcpr_lib_dir=external/cpr/install/lib",
         "-Dcpr_include_dir=external/cpr/install/include",
         "-Djson=external/json",
-        "-Dcpr_DIR=external/cpr/install/lib/cmake/cpr"
+        "-Dcpr_DIR=external/cpr/install/lib/cmake/cpr",
+        "-DCURL_DIR=external/CURL/install/lib/cmake/CURL"
     ],
     "developerName": "None",
     "projectName": "aura"

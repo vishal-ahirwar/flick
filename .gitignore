@@ -16,3 +16,4 @@ Build
 CMakeUserPresets.json
 __pycache__
 install
+demoapp
