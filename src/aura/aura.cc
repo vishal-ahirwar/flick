@@ -938,14 +938,14 @@ void Aura::addDeps()
 {
 	if (_args.size() < 3)
 	{
-		Log::log("You have provide github url! make sure it has CMakeList.txt", Type::E_ERROR);
+		Log::log("You have to provide github url! make sure it has CMakeList.txt", Type::E_ERROR);
 		return;
 	};
 	Deps deps;
 	if (deps.addDeps(_args.at(2)))
 		deps.buildDeps();
 	else
-		Log::log("Failed to add " + _args.at(2) + "make sure you those errors or remove it from external directory!", Type::E_ERROR);
+		Log::log("Failed to add " + _args.at(2) + "make sure you solve those errors or remove it from external directory!", Type::E_ERROR);
 };
 
 void Aura::askUserinfo(UserInfo *user) {
