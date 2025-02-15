@@ -6,6 +6,7 @@
 #include <sstream>
 #include <thread>
 
+
 constexpr std::string_view CONFIG_CMAKE_ARGS{"-DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang"};
 namespace fs = std::filesystem;
 void DepsSetting::set(const std::string &cmake_args)
@@ -212,3 +213,33 @@ void Deps::findCMakeConfig(const std::string &root, std::vector<std::string> &co
         };
     };
 };
+
+bool Deps::checkIfLibIsPresentInGlobalDir(const std::string &url)
+{
+    return false;
+}
+
+bool Deps::checkIfLibIsPresentInLocalDir(const std::string &url)
+{
+    return false;
+}
+
+bool Deps::installLocally(const std::string &url)
+{
+    return false;
+}
+
+bool Deps::installGlobally(const std::string &url)
+{
+    return false;
+}
+
+bool Deps::addToConfig(const std::string &path)
+{
+    return false;
+}
+
+bool Deps::rebuildDeps(const std::string &url)
+{
+    return false;
+}

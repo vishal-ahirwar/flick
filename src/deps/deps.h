@@ -31,4 +31,11 @@ public:
     bool updateConfig(const std::string&lib_name,const std::string&lib_path);
     bool updateCMakeFile(const std::string&lib_name);
     void findCMakeConfig(const std::string&root,std::vector<std::string>&configs);
+    bool checkIfLibIsPresentInGlobalDir(const std::string&url);
+    bool checkIfLibIsPresentInLocalDir(const std::string&url);
+    bool installLocally(const std::string&url);
+    bool installGlobally(const std::string&url);
+    bool addToConfig(const std::string&path);
+    bool rebuildDeps(const std::string&url);
+    
 };
