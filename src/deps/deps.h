@@ -3,6 +3,7 @@
 #include <string>
 #include<projectsetting/projectsetting.h>
 #include<vector>
+#include<userinfo/userinfo.h>
 
 constexpr std::string_view external_dir{"external"};
 constexpr std::string_view config_json{"config.json"};
@@ -21,6 +22,7 @@ class Deps
 {
     DepsSetting _deps_setting{};
     ProjectSetting _project_setting{};
+    UserInfo _userinfo{};
 public:
     bool buildDeps();
     bool addDeps(const std::string&url);

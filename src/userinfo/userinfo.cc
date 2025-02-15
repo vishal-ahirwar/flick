@@ -1,6 +1,12 @@
 #include <userinfo/userinfo.h>
-#include "userinfo.h"
 
+void UserInfo::readUserInfo()
+{
+}
+
+void UserInfo::writeUserInfo()
+{
+}
 UserInfo::UserInfo() : _user_name{"None"}
 {
 }

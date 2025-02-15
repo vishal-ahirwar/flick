@@ -4,9 +4,12 @@
 class UserInfo
 {
     std::string _user_name{};
-    public:
+    
+public:
+    void readUserInfo();
+    void writeUserInfo();
     UserInfo();
-    std::string getUserName()const;
+    std::string getUserName() const;
 };
 
 #endif
