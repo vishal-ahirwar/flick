@@ -16,15 +16,16 @@
 #include <log/log.h>
 #include <json.hpp>
 #include <deps/deps.h>
-#ifdef WIN32
+#include <projectgenerator/projectgenerator.h>
+
+#ifdef _WIN32
 #include <windows.h>
 #define USERNAME "USERPROFILE"
-#endif
-#ifndef WIN32
+#else
 #include <unistd.h>
-#include "aura.hpp"
 #define USERNAME "USER"
 #endif
+
 namespace fs = std::filesystem;
 Aura::Aura(const std::vector<std::string> &args)
 {
@@ -87,16 +88,37 @@ void Aura::setupUnitTestingFramework()
 
 void Aura::createNewProject()
 {
-
-	Log::log("Creating directory..", Type::E_DISPLAY);
-	std::string cmdString{};
-	createDir();
-	Log::log("Generating Code for main.cxx and CMakeLists.txt..", Type::E_DISPLAY);
-	generateCppTemplateFile();
-	generateCmakeFile();
-	generateGitIgnoreFile();
-	writeProjectSettings(&_project_setting);
-	Log::log("happy Coding :)", Type::E_DISPLAY);
+	ProjectGenerator generator{};
+	generator.setProjectSetting(_project_setting);
+	Log::log("Please Choose your Programming language [0.C]/[1.CXX]/[Default.CXX] : ", Type::E_DISPLAY);
+	int input{getchar()};
+	switch (input)
+	{
+	case 0:
+	{
+		generator.generate(ProjectGenerator::Lang::C);
+		break;
+	};
+	case 1:
+	{
+		generator.generate(ProjectGenerator::Lang::CXX);
+		break;
+	};
+	default:
+	{
+		generator.generate(ProjectGenerator::Lang::CXX);
+		break;
+	};
+	};
+	// Log::log("Creating directory..", Type::E_DISPLAY);
+	// std::string cmdString{};
+	// createDir();
+	// Log::log("Generating Code for main.cxx and CMakeLists.txt..", Type::E_DISPLAY);
+	// generateCppTemplateFile();
+	// generateCmakeFile();
+	// generateGitIgnoreFile();
+	// writeProjectSettings(&_project_setting);
+	// Log::log("happy Coding :)", Type::E_DISPLAY);
 };
 
 bool Aura::executeCMake(const std::string &additional_cmake_arg)
@@ -152,14 +174,14 @@ void Aura::run()
 {
 	std::string run{};
 	// printf("%s%s: \n%s", YELLOW, projectName.c_str(),WHITE);
-#ifdef WIN32
+#ifdef _WIN32
 	run += ".\\build\\debug\\";
 	run += _project_setting.getProjectName();
 	run += ".exe";
 #else
 	run += "./build/debug/";
 	run += _project_setting.getProjectName();
-#endif // WIN32
+#endif // _WIN32
 	for (int i = 2; i < _args.size(); ++i)
 	{
 		run += " ";
@@ -184,7 +206,7 @@ void Aura::build()
 //
 void Aura::addToPathWin()
 {
-#ifdef WIN32
+#ifdef _WIN32
 	namespace fs = std::filesystem;
 	std::string aura{getenv(USERNAME)};
 	aura += "\\.aura";
@@ -350,9 +372,9 @@ void Aura::addToPathUnix()
 // installing dev tools
 void Aura::installEssentialTools(bool &isInstallationComplete)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	namespace fs = std::filesystem;
-	Log::log("This will install C/C++ Clang Toolchain with cmake and ninja from Github,\nAre you sure you "
+	Log::log("This will install Clang-LLVM Toolchain with cmake and ninja from Github,\nAre you sure you "
 			 "want to "
 			 "continue??[y/n]",
 			 Type::E_DISPLAY);
@@ -370,6 +392,8 @@ void Aura::installEssentialTools(bool &isInstallationComplete)
 	if (!home.c_str())
 		return;
 	home += "\\.aura";
+	// system(("start " + std::string(VS_URL)).c_str());
+	// Log::log("Make sure you download Desktop Development in C++ from Visual Studio Installer", Type::E_WARNING);
 	Downloader::download(std::string(COMPILER_URL_64BIT), home + "\\compiler.zip");
 	Downloader::download(std::string(CMAKE_URL_64BIT), home + "\\cmake.zip");
 	Downloader::download(std::string(NINJA_URL_64BIT), home + "\\ninja.zip");
@@ -590,7 +614,7 @@ void Aura::test()
 {
 	setupUnitTestingFramework();
 	compile();
-#ifdef WIN32
+#ifdef _WIN32
 	system(".\\build\\debug\\tests.exe");
 #else
 	system("./build/debug/tests");
@@ -603,7 +627,7 @@ bool Aura::onSetup()
 {
 	bool isInstallationComplete{false};
 	namespace fs = std::filesystem;
-#ifdef WIN32
+#ifdef _WIN32
 	std::string home = getenv(USERNAME);
 #else
 	std::string home{"/home/"};
@@ -612,7 +636,7 @@ bool Aura::onSetup()
 	if (!home.c_str())
 		return false;
 	std::fstream file;
-#ifdef WIN32
+#ifdef _WIN32
 	if (!fs::create_directory(home + "\\.aura"))
 	{
 		Log::log(".aura dir alread exist", Type::E_WARNING);
@@ -716,7 +740,7 @@ void Aura::fixInstallation()
 
 	if (tolower(c) != 'y')
 		return;
-#ifdef WIN32
+#ifdef _WIN32
 	std::string home = getenv(USERNAME);
 #else
 	std::string home{"/home/"};
@@ -724,7 +748,7 @@ void Aura::fixInstallation()
 #endif
 	namespace fs = std::filesystem;
 	Log::log("reseting aura...", Type::E_WARNING);
-#ifdef WIN32
+#ifdef _WIN32
 	fs::remove_all((home + "\\.aura"));
 #else
 	fs::remove_all((home + "/.aura"));
@@ -736,7 +760,7 @@ void Aura::fixInstallation()
 // cross-platform : creating processs to start the update
 void createProcess(const std::string &path)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	STARTUPINFO si = {sizeof(si)};
 	PROCESS_INFORMATION pi;
 	if (CreateProcessA(
@@ -802,13 +826,13 @@ void createProcess(const std::string &path)
 void Aura::update()
 {
 	namespace fs = std::filesystem;
-#ifdef WIN32
+#ifdef _WIN32
 	std::string aura = getenv(USERNAME);
 #else
 	std::string aura{"/home/"};
 	aura += getenv(USERNAME);
 #endif
-#ifdef WIN32
+#ifdef _WIN32
 	aura += "\\.aura";
 	std::string source{aura + "\\utool.exe"};
 #else
@@ -824,7 +848,7 @@ void Aura::update()
 	else
 	{
 		Downloader::download(std::string(UPDATER_URL), source);
-#ifndef WIN32 // for linux we have to set permission for the newly downloaded file
+#ifndef _WIN32 // for linux we have to set permission for the newly downloaded file
 		system(("chmod +x " + source).c_str());
 #endif
 		createProcess(source); // starting process parent-less which will start utool so aura will shutdown and then utool override the aura.exe
@@ -835,7 +859,7 @@ void Aura::debug()
 {
 	if (!compile())
 		return;
-#ifdef WIN32
+#ifdef _WIN32
 	system(("lldb ./build/debug/" + _project_setting.getProjectName() + ".exe").c_str());
 #else
 	system(("lldb ./build/debug/" + _project_setting.getProjectName()).c_str());

@@ -3,13 +3,13 @@
 #include <downloader/downloader.h>
 #include <log/log.h>
 #include <rt/rt.h>
-#ifdef WIN32
+#ifdef _WIN32
 constexpr std::string_view UPDATE_URL{"https://github.com/vishal-ahirwar/aura/releases/latest/download/aura.exe"};
 #else
 constexpr std::string_view UPDATE_URL{"https://github.com/vishal-ahirwar/aura/releases/latest/download/aura"};
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 #define USERNAME "USERPROFILE"
 #else
 #define USERNAME "USER"
@@ -18,7 +18,7 @@ constexpr std::string_view UPDATE_URL{"https://github.com/vishal-ahirwar/aura/re
 int main()
 {
     RT rt("utool");
-#ifdef WIN32
+#ifdef _WIN32
     std::string home = getenv(USERNAME);
     home += "\\.aura";
 #else
@@ -27,7 +27,7 @@ int main()
     home += "/.aura";
 #endif
     Log::log("updating aura...", Type::E_DISPLAY);
-#ifdef WIN32
+#ifdef _WIN32
     Downloader::download(std::string(UPDATE_URL), home + "\\aura.exe");
 #else
     Downloader::download(std::string(UPDATE_URL), home + "/aura");

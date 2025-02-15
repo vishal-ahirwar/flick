@@ -6,25 +6,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_COMPILER_WORKS 1)
 
 set(BUILD_SHARED_LIBS OFF)
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static -static-libgcc -static-libstdc++ -lc++ -lc++abi")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -funroll-loops -stdlib=libc++")
+set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS} -static")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -march=native -funroll-loops")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(COMPANY "Vishal ahirwar")
 string(TIMESTAMP CURRENT_YEAR "%Y")
 set(COPYRIGHT "Copyright(c) ${CURRENT_YEAR} Vishal Ahirwar and all Contributors. All rights reserved.")
-
-# Check if the compiler is Clang
-if(NOT CMAKE_C_COMPILER_ID STREQUAL "Clang")
-    message(FATAL_ERROR "This project requires Clang as the compiler. Please set Clang as the compiler.")
-endif()
-
-if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    message(FATAL_ERROR "This project requires Clang as the compiler. Please set Clang as the compiler.")
-endif()
-
 include_directories(src ${CMAKE_BINARY_DIR} ${cpr_include_dir} ${json})
 #@find
+# find_package(CURL REQUIRED)
 find_package(fmt REQUIRED)
 configure_file(res/auraConfig.h.in auraConfig.h)
 file(GLOB SOURCES "src/*.cc" "src/*/*.cc")
@@ -33,6 +24,7 @@ add_executable(utool utool/main.cc src/downloader/downloader.cc src/rt/rt.cc src
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 #@link
+# target_link_libraries(${PROJECT_NAME} CURL::CURL)
 target_link_directories(${PROJECT_NAME} PUBLIC ${cpr_lib_dir})
 target_link_directories(utool PUBLIC ${cpr_lib_dir})
 if(WIN32)

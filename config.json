@@ -5,9 +5,7 @@
         "-Dfmt_DIR=external/fmt/install/lib/cmake/fmt",
         "-Dcpr_lib_dir=external/cpr/install/lib",
         "-Dcpr_include_dir=external/cpr/install/include",
-        "-Djson=external/json",
-        "-Dcpr_DIR=external/cpr/install/lib/cmake/cpr",
-        "-DCURL_DIR=external/CURL/install/lib/cmake/CURL"
+        "-Djson=external/json"
     ],
     "developerName": "None",
     "projectName": "aura"

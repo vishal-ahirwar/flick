@@ -199,6 +199,11 @@ bool Deps::updateCMakeFile(const std::string &lib_name)
 
 void Deps::findCMakeConfig(const std::string &root, std::vector<std::string> &configs)
 {
+    if(!fs::exists(root + "/lib/cmake"))
+    {
+        configs.push_back(root);
+        return;
+    }
     for (const auto &lib_path : fs::directory_iterator(root + "/lib/cmake"))
     {
         if (lib_path.is_directory())

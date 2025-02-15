@@ -7,6 +7,7 @@ class ProjectSetting
     std::string _developer_name{};
     std::string _build_date{};
     std::string _cmake_args{};
+    std::string _lang{"CXX"};
 public:
     std::string getProjectName()const;
     std::string getDeveloperName()const;

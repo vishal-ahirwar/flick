@@ -7,7 +7,7 @@
 // progress bar
 void Downloader::download(const std::string &url, const std::string &outputFilePath)
 {
-#ifdef WIN32
+#ifdef _WIN32
     std::string name = outputFilePath.substr(outputFilePath.find_last_of("\\") + 1);
 #else
     std::string name = outputFilePath.substr(outputFilePath.find_last_of("/") + 1);

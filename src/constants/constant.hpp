@@ -107,7 +107,7 @@ TEST_CASE("Factorials are computed", "[factorial]")
 
 constexpr std::string_view VIM_CONFIG{R"()"};
 
-#ifdef WIN32
+#ifdef _WIN32
 constexpr std::string_view VSCODE_CONFIG{R"(    {
        "configurations": [
            {
@@ -129,7 +129,6 @@ constexpr std::string_view VSCODE_CONFIG{R"(    {
        ],
        "version": 4
    })"};
-
 constexpr std::string_view COMPILER_URL_64BIT{"https://github.com/mstorsjo/llvm-mingw/releases/download/20250114/llvm-mingw-20250114-ucrt-x86_64.zip"};
 constexpr std::string_view CMAKE_URL_64BIT{"https://github.com/Kitware/CMake/releases/download/v3.31.2/cmake-3.31.2-windows-x86_64.zip"};
 constexpr std::string_view UPDATER_URL{"https://github.com/vishal-ahirwar/aura/releases/latest/download/utool.exe"};
