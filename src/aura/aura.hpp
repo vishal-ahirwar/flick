@@ -29,20 +29,6 @@ public:
     void refresh();
     void buildDeps();
     void addDeps();
-    static void askUserinfo(struct UserInfo *user);
-    static void readUserInfoFromConfigFile(UserInfo *user);
-    static void writeUserInfoToConfigFile(UserInfo *user);
-    static void readProjectSettings(ProjectSetting *setting);
-    static void writeProjectSettings(ProjectSetting *setting);
-
-private:
-    void createDir();
-    void generateCppTemplateFile();
-    void generateCmakeFile();
-    void generateGitIgnoreFile();
-    void setupUnitTestingFramework();
-    void generateLicenceFile();
-
 private:
     bool onSetup();
     void installEssentialTools(bool &);

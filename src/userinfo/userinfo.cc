@@ -15,3 +15,12 @@ std::string UserInfo::getUserName() const
 {
     return _user_name;
 }
+
+
+void UserInfo::readUserInfoFromConfigFile(UserInfo *user) {
+
+};
+
+void UserInfo::writeUserInfoToConfigFile(UserInfo *user) {
+
+};

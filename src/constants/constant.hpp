@@ -68,7 +68,7 @@ install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 #@link Warning: Do not remove this line
 )"};
 
-std::string MAIN_CODE{
+static std::string MAIN_CODE{
     R"(
 //Auto Genrated C++ file by aura CLI
 //@COPYRIGHT

@@ -9,6 +9,7 @@
 #include <format>
 #include <chrono>
 #include <aura/aura.hpp>
+#include <projectgenerator/projectgenerator.h>
 #include <constants/colors.hpp>
 #include <constants/constant.hpp>
 #include <downloader/downloader.h>
@@ -16,8 +17,8 @@
 #include <log/log.h>
 #include <json.hpp>
 #include <deps/deps.h>
-#include <projectgenerator/projectgenerator.h>
-#include<utils/utils.h>
+#include <utils/utils.h>
+#include <userinfo/userinfo.h>
 #ifdef _WIN32
 #include <windows.h>
 #define USERNAME "USERPROFILE"
@@ -31,7 +32,7 @@ Aura::Aura(const std::vector<std::string> &args)
 {
 	_args = args;
 	std::string cmd{args.at(1)};
-	readUserInfoFromConfigFile(&this->_user_info);
+	UserInfo::readUserInfoFromConfigFile(&this->_user_info);
 	if (cmd == "create")
 	{
 		if (args.size() < 3)
@@ -46,79 +47,38 @@ Aura::Aura(const std::vector<std::string> &args)
 		return;
 	};
 	if (cmd != "setup" && cmd != "fix" && cmd != "update" && cmd != "builddeps")
-		readProjectSettings(&this->_project_setting);
+		ProjectGenerator::readProjectSettings(&this->_project_setting);
 };
 Aura::~Aura() {
 
 };
 
-void Aura::setupUnitTestingFramework()
-{
-	namespace fs = std::filesystem;
-	auto path = fs::current_path().string() + "/tests/";
-	if (fs::exists(path))
-	{
-		return;
-	};
-	fs::create_directory(path);
-
-	std::fstream testFile(path + "main.cc", std::ios::out);
-	if (testFile.is_open())
-	{
-		testFile << TEST_CXX_CODE;
-		testFile.close();
-	};
-	std::ofstream file{"./CMakeLists.txt", std::ios::app};
-	if (file.is_open())
-	{
-		file << "#Unit Testing CMake Section\n";
-		file << "find_package(Catch2)\n";
-		file << "add_executable(tests ./tests/main.cc)\n";
-		file << "target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)\n";
-	}
-	else
-	{
-		Log::log("Failed to open CMakeLists.txt", Type::E_ERROR);
-		return;
-	};
-	file.close();
-	reBuild();
-	Log::log("unit testing template code added to project run tests with : aura utest", Type::E_DISPLAY);
-};
-
 void Aura::createNewProject()
 {
 	ProjectGenerator generator{};
-	generator.setProjectSetting(_project_setting);
 	Log::log("Please Choose your Programming language [0.C]/[1.CXX]/[Default.CXX] : ", Type::E_DISPLAY);
 	int input{getchar()};
+	ProjectGenerator::Lang lang{};
 	switch (input)
 	{
 	case 0:
 	{
-		generator.generate(ProjectGenerator::Lang::C);
+		lang = ProjectGenerator::Lang::C;
 		break;
 	};
 	case 1:
 	{
-		generator.generate(ProjectGenerator::Lang::CXX);
+		lang = ProjectGenerator::Lang::CXX;
 		break;
 	};
 	default:
 	{
-		generator.generate(ProjectGenerator::Lang::CXX);
+		lang = ProjectGenerator::Lang::CXX;
 		break;
 	};
 	};
-	// Log::log("Creating directory..", Type::E_DISPLAY);
-	// std::string cmdString{};
-	// createDir();
-	// Log::log("Generating Code for main.cxx and CMakeLists.txt..", Type::E_DISPLAY);
-	// generateCppTemplateFile();
-	// generateCmakeFile();
-	// generateGitIgnoreFile();
-	// writeProjectSettings(&_project_setting);
-	// Log::log("happy Coding :)", Type::E_DISPLAY);
+	generator.setProjectSetting(_project_setting, lang);
+	generator.generate();
 };
 
 bool Aura::executeCMake(const std::string &additional_cmake_arg)
@@ -429,153 +389,6 @@ void Aura::setup()
 	onSetup();
 };
 
-// creating folder structure for project
-void Aura::createDir()
-{
-	namespace fs = std::filesystem;
-	std::string cmdString{};
-	cmdString += _project_setting.getProjectName();
-	if (fs::create_directory(cmdString.c_str()))
-	{
-		cmdString += "/src";
-		fs::create_directory(cmdString.c_str());
-		auto pos = cmdString.find("/");
-		cmdString.replace(pos + 1, cmdString.length() - pos, "res");
-		fs::create_directory(cmdString.c_str());
-		pos = cmdString.find("/");
-		cmdString.replace(pos + 1, cmdString.length() - pos, "external");
-		fs::create_directory(cmdString.c_str());
-	}
-	else
-	{
-		Log::log("failed to create dir error!", Type::E_ERROR);
-		exit(0);
-	}
-};
-//
-void Aura::generateCppTemplateFile()
-{
-	std::ofstream file;
-	file.open("./" + _project_setting.getProjectName() + "/src/main.cxx", std::ios::out);
-
-	if (file.is_open())
-	{
-		std::string_view header{"_HEADER_"};
-		std::string_view copyright{"_COPYRIGHT_"};
-		std::string_view project{"_PROJECT_"};
-		std::string_view comment{"@COPYRIGHT"};
-		std::string cap;
-		cap.resize(_project_setting.getProjectName().length());
-		std::transform(_project_setting.getProjectName().begin(), _project_setting.getProjectName().end(), cap.begin(), ::toupper);
-		auto index = MAIN_CODE.find(header);
-		if (index != std::string::npos)
-			MAIN_CODE.replace(index, header.length(), ("#include<" + _project_setting.getProjectName() + "config.h>"));
-		index = MAIN_CODE.find(copyright);
-		if (index != std::string::npos)
-			MAIN_CODE.replace(index, copyright.length(), (cap + "_COPYRIGHT"));
-		index = MAIN_CODE.find(project);
-		if (index != std::string::npos)
-			MAIN_CODE.replace(index, project.length(), "\"" + _project_setting.getProjectName() + "\"");
-		index = MAIN_CODE.find(comment);
-		if (index != std::string::npos)
-			MAIN_CODE.replace(index, comment.length(), _user_info.getUserName());
-		file << MAIN_CODE;
-		file.close();
-	};
-};
-
-//
-void Aura::generateCmakeFile()
-{
-	std::string config{(_project_setting.getProjectName() + "/res/config.h.in")};
-	{
-		std::ofstream file;
-		std::string cap;
-		cap.resize(_project_setting.getProjectName().length());
-		std::transform(_project_setting.getProjectName().begin(), _project_setting.getProjectName().end(), cap.begin(), ::toupper);
-		file.open(config, std::ios::out);
-		if (file.is_open())
-		{
-			file << ("#define " + cap + "_VERSION_MAJOR @" + _project_setting.getProjectName() + "_VERSION_MAJOR@") << std::endl;
-			file << ("#define " + cap + "_VERSION_MINOR @" + _project_setting.getProjectName() + "_VERSION_MINOR@") << std::endl;
-			file << ("#define " + cap + "_VERSION_PATCH @" + _project_setting.getProjectName() + "_VERSION_PATCH@") << std::endl;
-			file << ("#define " + cap + "_COMPANY" + " \"@COMPANY@\"") << std::endl;
-			file << ("#define " + cap + "_COPYRIGHT" + " \"@COPYRIGHT@\"") << std::endl;
-			file.close();
-		};
-	}
-	{
-
-		std::ofstream file;
-		file.open("./" + _project_setting.getProjectName() + "/CMakeLists.txt", std::ios::out);
-		constexpr std::string_view config_in{"@config_in"};
-		constexpr std::string_view config_h{"@config_h"};
-		constexpr std::string_view comment{"@COPYRIGHT"};
-		constexpr std::string_view developer{"@DeveloperName"};
-		if (file.is_open())
-		{
-			constexpr std::string_view _name{"@name"};
-			std::string str(CMAKE_CODE);
-			auto index = str.find(_name);
-			if (index != std::string::npos)
-			{
-				str.replace(index, _name.size(), _project_setting.getProjectName());
-			};
-			index = str.find(config_h);
-			if (index != std::string::npos)
-				str.replace(index, config_h.length(), (_project_setting.getProjectName() + "config.h"));
-			index = str.find(config_in);
-			if (index != std::string::npos)
-				str.replace(index, config_in.length(), "res/config.h.in");
-			index = str.find(comment);
-			if (index != std::string::npos)
-				str.replace(index, comment.length(), _user_info.getUserName());
-			index = str.find(developer);
-			if (index != std::string::npos)
-				str.replace(index, developer.length(), _user_info.getUserName());
-			file << str;
-			file.close();
-		};
-	}
-}
-//
-void Aura::generateGitIgnoreFile()
-{
-	std::ofstream file;
-	file.open("./" + _project_setting.getProjectName() + "/.gitignore", std::ios::out);
-	if (file.is_open())
-	{
-		file << GITIGNORE_CODE;
-
-		file.close();
-	};
-};
-//
-void Aura::generateLicenceFile()
-{
-	std::ofstream out;
-	out.open("License.txt", std::ios_base::out);
-	if (!out.is_open())
-	{
-		Log::log("Failed to Generate License.txt, You may need to create License.txt by "
-				 "yourself :)%s",
-				 Type::E_ERROR);
-		return;
-	};
-	std::string _licence{LICENSE_TEXT};
-	// TODO
-	constexpr std::string_view year{"@_YEAR_"};
-	constexpr std::string_view name{"@_OWNER_"};
-	auto index = _licence.find(year);
-	if (index != std::string::npos)
-		_licence.replace(index, year.length(), std::format("{:%Y}", std::chrono::system_clock::now()));
-	index = _licence.find(name);
-	if (index != std::string::npos)
-		_licence.replace(index, name.length(), _user_info.getUserName());
-	out << _licence;
-	out.close();
-}
-//
 
 // creating packaged build [with installer for windows] using cpack
 void Aura::createInstaller()
@@ -598,7 +411,7 @@ void Aura::createInstaller()
 	{
 		file << CPACK_CODE;
 		file.close();
-		generateLicenceFile();
+		ProjectGenerator::generateLicenceFile();
 		if (system("cd build/release && cpack"))
 			Log::log("CPack added to cmake run 'aura createinstaller' command again",
 					 Type::E_DISPLAY);
@@ -612,7 +425,7 @@ void Aura::createInstaller()
 // running utest
 void Aura::test()
 {
-	setupUnitTestingFramework();
+	ProjectGenerator::setupUnitTestingFramework();
 	compile();
 #ifdef _WIN32
 	system(".\\build\\debug\\tests.exe");
@@ -970,36 +783,4 @@ void Aura::addDeps()
 		deps.buildDeps();
 	else
 		Log::log("Failed to add " + _args.at(2) + "make sure you solve those errors or remove it from external directory!", Type::E_ERROR);
-};
-
-void Aura::askUserinfo(UserInfo *user) {
-
-};
-
-void Aura::readUserInfoFromConfigFile(UserInfo *user) {
-
-};
-
-void Aura::writeUserInfoToConfigFile(UserInfo *user) {
-
-};
-
-void Aura::readProjectSettings(ProjectSetting *setting)
-{
-	if (!setting)
-		return;
-	if (!setting->readConfig())
-	{
-		Log::log("Failed to read config file", Type::E_ERROR);
-		exit(0);
-	};
-};
-void Aura::writeProjectSettings(ProjectSetting *setting)
-{
-	if (!setting)
-		return;
-	setting->writeConfig(setting->getProjectName() + "/");
-	Log::log("Generating config.json", Type::E_DISPLAY);
-	Deps deps{};
-	deps.getSetting().write(setting->getProjectName());
 };
