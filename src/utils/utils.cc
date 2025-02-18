@@ -3,6 +3,7 @@
 #include <windows.h>
 #define USERNAME "USERPROFILE"
 #else
+#include<unistd.h>
 #include <cstdlib>
 #define USERNAME "USER"
 #endif
@@ -59,7 +60,7 @@ constexpr int Utils::startApp(const std::string &path)
     {
         // Child process: Execute the application
         execl(path.c_str(), path.c_str(), (char *)NULL);
-        _exit(EXIT_FAILURE); // Only reached if execl fails
+        exit(EXIT_FAILURE); // Only reached if execl fails
     }
 
     return 0; // Parent returns immediately, process runs in the background
