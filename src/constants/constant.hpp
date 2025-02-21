@@ -50,22 +50,38 @@ constexpr std::string_view CMAKE_CODE{
 #@COPYRIGHT
 cmake_minimum_required(VERSION 3.6...3.31)
 project(@name VERSION 1.0.0 LANGUAGES CXX)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(BUILD_SHARED_LIBS OFF)
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -funroll-loops")
+option(STATIC_LINK "Enable static linking" OFF)
+
+# Apply options only for Release mode
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    message(STATUS "Configuring for Release mode: Enabling optimizations")
+    add_compile_options(-O3 -march=native -funroll-loops)
+endif()
+# Apply static linking if enabled
+if(STATIC_LINK)
+    message(STATUS "Static linking enabled")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+endif()
+
 set(COMPANY "@DeveloperName")
 string(TIMESTAMP CURRENT_YEAR "%Y")
 set(COPYRIGHT "Copyright(c) ${CURRENT_YEAR} ${COMPANY}.")
+
 include_directories(src ${CMAKE_BINARY_DIR})
 configure_file(@config_in @config_h)
+
 #@find Warning: Do not remove this line
+
 file(GLOB SOURCES "src/*.cxx")
 add_executable(${PROJECT_NAME} ${SOURCES})
+
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 #@link Warning: Do not remove this line
+
 )"};
 
 static std::string MAIN_CODE{
@@ -89,7 +105,7 @@ int main(int argc,char*argv[])
 };
 
 )"};
-constexpr std::string_view CONFIG_CMAKE_ARGS{"-DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang"};
+constexpr std::string_view CONFIG_CMAKE_ARGS{"-DBUILD_SHARED_LIBS=OFF -DSTATIC_LINK=ON -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang"};
 constexpr std::string_view TEST_CXX_CODE{R"(
 #include <catch2/catch_test_macros.hpp>
 
