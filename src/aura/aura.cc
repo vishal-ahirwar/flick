@@ -763,7 +763,7 @@ void Aura::refresh()
 {
 	executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug " + _project_setting.getCMakeArgs());
 	if (fs::exists("build/release"))
-		executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Release " + _project_setting.getCMakeArgs());
+		executeCMake("-Bbuild/release -DCMAKE_BUILD_TYPE=Release " + _project_setting.getCMakeArgs());
 };
 void Aura::buildDeps()
 {
