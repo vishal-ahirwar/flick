@@ -29,9 +29,5 @@ private:
     void generateCppTemplateFile();
     void generateCmakeFile();
     void generateGitIgnoreFile();
-
-public:
-    static void setupUnitTestingFramework();
-    static void generateLicenceFile();
 };
 #endif

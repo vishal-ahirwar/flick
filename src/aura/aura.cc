@@ -19,6 +19,7 @@
 #include <deps/deps.h>
 #include <utils/utils.h>
 #include <userinfo/userinfo.h>
+#include<unittester/unittester.h>
 #ifdef _WIN32
 #include <windows.h>
 #define USERNAME "USERPROFILE"
@@ -411,7 +412,11 @@ void Aura::createInstaller()
 	{
 		file << CPACK_CODE;
 		file.close();
-		ProjectGenerator::generateLicenceFile();
+		if(!fs::exists("License.txt"))
+		{
+			UnitTester utester(_user_info);
+			utester.generateLicenceFile();
+		};
 		if (system("cd build/release && cpack"))
 			Log::log("CPack added to cmake run 'aura createinstaller' command again",
 					 Type::E_DISPLAY);
@@ -425,8 +430,9 @@ void Aura::createInstaller()
 // running utest
 void Aura::test()
 {
-	ProjectGenerator::setupUnitTestingFramework();
-	compile();
+	UnitTester tester(_user_info);
+	tester.setupUnitTestingFramework();
+	tester.runUnitTesting();
 #ifdef _WIN32
 	system(".\\build\\debug\\tests.exe");
 #else
