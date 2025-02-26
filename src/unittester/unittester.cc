@@ -12,31 +12,6 @@ void UnitTester::runUnitTesting() {
 
 };
 //
-void UnitTester::generateLicenceFile()
-{
-    std::ofstream out;
-    out.open("License.txt", std::ios_base::out);
-    if (!out.is_open())
-    {
-        Log::log("Failed to Generate License.txt, You may need to create License.txt by "
-                 "yourself :)%s",
-                 Type::E_ERROR);
-        return;
-    };
-    std::string _licence{LICENSE_TEXT};
-    // TODO
-    constexpr std::string_view year{"@_YEAR_"};
-    constexpr std::string_view name{"@_OWNER_"};
-    auto index = _licence.find(year);
-    if (index != std::string::npos)
-        _licence.replace(index, year.length(), std::format("{:%Y}", std::chrono::system_clock::now()));
-    index = _licence.find(name);
-    if (index != std::string::npos)
-        _licence.replace(index, name.length(), _user_info.getUserName());
-    out << _licence;
-    out.close();
-}
-//
 
 /*
 Make sure to call rebuild after calling this method

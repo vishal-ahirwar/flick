@@ -414,8 +414,7 @@ void Aura::createInstaller()
 		file.close();
 		if(!fs::exists("License.txt"))
 		{
-			UnitTester utester(_user_info);
-			utester.generateLicenceFile();
+			ProjectGenerator::generateLicenceFile(_user_info);
 		};
 		if (system("cd build/release && cpack"))
 			Log::log("CPack added to cmake run 'aura createinstaller' command again",

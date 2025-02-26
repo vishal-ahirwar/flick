@@ -8,7 +8,6 @@ class UnitTester
 public:
     UnitTester(const UserInfo&);
     void setupUnitTestingFramework();
-    void generateLicenceFile();
     void runUnitTesting();
 };
 #endif // UNITTESTER_H

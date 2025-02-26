@@ -29,5 +29,7 @@ private:
     void generateCppTemplateFile();
     void generateCmakeFile();
     void generateGitIgnoreFile();
+public:
+    static void generateLicenceFile(const UserInfo&user_info);
 };
 #endif
