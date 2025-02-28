@@ -1,6 +1,30 @@
 {
-    "cmakeArgs": [
+    "globalArgs": [
         "-DBUILD_SHARED_LIBS=OFF",
         "-DCMAKE_BUILD_TYPE=Release"
-    ]
+    ],
+    "libs": {
+        "fmt": {
+            "url": "https://github.com/fmtlib/fmt.git",
+            "buildLocal": false,
+            "cmakeArgs": []
+        },
+        "json": {
+            "url": "https://github.com/nlohmann/json.git",
+            "buildLocal": false,
+            "cmakeArgs": []
+        },
+        "openssl": {
+            "url": "https://github.com/openssl/openssl.git",
+            "buildLocal": false,
+            "cmakeArgs": []
+        },
+        "qt5":{
+            "url":"https://github.com/qt/qtbase.git",
+            "buildLocal":false,
+            "cmakeArgs":[
+                
+            ]
+        }
+    }
 }
