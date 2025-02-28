@@ -79,10 +79,12 @@ void DepsSetting::write(const std::string &project_name)
         args.push_back(arg);
     };
     data["globalArgs"] = args;
-    std::map<std::string,std::string>libs{};
-    libs["name"]="fmt";
-    libs["url"]="https://github.com/fmtlib/fmt.git";
-    data["libs"]=libs;
+    data["libs"]={
+        {"name","fmt"},
+        {"url","https://github.com/fmtlib/fmt.git"},
+        {"localArgs",args},
+        {"buildLocal",false}
+    };
     out << data;
     out.close();
 };
