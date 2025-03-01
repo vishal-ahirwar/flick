@@ -3,51 +3,51 @@
 #include <filesystem>
 #include <deps/deps.h>
 #include <fstream>
-#include<chrono>
-#include<format>
+#include <chrono>
+#include <format>
+#include <assert.h>
 void ProjectGenerator::generate()
 {
-    generateProject();
+	generateProject();
 }
 
 void ProjectGenerator::setProjectSetting(const ProjectSetting &project_setting, const Lang &lang)
 {
-    _lang = lang;
-    _project_setting=project_setting;
+	_lang = lang;
+	_project_setting = project_setting;
 }
 
 void ProjectGenerator::generateProject()
 {
-    Log::log("Creating directory..", Type::E_DISPLAY);
-    std::string cmdString{};
-    createDir();
-    Log::log("Generating Code for main.cxx and CMakeLists.txt..", Type::E_DISPLAY);
-    generateCppTemplateFile();
-    generateCmakeFile();
-    generateGitIgnoreFile();
-    writeProjectSettings(&_project_setting);
-    Log::log("happy Coding :)", Type::E_DISPLAY);
+	Log::log("Creating directory..", Type::E_DISPLAY);
+	std::string cmdString{};
+	createDir();
+	Log::log("Generating Code for main.cxx and CMakeLists.txt..", Type::E_DISPLAY);
+	generateCppTemplateFile();
+	generateCmakeFile();
+	generateGitIgnoreFile();
+	writeProjectSettings(&_project_setting);
+	Log::log("happy Coding :)", Type::E_DISPLAY);
 }
-
 
 void ProjectGenerator::readProjectSettings(ProjectSetting *setting)
 {
-    if (!setting)
-        return;
-    if (!setting->readConfig())
-    {
-        Log::log("Failed to read config file", Type::E_ERROR);
-        exit(0);
-    };
+	if (!setting)
+		return;
+	if (!setting->readConfig())
+	{
+		Log::log("Failed to read config file", Type::E_ERROR);
+		exit(0);
+	};
 };
 void ProjectGenerator::writeProjectSettings(ProjectSetting *setting)
 {
-    if (!setting)
-        return;
-    setting->writeConfig(setting->getProjectName() + "/");
-    Log::log("Generating config.json", Type::E_DISPLAY);
-    Deps deps{};
-    deps.getSetting().write(setting->getProjectName());
+	if (!setting)
+		return;
+	setting->writeConfig(setting->getProjectName() + "/");
+	Log::log("Generating config.json", Type::E_DISPLAY);
+	Deps deps{};
+	deps.getSetting().write(setting->getProjectName());
 };
 
 // creating folder structure for project
@@ -85,25 +85,30 @@ void ProjectGenerator::generateCppTemplateFile()
 		std::string_view copyright{"_COPYRIGHT_"};
 		std::string_view project{"_PROJECT_"};
 		std::string_view comment{"@COPYRIGHT"};
-		std::string cap;
-		cap.resize(_project_setting.getProjectName().length());
+
+		std::string cap("",_project_setting.getProjectName().length());
 		std::transform(_project_setting.getProjectName().begin(), _project_setting.getProjectName().end(), cap.begin(), ::toupper);
+
 		auto index = MAIN_CODE.find(header);
 		if (index != std::string::npos)
 			MAIN_CODE.replace(index, header.length(), ("#include<" + _project_setting.getProjectName() + "config.h>"));
+
 		index = MAIN_CODE.find(copyright);
 		if (index != std::string::npos)
 			MAIN_CODE.replace(index, copyright.length(), (cap + "_COPYRIGHT"));
+
 		index = MAIN_CODE.find(project);
 		if (index != std::string::npos)
 			MAIN_CODE.replace(index, project.length(), "\"" + _project_setting.getProjectName() + "\"");
+
 		index = MAIN_CODE.find(comment);
 		if (index != std::string::npos)
 			MAIN_CODE.replace(index, comment.length(), _user_info.getUserName());
+
 		file << MAIN_CODE;
 		file.close();
-	};
-};
+	}
+}
 
 //
 void ProjectGenerator::generateCmakeFile()
@@ -111,8 +116,7 @@ void ProjectGenerator::generateCmakeFile()
 	std::string config{(_project_setting.getProjectName() + "/res/config.h.in")};
 	{
 		std::ofstream file;
-		std::string cap;
-		cap.resize(_project_setting.getProjectName().length());
+		std::string cap("", _project_setting.getProjectName().length());
 		std::transform(_project_setting.getProjectName().begin(), _project_setting.getProjectName().end(), cap.begin(), ::toupper);
 		file.open(config, std::ios::out);
 		if (file.is_open())
@@ -171,27 +175,27 @@ void ProjectGenerator::generateGitIgnoreFile()
 		file.close();
 	};
 };
-void ProjectGenerator::generateLicenceFile(const UserInfo&user_info)
+void ProjectGenerator::generateLicenceFile(const UserInfo &user_info)
 {
-    std::ofstream out;
-    out.open("License.txt", std::ios_base::out);
-    if (!out.is_open())
-    {
-        Log::log("Failed to Generate License.txt, You may need to create License.txt by "
-                 "yourself :)%s",
-                 Type::E_ERROR);
-        return;
-    };
-    std::string _licence{LICENSE_TEXT};
-    // TODO
-    constexpr std::string_view year{"@_YEAR_"};
-    constexpr std::string_view name{"@_OWNER_"};
-    auto index = _licence.find(year);
-    if (index != std::string::npos)
-        _licence.replace(index, year.length(), std::format("{:%Y}", std::chrono::system_clock::now()));
-    index = _licence.find(name);
-    if (index != std::string::npos)
-        _licence.replace(index, name.length(), user_info.getUserName());
-    out << _licence;
-    out.close();
+	std::ofstream out;
+	out.open("License.txt", std::ios_base::out);
+	if (!out.is_open())
+	{
+		Log::log("Failed to Generate License.txt, You may need to create License.txt by "
+				 "yourself :)%s",
+				 Type::E_ERROR);
+		return;
+	};
+	std::string _licence{LICENSE_TEXT};
+	// TODO
+	constexpr std::string_view year{"@_YEAR_"};
+	constexpr std::string_view name{"@_OWNER_"};
+	auto index = _licence.find(year);
+	if (index != std::string::npos)
+		_licence.replace(index, year.length(), std::format("{:%Y}", std::chrono::system_clock::now()));
+	index = _licence.find(name);
+	if (index != std::string::npos)
+		_licence.replace(index, name.length(), user_info.getUserName());
+	out << _licence;
+	out.close();
 }

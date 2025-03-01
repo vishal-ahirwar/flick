@@ -4,7 +4,8 @@
 #include <sstream>
 #include <log/log.h>
 constexpr std::string_view config_json{"config.json"};
-std::string ProjectSetting::getProjectName() const
+
+const std::string& ProjectSetting::getProjectName() const
 {
     return _project_name;
 }
