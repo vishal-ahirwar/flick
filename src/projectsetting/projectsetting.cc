@@ -10,17 +10,17 @@ const std::string& ProjectSetting::getProjectName() const
     return _project_name;
 }
 
-std::string ProjectSetting::getDeveloperName() const
+const std::string& ProjectSetting::getDeveloperName() const
 {
     return _developer_name;
 }
 
-std::string ProjectSetting::getBuildDate() const
+const std::string& ProjectSetting::getBuildDate() const
 {
     return _build_date;
 }
 
-std::string ProjectSetting::getCMakeArgs() const
+const std::string& ProjectSetting::getCMakeArgs() const
 {
     return _cmake_args;
 }

@@ -10,9 +10,9 @@ class ProjectSetting
     std::string _lang{"CXX"};
 public:
     const std::string& getProjectName()const;
-    std::string getDeveloperName()const;
-    std::string getBuildDate()const;
-    std::string getCMakeArgs()const;
+    const std::string& getDeveloperName()const;
+    const std::string& getBuildDate()const;
+    const std::string& getCMakeArgs()const;
     void set(const std::string&project_name,const std::string&developer_name,const std::string&build_date,const std::string&cmake_args);
     bool readConfig();
     bool writeConfig(const std::string&path="");
