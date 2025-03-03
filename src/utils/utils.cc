@@ -22,7 +22,7 @@ std::string Utils::getAuraPath()
     return path;
 };
 
-constexpr int Utils::startApp(const std::string &path)
+int Utils::startApp(const std::string &path)
 {
 #ifdef _WIN32
     STARTUPINFO si = {0};

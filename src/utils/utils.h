@@ -5,6 +5,6 @@
 namespace Utils
 {
     std::string getAuraPath();
-    constexpr int startApp(const std::string&path); 
+    int startApp(const std::string&path); 
 };
 #endif
