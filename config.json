@@ -1,7 +1,6 @@
 {
     "build": "Tue Feb 11 16:06:35 2025",
     "cmakeArgs": [
-
         "-DBUILD_SHARED_LIBS=OFF",
         "-Dfmt_DIR=external/fmt/install/lib/cmake/fmt",
         "-Dcpr_lib_dir=external/cpr/install/lib",
@@ -13,6 +12,6 @@
         "-DCMAKE_CXX_COMPILER=clang++",
         "-DCMAKE_C_COMPILER=clang"
     ],
-    "developerName": "None",
+    "developerName": "Vishal Ahirwar",
     "projectName": "aura"
 }

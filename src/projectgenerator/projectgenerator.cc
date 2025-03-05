@@ -86,7 +86,7 @@ void ProjectGenerator::generateCppTemplateFile()
 		std::string_view project{"_PROJECT_"};
 		std::string_view comment{"@COPYRIGHT"};
 
-		std::string cap("",_project_setting.getProjectName().length());
+		std::string cap("", _project_setting.getProjectName().length());
 		std::transform(_project_setting.getProjectName().begin(), _project_setting.getProjectName().end(), cap.begin(), ::toupper);
 
 		auto index = MAIN_CODE.find(header);
@@ -121,11 +121,12 @@ void ProjectGenerator::generateCmakeFile()
 		file.open(config, std::ios::out);
 		if (file.is_open())
 		{
-			file << ("#define " + cap + "_VERSION_MAJOR @" + _project_setting.getProjectName() + "_VERSION_MAJOR@") << std::endl;
-			file << ("#define " + cap + "_VERSION_MINOR @" + _project_setting.getProjectName() + "_VERSION_MINOR@") << std::endl;
-			file << ("#define " + cap + "_VERSION_PATCH @" + _project_setting.getProjectName() + "_VERSION_PATCH@") << std::endl;
-			file << ("#define " + cap + "_COMPANY" + " \"@COMPANY@\"") << std::endl;
-			file << ("#define " + cap + "_COPYRIGHT" + " \"@COPYRIGHT@\"") << std::endl;
+			file << "namespace Project{" << std::endl;
+			file << ("const char*const VERSION_STRING=\"@" + _project_setting.getProjectName() + "_VERSION_MAJOR@.@" + _project_setting.getProjectName() + "_VERSION_MINOR@.@" + _project_setting.getProjectName() + "_VERSION_PATCH@\";") << std::endl;
+			file << ("const char*const COMPANY_NAME =\"@COMPANY@\";") << std::endl;
+			file << ("const char*const COPYRIGHT_STRING= \"@COPYRIGHT@\";") << std::endl;
+			file << ("const char*const PROJECT_NAME=\"@PROJECT_NAME@\";") << std::endl;
+			file << "}";
 			file.close();
 		};
 	}

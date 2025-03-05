@@ -92,15 +92,9 @@ static std::string MAIN_CODE{
 _HEADER_
 int main(int argc,char*argv[])
 {
-    std::cerr<<"Hello, "<<_PROJECT_<<std::endl;
-    std::cerr<<_COPYRIGHT_<<std::endl;
-    if(argc<2)return 0;
-    std::cerr<<"Args: ";
-    for(int i=1;i<argc;++i)
-    {
-        std::cerr<<argv[i]<<" ";
-    };
-    std::cerr<<std::endl;
+    std::cerr << "Hello, " << Project::COMPANY_NAME << std::endl;
+    std::cerr << Project::PROJECT_NAME << " v" << Project::VERSION_STRING << std::endl;
+    std::cerr << Project::COPYRIGHT_STRING << std::endl;
     return 0;
 };
 

@@ -79,10 +79,10 @@ void DepsSetting::write(const std::string &project_name)
     {
         args.push_back(arg);
     };
-    data["globalArgs"] = args;
+    data["cmakeArgs"] = args;
     data["libs"]["fmt"] = {
         {"url", "https://github.com/fmtlib/fmt.git"},
-        {"localArgs", args},
+        {"cmakeArgs", args},
         {"buildLocal", false}};
     out << data;
     out.close();

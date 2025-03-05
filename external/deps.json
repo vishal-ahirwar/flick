@@ -1,5 +1,5 @@
 {
-    "globalArgs": [
+    "cmakeArgs": [
         "-DBUILD_SHARED_LIBS=OFF",
         "-DCMAKE_BUILD_TYPE=Release"
     ],
