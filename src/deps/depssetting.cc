@@ -1,7 +1,7 @@
 #include <deps/depssetting.h>
 #include <fstream>
 #include <log/log.h>
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 #include <sstream>
 #include <map>
 constexpr std::string_view CONFIG_CMAKE_ARGS{"-DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang"};

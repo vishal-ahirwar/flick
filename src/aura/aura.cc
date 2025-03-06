@@ -15,7 +15,6 @@
 #include <downloader/downloader.h>
 #include <rt/rt.h>
 #include <log/log.h>
-#include <json.hpp>
 #include <deps/deps.h>
 #include <utils/utils.h>
 #include <userinfo/userinfo.h>
