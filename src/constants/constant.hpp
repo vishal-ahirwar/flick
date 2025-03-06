@@ -83,41 +83,55 @@ install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 #@link Warning: Do not remove this line
 
 )"};
-
 static std::string MAIN_CODE{
     R"(
-//Auto Genrated C++ file by aura CLI
-//@COPYRIGHT
-#include<iostream>
-_HEADER_
-int main(int argc,char*argv[])
-{
-    std::cerr << "Hello, " << Project::COMPANY_NAME << std::endl;
-    std::cerr << Project::PROJECT_NAME << " v" << Project::VERSION_STRING << std::endl;
-    std::cerr << Project::COPYRIGHT_STRING << std::endl;
-    return 0;
-};
-
-)"};
+        //Auto Genrated C++ file by aura CLI
+        //@COPYRIGHT
+        #include<iostream>
+        _HEADER_
+        int main(int argc,char*argv[])
+        {
+            std::cerr << "Hello, " << Project::COMPANY_NAME << std::endl;
+            std::cerr << Project::PROJECT_NAME << " v" << Project::VERSION_STRING << std::endl;
+            std::cerr << Project::COPYRIGHT_STRING << std::endl;
+            return 0;
+            };
+            
+            )"};
 constexpr std::string_view CONFIG_CMAKE_ARGS{"-DBUILD_SHARED_LIBS=OFF -DSTATIC_LINK=ON -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang"};
 constexpr std::string_view TEST_CXX_CODE{R"(
-#include <catch2/catch_test_macros.hpp>
-
-unsigned int Factorial(unsigned int number)
-{
-    return number <= 1 ? number : Factorial(number - 1) * number;
-}
-
-TEST_CASE("Factorials are computed", "[factorial]")
-{
-    REQUIRE(Factorial(1) == 1);
-    REQUIRE(Factorial(2) == 2);
-    REQUIRE(Factorial(5) == 120);
-})"};
+                #include <catch2/catch_test_macros.hpp>
+                
+                unsigned int Factorial(unsigned int number)
+                {
+                    return number <= 1 ? number : Factorial(number - 1) * number;
+                    }
+                    
+                    TEST_CASE("Factorials are computed", "[factorial]")
+                    {
+                        REQUIRE(Factorial(1) == 1);
+                        REQUIRE(Factorial(2) == 2);
+                        REQUIRE(Factorial(5) == 120);
+                        })"};
 
 constexpr std::string_view VIM_CONFIG{R"()"};
 
 #ifdef _WIN32
+constexpr std::string_view CMAKE_PRESETS{R"(
+    {
+    "version": 2,
+    "configurePresets": [
+      {
+        "name": "vcpkg",
+        "generator": "Ninja",
+        "binaryDir": "${sourceDir}/build",
+        "cacheVariables": {
+          "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+          "VCPKG_TARGET_TRIPLET":"x64-windows-static-md"
+        }
+      }
+    ]
+  })"};
 constexpr std::string_view VSCODE_CONFIG{R"(    {
        "configurations": [
            {
@@ -139,12 +153,26 @@ constexpr std::string_view VSCODE_CONFIG{R"(    {
        ],
        "version": 4
    })"};
-constexpr std::string_view COMPILER_URL_64BIT{"https://github.com/mstorsjo/llvm-mingw/releases/download/20250114/llvm-mingw-20250114-ucrt-x86_64.zip"};
+constexpr std::string_view COMPILER_URL_64BIT{"https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/clang+llvm-19.1.7-x86_64-pc-windows-msvc.tar.xz"};
 constexpr std::string_view CMAKE_URL_64BIT{"https://github.com/Kitware/CMake/releases/download/v3.31.2/cmake-3.31.2-windows-x86_64.zip"};
 constexpr std::string_view UPDATER_URL{"https://github.com/vishal-ahirwar/aura/releases/latest/download/utool.exe"};
 constexpr std::string_view NINJA_URL_64BIT{"https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-win.zip"};
 constexpr std::string_view NSIS_URL{"https://cyfuture.dl.sourceforge.net/project/nsis/NSIS%203/3.10/nsis-3.10.zip?viasf=1"}; // TODO
 #else
+constexpr std::string_view CMAKE_PRESETS{R"(
+    {
+    "version": 2,
+    "configurePresets": [
+      {
+        "name": "vcpkg",
+        "generator": "Ninja",
+        "binaryDir": "${sourceDir}/build",
+        "cacheVariables": {
+          "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+        }
+      }
+    ]
+  })"};
 constexpr std::string_view VSCODE_CONFIG{R"(     {
        "configurations": [
            {

@@ -18,7 +18,7 @@
 #include <deps/deps.h>
 #include <utils/utils.h>
 #include <userinfo/userinfo.h>
-#include<unittester/unittester.h>
+#include <unittester/unittester.h>
 #ifdef _WIN32
 #include <windows.h>
 #define USERNAME "USERPROFILE"
@@ -43,7 +43,7 @@ Aura::Aura(const std::vector<std::string> &args)
 		std::time_t now = std::time(nullptr);
 		std::string date{std::ctime(&now)};
 		date.pop_back();
-		_project_setting.set(_args.at(2), _user_info.getUserName(), date, std::string(CONFIG_CMAKE_ARGS));
+		_project_setting.set(_args.at(2));
 		return;
 	};
 	if (cmd != "setup" && cmd != "fix" && cmd != "update" && cmd != "builddeps")
@@ -100,9 +100,9 @@ bool Aura::compile()
 	{
 		// run cmake
 		Log::log("Compile Process has been started...", Type::E_DISPLAY);
-		executeCMake(std::string("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug ") + _project_setting.getCMakeArgs()); // TODO
+		executeCMake(std::string("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug --preset=vcpkg")); // TODO
 		// run ninja
-		if (!system(("ninja -C build/debug -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
+		if (!system(("cmake --build build/debug -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL", Type::E_DISPLAY);
 			return true;
@@ -116,7 +116,7 @@ bool Aura::compile()
 	else
 	{
 		// run ninja
-		if (!system(("ninja -C build/debug -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
+		if (!system(("cmake --build build/debug -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL", Type::E_DISPLAY);
 
@@ -199,12 +199,18 @@ void Aura::addToPathWin()
 		{
 			if (dir.path().string().find("_internal") != std::string::npos)
 				continue;
+			if (dir.path().string().find("vcpkg") != std::string::npos)
+			{
+				path += dir.path().string() + ";";
+				continue;
+			}
 			if (dir.path().string().find("nsis") != std::string::npos)
 			{
 				path += dir.path().string() + ";";
 				path += (dir.path().string() + "\\Bin;");
 				continue;
 			};
+
 			path += dir.path().string();
 			path += "\\bin;";
 		}
@@ -280,6 +286,7 @@ void Aura::addToPathUnix()
 		{
 			if (dir.path().string().find("_internal") != std::string::npos)
 				continue;
+
 			path += dir.path().string();
 			path += ";";
 		};
@@ -328,13 +335,47 @@ void Aura::addToPathUnix()
 		}
 	};
 };
-
+void Aura::setupVcpkg(const std::string &home)
+{
+	if (system("cl") != 0)
+	{
+		Log::log("Desktop Development with C++ Build Tools must be installed on windows to use clang and vcpkg, so please install them right now from vs official site then try again", Type::E_WARNING);
+		std::this_thread::sleep_for(std::chrono::seconds(4));
+		system("start https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022");
+		std::exit(0);
+	};
+	if (system((std::string("git clone https://github.com/microsoft/vcpkg.git ") + std::string(home)).c_str()) != 0)
+	{
+		Log::log("UnkownError", Type::E_ERROR);
+		std::exit(0);
+	};
+#ifdef _WIN32
+	std::string cmd{"setx VCPKG_ROOT " + home + "\\vcpkg"};
+	system(cmd.c_str());
+	system(("cd " + home + "\\vcpkg &&" + " .\\bootstrap-vcpkg.bat").c_str());
+#else
+	system(("cd " + home + "\\vcpkg &&" + " ./bootstrap-vcpkg.sh").c_str());
+	std::string bashrc = std::string("/home/") + getenv(USERNAME) + "/.bashrc";
+	std::fstream file(bashrc.c_str(), std::ios::app);
+	if (file.is_open())
+	{
+		file << "export VCPKG_ROOT=" << home + "/vcpkg" << std::endl;
+		file << "export PATH=$VCPKG_ROOT:$PATH" << std::endl;
+		file.close();
+	}
+	else
+	{
+		Log::log("failed to open ~/.bashrc file!\n", Type::E_ERROR);
+		return;
+	}
+#endif
+};
 // installing dev tools
 void Aura::installEssentialTools(bool &isInstallationComplete)
 {
 #ifdef _WIN32
 	namespace fs = std::filesystem;
-	Log::log("This will install Clang-LLVM Toolchain with cmake and ninja from Github,\nAre you sure you "
+	Log::log("This will install Clang-LLVM Toolchain with cmake,  ninja and vcpkg package manager from Github,\nAre you sure you "
 			 "want to "
 			 "continue??[y/n]",
 			 Type::E_DISPLAY);
@@ -354,6 +395,7 @@ void Aura::installEssentialTools(bool &isInstallationComplete)
 	home += "\\.aura";
 	// system(("start " + std::string(VS_URL)).c_str());
 	// Log::log("Make sure you download Desktop Development in C++ from Visual Studio Installer", Type::E_WARNING);
+	setupVcpkg(home);
 	Downloader::download(std::string(COMPILER_URL_64BIT), home + "\\compiler.zip");
 	Downloader::download(std::string(CMAKE_URL_64BIT), home + "\\cmake.zip");
 	Downloader::download(std::string(NINJA_URL_64BIT), home + "\\ninja.zip");
@@ -386,14 +428,16 @@ void Aura::installEssentialTools(bool &isInstallationComplete)
 //
 void Aura::setup()
 {
-	onSetup();
+	if (system("git") == 0)
+		onSetup();
+	else
+		Log::log("git is not installed", Type::E_ERROR);
 };
-
 
 // creating packaged build [with installer for windows] using cpack
 void Aura::createInstaller()
 {
-	if (!executeCMake("-Bbuild/release -DCMAKE_BUILD_TYPE=Release " + _project_setting.getCMakeArgs()))
+	if (!executeCMake("-Bbuild/release -DCMAKE_BUILD_TYPE=Release --preset=vcpkg"))
 	{
 		Log::log("Please First fix all the errors", Type::E_ERROR);
 		return;
@@ -411,7 +455,7 @@ void Aura::createInstaller()
 	{
 		file << CPACK_CODE;
 		file.close();
-		if(!fs::exists("License.txt"))
+		if (!fs::exists("License.txt"))
 		{
 			ProjectGenerator::generateLicenceFile(_user_info);
 		};
@@ -694,9 +738,9 @@ bool Aura::release()
 	{
 		// run cmake
 		Log::log("Compile Process has been started...", Type::E_DISPLAY);
-		executeCMake(std::string("-Bbuild/release -DCMAKE_BUILD_TYPE=Release ") + _project_setting.getCMakeArgs()); // TODO
+		executeCMake(std::string("-Bbuild/release -DCMAKE_BUILD_TYPE=Release --preset=vcpkg")); // TODO
 		// run ninja
-		if (!system(("ninja -C build/release -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
+		if (!system(("cmake --build build/release -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL", Type::E_DISPLAY);
 			return true;
@@ -710,7 +754,7 @@ bool Aura::release()
 	else
 	{
 		// run ninja
-		if (!system(("ninja -C build/release -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
+		if (!system(("cmake --build build/release -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL", Type::E_DISPLAY);
 
@@ -729,8 +773,11 @@ bool Aura::release()
 void Aura::vsCode()
 {
 	namespace fs = std::filesystem;
-	if (!fs::exists("config.json"))
+	if (!fs::exists("vcpkg.json"))
+	{
+		Log::log("vscode config file generation failed",Type::E_ERROR);
 		return;
+	}
 	if (fs::exists(".vscode"))
 		Log::log(".vscode already exist!", Type::E_WARNING);
 	else
@@ -754,7 +801,7 @@ void Aura::reBuild()
 	try
 	{
 		fs::remove_all("build");
-		executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug " + _project_setting.getCMakeArgs());
+		executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug --preset=vcpkg");
 		compile();
 	}
 	catch (std::exception &e)
@@ -765,9 +812,9 @@ void Aura::reBuild()
 
 void Aura::refresh()
 {
-	executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug " + _project_setting.getCMakeArgs());
+	executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug --preset=vcpkg");
 	if (fs::exists("build/release"))
-		executeCMake("-Bbuild/release -DCMAKE_BUILD_TYPE=Release " + _project_setting.getCMakeArgs());
+		executeCMake("-Bbuild/release -DCMAKE_BUILD_TYPE=Release --preset=vcpkg");
 };
 void Aura::buildDeps()
 {

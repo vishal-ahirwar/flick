@@ -26,9 +26,22 @@ void ProjectGenerator::generateProject()
 	generateCppTemplateFile();
 	generateCmakeFile();
 	generateGitIgnoreFile();
+	generateVcpkgFiles();
 	writeProjectSettings(&_project_setting);
 	Log::log("happy Coding :)", Type::E_DISPLAY);
 }
+
+void ProjectGenerator::generateVcpkgFiles()
+{
+	std::ofstream out(_project_setting.getProjectName() + "/CMakePresets.json");
+	if (!out.is_open())
+	{
+		Log::log("failed to generate CMakePresets.json", Type::E_ERROR);
+		return;
+	};
+	out << CMAKE_PRESETS;
+	out.close();
+};
 
 void ProjectGenerator::readProjectSettings(ProjectSetting *setting)
 {
@@ -36,7 +49,7 @@ void ProjectGenerator::readProjectSettings(ProjectSetting *setting)
 		return;
 	if (!setting->readConfig())
 	{
-		Log::log("Failed to read config file", Type::E_ERROR);
+		Log::log("Failed to read vcpkg.json file", Type::E_ERROR);
 		exit(0);
 	};
 };

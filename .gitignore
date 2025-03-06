@@ -9,7 +9,7 @@ CMakeLists.txt.user
 /out
 
 .vscode
-
+build
 /cmake-build-minsizerel
 /cmake-build-release
 Build

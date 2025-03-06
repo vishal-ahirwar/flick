@@ -5,59 +5,59 @@
 #include <filesystem>
 #include <sstream>
 #include <thread>
-namespace fs=std::filesystem;
+namespace fs = std::filesystem;
 bool Deps::buildDeps()
 {
-    _deps_setting.read();
-    if (!fs::exists(external_dir))
-    {
-        Log::log("External directory not found!", Type::E_ERROR);
-        return false;
-    }
+    // _deps_setting.read();
+    // if (!fs::exists(external_dir))
+    // {
+    //     Log::log("External directory not found!", Type::E_ERROR);
+    //     return false;
+    // }
 
-    for (const auto &entry : fs::directory_iterator(external_dir))
-    {
-        if (entry.is_directory())
-        {
-            bool is_cmake_present{false};
-            for (const auto &cmake_file : fs::directory_iterator(entry.path()))
-                if (!cmake_file.is_directory() && cmake_file.path().filename().string() == "CMakeLists.txt")
-                {
-                    is_cmake_present = true;
-                    break;
-                };
-            if (!is_cmake_present)
-                continue;
-            std::string libPath = entry.path().string();
-            std::string buildDir = libPath + "/build";
-            std::string libName = entry.path().filename().string();
-            std::string installDir = libPath + "/install";
-            Log::log("Building: " + libName, Type::E_DISPLAY);
+    // for (const auto &entry : fs::directory_iterator(external_dir))
+    // {
+    //     if (entry.is_directory())
+    //     {
+    //         bool is_cmake_present{false};
+    //         for (const auto &cmake_file : fs::directory_iterator(entry.path()))
+    //             if (!cmake_file.is_directory() && cmake_file.path().filename().string() == "CMakeLists.txt")
+    //             {
+    //                 is_cmake_present = true;
+    //                 break;
+    //             };
+    //         if (!is_cmake_present)
+    //             continue;
+    //         std::string libPath = entry.path().string();
+    //         std::string buildDir = libPath + "/build";
+    //         std::string libName = entry.path().filename().string();
+    //         std::string installDir = libPath + "/install";
+    //         Log::log("Building: " + libName, Type::E_DISPLAY);
 
-            fs::create_directory(buildDir);
-            std::string cmakeCmd = "cmake -S " + libPath + " -B " + buildDir + " -G \"Ninja\" " + _deps_setting.getCMakeArgs();
-            std::string buildCmd = "ninja -C " + buildDir + " -j" + std::to_string(std::thread::hardware_concurrency() - 1);
-            std::string installCmd = "cmake --install " + buildDir + " --prefix=" + installDir;
-            if (std::system(cmakeCmd.c_str()) != 0 || std::system(buildCmd.c_str()) != 0 || std::system(installCmd.c_str()) != 0)
-            {
-                Log::log("Failed to build " + libName, Type::E_ERROR);
-                continue;
-            }
-            else
-            {
-                std::vector<std::string> configs{};
-                findCMakeConfig(libName, configs);
-                for (const std::string &config : configs)
-                {
+    //         fs::create_directory(buildDir);
+    //         std::string cmakeCmd = "cmake -S " + libPath + " -B " + buildDir + " -G \"Ninja\" " + _deps_setting.getCMakeArgs();
+    //         std::string buildCmd = "ninja -C " + buildDir + " -j" + std::to_string(std::thread::hardware_concurrency() - 1);
+    //         std::string installCmd = "cmake --install " + buildDir + " --prefix=" + installDir;
+    //         if (std::system(cmakeCmd.c_str()) != 0 || std::system(buildCmd.c_str()) != 0 || std::system(installCmd.c_str()) != 0)
+    //         {
+    //             Log::log("Failed to build " + libName, Type::E_ERROR);
+    //             continue;
+    //         }
+    //         else
+    //         {
+    //             std::vector<std::string> configs{};
+    //             findCMakeConfig(libName, configs);
+    //             for (const std::string &config : configs)
+    //             {
 
-                    if (updateConfig(config,installDir))
-                        Log::log("adding " + config + " to config.json", Type::E_DISPLAY);
-                    if (updateCMakeFile(config))
-                        Log::log("adding " + config + " to CMakeLists.txt", Type::E_DISPLAY);
-                }
-            }
-        }
-    }
+    //                 if (updateConfig(config, installDir))
+    //                     Log::log("adding " + config + " to config.json", Type::E_DISPLAY);
+    //                 if (updateCMakeFile(config))
+    //                     Log::log("adding " + config + " to CMakeLists.txt", Type::E_DISPLAY);
+    //             }
+    //         }
+    //     }
+    // }
     return true;
 }
 
@@ -69,33 +69,11 @@ DepsSetting &Deps::getSetting()
 
 bool Deps::addDeps(const std::string &url)
 {
-    return !url.empty() && system(("cd external && git clone " + url).c_str()) == 0;
+    if (url.find(".git") != std::string::npos)
+        return system(("cd external && git clone " + url).c_str()) == 0;
+    // will use pipe for that
+    return system(("vcpkg add port " + url).c_str()) == 0;
 };
-
-bool Deps::updateConfig(const std::string &lib_name, const std::string &lib_path)
-{
-    _project_setting.readConfig();
-    const std::string libdir{"-D" + lib_name + "_DIR="};
-    std::string lib_config_path{libdir + lib_path + "/lib/cmake/" + lib_name};
-    std::istringstream ss{_project_setting.getCMakeArgs()};
-    std::string cmake_arg{};
-    bool is_in_config{false};
-    while (std::getline(ss, cmake_arg, ' '))
-    {
-        if (cmake_arg.find(libdir) != std::string::npos)
-        {
-            is_in_config = true;
-            break;
-        }
-    };
-    if (!is_in_config)
-    {
-        _project_setting.set(_project_setting.getProjectName(), _project_setting.getDeveloperName(), _project_setting.getBuildDate(), _project_setting.getCMakeArgs() + " " + lib_config_path);
-        _project_setting.writeConfig();
-        return true;
-    }
-    return false;
-}
 
 bool Deps::updateCMakeFile(const std::string &lib_name)
 {
@@ -150,7 +128,7 @@ bool Deps::updateCMakeFile(const std::string &lib_name)
 
 void Deps::findCMakeConfig(const std::string &root, std::vector<std::string> &configs)
 {
-    if(!fs::exists(root + "/build/install/lib/cmake"))
+    if (!fs::exists(root + "/build/install/lib/cmake"))
     {
         configs.push_back(root);
         return;

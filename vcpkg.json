@@ -1,4 +1,6 @@
 {
+  "name": "aura",
+  "version": "1.0.0",
   "dependencies": [
     "cpr",
     "fmt",
