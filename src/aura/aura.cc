@@ -430,12 +430,12 @@ void Aura::installEssentialTools(bool &isInstallationComplete)
 	// system(("start " + std::string(VS_URL)).c_str());
 	// Log::log("Make sure you download Desktop Development in C++ from Visual Studio Installer", Type::E_WARNING);
 	setupVcpkg(home);
-	Downloader::download(std::string(COMPILER_URL_64BIT), home + "\\compiler.zip");
+	Downloader::download(std::string(COMPILER_URL_64BIT), home + "\\compiler.tar.xz");
 	Downloader::download(std::string(CMAKE_URL_64BIT), home + "\\cmake.zip");
 	Downloader::download(std::string(NINJA_URL_64BIT), home + "\\ninja.zip");
 	Downloader::download(std::string(NSIS_URL), home + "\\nsis.zip");
-	printf("%sunzipping file at %s%s\n", BLUE, home.c_str(), WHITE);
-	if (system((std::string("tar -xf ") + "\"" + home + "\\compiler.zip\"" + " -C " + "\"" + home + "\"").c_str()))
+	printf("%sextracting file at %s%s\n", BLUE, home.c_str(), WHITE);
+	if (system((std::string("tar -xvjf ") + "\"" + home + "\\compiler.tar.xz\"" + " -C " + "\"" + home + "\"").c_str()))
 		return;
 	if (system((std::string("tar -xf ") + "\"" + home + "\\cmake.zip\"" + " -C " + "\"" + home + "\"").c_str()))
 		return;
@@ -444,7 +444,7 @@ void Aura::installEssentialTools(bool &isInstallationComplete)
 	if (system((std::string("tar -xf ") + "\"" + home + "\\nsis.zip\"" + " -C " + "\"" + home + "\"").c_str()))
 		return;
 	Log::log("removing downloaded archives...", Type::E_DISPLAY);
-	fs::remove((home + "\\compiler.zip"));
+	fs::remove((home + "\\compiler.tar.xz"));
 	fs::remove((home + "\\cmake.zip"));
 	fs::remove((home + "\\ninja.zip"));
 	fs::remove((home + "\\nsis.zip"));
