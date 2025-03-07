@@ -116,7 +116,7 @@ constexpr std::string_view TEST_CXX_CODE{R"(
 
 constexpr std::string_view VIM_CONFIG{R"()"};
 
-#ifdef _WIN32
+
 constexpr std::string_view CMAKE_PRESETS{R"(
 {
   "version": 2,
@@ -152,7 +152,7 @@ constexpr std::string_view CMAKE_PRESETS{R"(
     }
   ]
 })"};
-
+#ifdef _WIN32
 constexpr std::string_view VSCODE_CONFIG{R"(    {
        "configurations": [
            {
