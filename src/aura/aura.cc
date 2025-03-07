@@ -870,8 +870,9 @@ void Aura::addDeps()
 		return;
 	};
 	Deps deps;
-	if (deps.addDeps(_args.at(2)))
+	if (deps.addDeps(_args.at(2))){
 		deps.updateCMakeFile(_args.at(2));
+	}
 	else
 		Log::log("Failed to add " + _args.at(2) + "make sure you solve those errors or remove it from external directory!", Type::E_ERROR);
 };

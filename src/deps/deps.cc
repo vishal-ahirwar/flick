@@ -72,6 +72,7 @@ bool Deps::addDeps(const std::string &url)
     // if (url.find(".git") != std::string::npos)
     //     return system(("cd external && git clone " + url).c_str()) == 0;
     // will use pipe for that
+    Log::log(url+" added to vcpkg.json",Type::E_DISPLAY);
     return system(("vcpkg add port " + url).c_str()) == 0;
 };
 
@@ -122,7 +123,7 @@ bool Deps::updateCMakeFile(const std::string &lib_name)
         out << l << "\n";
     };
     out.close();
-
+    Log::log(lib_name+" added to CMakeLists.txt",Type::E_DISPLAY);
     return true;
 }
 
