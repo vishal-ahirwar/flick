@@ -19,14 +19,22 @@
 #include <utils/utils.h>
 #include <userinfo/userinfo.h>
 #include <unittester/unittester.h>
-#ifdef _WIN32
-#include <windows.h>
-#define USERNAME "USERPROFILE"
-#else
-#include <unistd.h>
-#define USERNAME "USER"
-#endif
 #include <regex>
+
+#if defined(_WIN32)
+	#include <windows.h>
+	#define USERNAME "USERPROFILE"// Windows environment variable
+	constexpr std::string_view VCPKG_TRIPLET{"windows"};
+#elif defined(__linux__)
+	#include <unistd.h>
+	#define USERNAME "USER"// Linux environment variable
+	constexpr std::string_view VCPKG_TRIPLET{"linux"};
+#elif defined(__APPLE__)
+	#include <unistd.h>  // For macOS
+	constexpr std::string_view VCPKG_TRIPLET{"osx"};
+    #define USERNAME "USER"  // macOS environment variable
+#endif
+
 namespace fs = std::filesystem;
 Aura::Aura(const std::vector<std::string> &args)
 {
@@ -114,7 +122,7 @@ bool Aura::compile()
 	{
 		// run cmake
 		Log::log("Compile Process has been started...", Type::E_DISPLAY);
-		executeCMake(std::string("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug --preset=vcpkg")); // TODO
+		executeCMake(std::string("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug --preset=")+std::string(VCPKG_TRIPLET)); // TODO
 		// run ninja
 		if (!system(("cmake --build build/debug -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
 		{
@@ -471,7 +479,7 @@ void Aura::setup()
 // creating packaged build [with installer for windows] using cpack
 void Aura::createInstaller()
 {
-	if (!executeCMake("-Bbuild/release -DCMAKE_BUILD_TYPE=Release --preset=vcpkg"))
+	if (!executeCMake("-Bbuild/release -DCMAKE_BUILD_TYPE=Release --preset="+std::string(VCPKG_TRIPLET)))
 	{
 		Log::log("Please First fix all the errors", Type::E_ERROR);
 		return;
@@ -772,7 +780,7 @@ bool Aura::release()
 	{
 		// run cmake
 		Log::log("Compile Process has been started...", Type::E_DISPLAY);
-		executeCMake(std::string("-Bbuild/release -DCMAKE_BUILD_TYPE=Release --preset=vcpkg")); // TODO
+		executeCMake(std::string("-Bbuild/release -DCMAKE_BUILD_TYPE=Release --preset=")+std::string(VCPKG_TRIPLET)); // TODO
 		// run ninja
 		if (!system(("cmake --build build/release -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
 		{
@@ -835,7 +843,7 @@ void Aura::reBuild()
 	try
 	{
 		fs::remove_all("build");
-		executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug --preset=vcpkg");
+		executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug --preset="+std::string(VCPKG_TRIPLET));
 		compile();
 	}
 	catch (std::exception &e)
@@ -846,9 +854,7 @@ void Aura::reBuild()
 
 void Aura::refresh()
 {
-	executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug --preset=vcpkg");
-	if (fs::exists("build/release"))
-		executeCMake("-Bbuild/release -DCMAKE_BUILD_TYPE=Release --preset=vcpkg");
+	executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug --preset="+std::string(VCPKG_TRIPLET));
 };
 void Aura::buildDeps()
 {
@@ -865,7 +871,7 @@ void Aura::addDeps()
 	};
 	Deps deps;
 	if (deps.addDeps(_args.at(2)))
-		deps.buildDeps();
+		deps.updateCMakeFile(_args.at(2));
 	else
 		Log::log("Failed to add " + _args.at(2) + "make sure you solve those errors or remove it from external directory!", Type::E_ERROR);
 };

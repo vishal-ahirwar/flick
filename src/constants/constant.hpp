@@ -118,19 +118,41 @@ constexpr std::string_view VIM_CONFIG{R"()"};
 
 #ifdef _WIN32
 constexpr std::string_view CMAKE_PRESETS{R"(
+{
+  "version": 2,
+  "configurePresets": [
     {
-    "version": 2,
-    "configurePresets": [
-      {
-        "name": "vcpkg",
-        "generator": "Ninja",
-        "binaryDir": "${sourceDir}/build",
-        "cacheVariables": {
-          "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
-        }
+      "name": "vcpkg",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
       }
-    ]
-  })"};
+    },
+    {
+      "name": "windows",
+      "inherits": "vcpkg",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md"
+      }
+    },
+    {
+      "name": "linux",
+      "inherits": "vcpkg",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-linux"
+      }
+    },
+    {
+      "name": "osx",
+      "inherits": "vcpkg",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-osx"
+      }
+    }
+  ]
+})"};
+
 constexpr std::string_view VSCODE_CONFIG{R"(    {
        "configurations": [
            {
@@ -158,20 +180,6 @@ constexpr std::string_view UPDATER_URL{"https://github.com/vishal-ahirwar/aura/r
 constexpr std::string_view NINJA_URL_64BIT{"https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-win.zip"};
 constexpr std::string_view NSIS_URL{"https://cyfuture.dl.sourceforge.net/project/nsis/NSIS%203/3.10/nsis-3.10.zip?viasf=1"}; // TODO
 #else
-constexpr std::string_view CMAKE_PRESETS{R"(
-    {
-    "version": 2,
-    "configurePresets": [
-      {
-        "name": "vcpkg",
-        "generator": "Ninja",
-        "binaryDir": "${sourceDir}/build",
-        "cacheVariables": {
-          "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
-        }
-      }
-    ]
-  })"};
 constexpr std::string_view VSCODE_CONFIG{R"(     {
        "configurations": [
            {

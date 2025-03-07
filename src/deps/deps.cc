@@ -69,8 +69,8 @@ DepsSetting &Deps::getSetting()
 
 bool Deps::addDeps(const std::string &url)
 {
-    if (url.find(".git") != std::string::npos)
-        return system(("cd external && git clone " + url).c_str()) == 0;
+    // if (url.find(".git") != std::string::npos)
+    //     return system(("cd external && git clone " + url).c_str()) == 0;
     // will use pipe for that
     return system(("vcpkg add port " + url).c_str()) == 0;
 };
@@ -104,7 +104,7 @@ bool Deps::updateCMakeFile(const std::string &lib_name)
             break;
         };
     };
-    lines.insert(lines.begin() + pos, "find_package(" + lib_name + " REQUIRED)"); // NOTE
+    lines.insert(lines.begin() + pos, "find_package(" + lib_name + " CONFIG REQUIRED)"); // NOTE
     for (int i = 0; i < lines.size(); ++i)
     {
         if (lines[i].find("@link") != std::string::npos)
