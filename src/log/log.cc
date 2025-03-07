@@ -1,10 +1,51 @@
 #include <log/log.h>
 #include <fmt/core.h>
 #include <fmt/color.h>
-#include "log.h"
+#include <thread>
+#include <chrono>
 #include <auraConfig.h>
-void Log::log(const std::string_view &msg, Type e_type)
+void Log::log(const std::string_view &msg, Type e_type, bool btype_effect)
 {
+    if (btype_effect)
+    {
+        switch (e_type)
+        {
+        case Type::E_DISPLAY:
+        {
+            fmt::print(fmt::fg(fmt::color::light_green) | fmt::emphasis::bold, "[Display] ");
+            for (const auto &c : msg)
+            {
+                fmt::print(fmt::fg(fmt::color::light_green) | fmt::emphasis::bold, "{}", c);
+                std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            }
+            fmt::println("");
+            break;
+        };
+        case Type::E_WARNING:
+        {
+            fmt::print(fmt::fg(fmt::color::light_green) | fmt::emphasis::bold, "[Warning] ");
+            for (const auto &c : msg)
+            {
+                fmt::print(fmt::fg(fmt::color::light_green) | fmt::emphasis::bold, "{}", c);
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
+            fmt::println("");
+            break;
+        };
+        case Type::E_ERROR:
+        {
+            fmt::print(fmt::fg(fmt::color::light_green) | fmt::emphasis::bold, "[Error] ");
+            for (const auto &c : msg)
+            {
+                fmt::print(fmt::fg(fmt::color::light_green) | fmt::emphasis::bold, "{}", c);
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
+            fmt::println("");
+            break;
+        };
+        };
+        return;
+    }
     switch (e_type)
     {
     case Type::E_DISPLAY:

@@ -26,7 +26,7 @@
 #include <unistd.h>
 #define USERNAME "USER"
 #endif
-
+#include <regex>
 namespace fs = std::filesystem;
 Aura::Aura(const std::vector<std::string> &args)
 {
@@ -40,9 +40,15 @@ Aura::Aura(const std::vector<std::string> &args)
 			Log::log("No name for project! are you serious?", Type::E_ERROR);
 			exit(0);
 		};
-		std::time_t now = std::time(nullptr);
-		std::string date{std::ctime(&now)};
-		date.pop_back();
+		auto project_name{_args.at(2)};
+		std::regex pattern("^[a-z][a-z0-9-]*$");
+		// if (std::any_of(project_name.begin(), project_name.end(), [](const char &c)
+		// 				{ return !((c >= 'a' && c <= 'z') || isdigit(c) || c == '-'); }))
+		if (!std::regex_match(project_name, pattern))
+		{
+			Log::log("Project name must be in lowercase with no space and special characters allowed name : ^[a-z][a-z0-9-]*$", Type::E_ERROR);
+			std::exit(0);
+		};
 		_project_setting.set(_args.at(2));
 		return;
 	};
@@ -56,17 +62,25 @@ Aura::~Aura() {
 void Aura::createNewProject()
 {
 	ProjectGenerator generator{};
-	Log::log("Please Choose your Programming language [0.C]/[1.CXX]/[Default.CXX] : ", Type::E_DISPLAY);
-	int input{getchar()};
+	Log::log("Please Choose your Programming language (0.Quit)/(1=C)/(2=CXX)/(Default=CXX) : ", Type::E_DISPLAY);
+	int input{};
+	std::cin >> input;
 	ProjectGenerator::Lang lang{};
+	std::cerr << input << std::endl;
 	switch (input)
 	{
 	case 0:
 	{
+		Log::log("Aborting Project Creations!", Type::E_WARNING);
+		std::exit(0);
+		break;
+	}
+	case 1:
+	{
 		lang = ProjectGenerator::Lang::C;
 		break;
 	};
-	case 1:
+	case 2:
 	{
 		lang = ProjectGenerator::Lang::CXX;
 		break;
@@ -174,6 +188,19 @@ void Aura::addToPathWin()
 	std::string destination{(aura + "\\aura.exe").c_str()};
 	if (source.compare(destination) != 0)
 	{
+		for (auto &dll : fs::directory_iterator(fs::current_path()))
+		{
+			if (dll.is_directory())
+				continue;
+			if (dll.path().filename().string().find(".dll") != std::string::npos)
+			{
+				printf("%sCopying %s to %s%s\n", GREEN, dll.path().filename().string().c_str(), aura.c_str(), WHITE);
+				if (fs::copy_file(dll.path(), aura, fs::copy_options::update_existing))
+				{
+					printf("%s copied to %s\n", dll.path().filename().string().c_str(), aura.c_str());
+				}
+			}
+		}
 		if (!fs::exists(source))
 		{
 			Log::log("aura doesn't exist in current dir", Type::E_WARNING);
@@ -335,19 +362,26 @@ void Aura::addToPathUnix()
 		}
 	};
 };
+
 void Aura::setupVcpkg(const std::string &home)
 {
 	if (system("cl") != 0)
 	{
-		Log::log("Desktop Development with C++ Build Tools must be installed on windows to use clang and vcpkg, so please install them right now from vs official site then try again", Type::E_WARNING);
-		std::this_thread::sleep_for(std::chrono::seconds(4));
+		Log::log("Make sure you are runing aura from developer command prompt", Type::E_ERROR, true);
+		std::this_thread::sleep_for(std::chrono::seconds(2));
+		Log::log("Desktop Development with C++ Build Tools must be installed on windows to use clang and vcpkg, so please install them right now from vs official site then try again", Type::E_WARNING, true);
+		Log::log("Starting  https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022 in your default browser", Type::E_DISPLAY, true);
 		system("start https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022");
 		std::exit(0);
 	};
-	if (system((std::string("git clone https://github.com/microsoft/vcpkg.git ") + std::string(home)).c_str()) != 0)
+	try
 	{
-		Log::log("UnkownError", Type::E_ERROR);
-		std::exit(0);
+		system((std::string("git clone https://github.com/microsoft/vcpkg.git ") + std::string(home) + "/vcpkg").c_str());
+	}
+	catch (std::exception &e)
+	{
+		Log::log(e.what(), Type::E_ERROR);
+		return;
 	};
 #ifdef _WIN32
 	std::string cmd{"setx VCPKG_ROOT " + home + "\\vcpkg"};
@@ -428,7 +462,7 @@ void Aura::installEssentialTools(bool &isInstallationComplete)
 //
 void Aura::setup()
 {
-	if (system("git") == 0)
+	if (system("git --version") == 0)
 		onSetup();
 	else
 		Log::log("git is not installed", Type::E_ERROR);
@@ -775,7 +809,7 @@ void Aura::vsCode()
 	namespace fs = std::filesystem;
 	if (!fs::exists("vcpkg.json"))
 	{
-		Log::log("vscode config file generation failed",Type::E_ERROR);
+		Log::log("vscode config file generation failed", Type::E_ERROR);
 		return;
 	}
 	if (fs::exists(".vscode"))

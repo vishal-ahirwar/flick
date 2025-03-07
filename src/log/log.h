@@ -10,7 +10,7 @@ enum class Type
 class Log
 {
 public:
-    static void log(const std::string_view &, Type);
+    static void log(const std::string_view &, Type,bool btype_effect=false);
     static void about();
 };
 #endif

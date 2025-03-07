@@ -126,8 +126,7 @@ constexpr std::string_view CMAKE_PRESETS{R"(
         "generator": "Ninja",
         "binaryDir": "${sourceDir}/build",
         "cacheVariables": {
-          "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
-          "VCPKG_TARGET_TRIPLET":"x64-windows-static-md"
+          "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
         }
       }
     ]
