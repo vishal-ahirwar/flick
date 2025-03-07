@@ -13,7 +13,7 @@ void Downloader::download(const std::string &url, const std::string &outputFileP
     std::string name = outputFilePath.substr(outputFilePath.find_last_of("/") + 1);
 #endif
     // Perform the HTTP GET request
-    cpr::Response response = cpr::Get(cpr::Url{url}, cpr::ProgressCallback([&](cpr::cpr_off_t download_total, cpr::cpr_off_t download_now, cpr::cpr_off_t upload_total, cpr::cpr_off_t upload_now, intptr_t user_data) -> bool
+    cpr::Response response = cpr::Get(cpr::Url{url},cpr::ReserveSize{1024 * 1024 * 8},cpr::ProgressCallback([&](cpr::cpr_off_t download_total, cpr::cpr_off_t download_now, cpr::cpr_off_t upload_total, cpr::cpr_off_t upload_now, intptr_t user_data) -> bool
                                                                            { fmt::print(fmt::emphasis::faint|fmt::fg(fmt::color::cyan), "\rDownloading {} : {:.2f}%", name.c_str(),((double)download_now / download_total) * 100.0);return true; }));
 
     // Check if the download was successful

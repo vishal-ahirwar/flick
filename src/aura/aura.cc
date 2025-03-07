@@ -195,10 +195,10 @@ void Aura::addToPathWin()
 			if (dll.path().filename().string().find(".dll") != std::string::npos)
 			{
 				printf("%sCopying %s to %s%s\n", GREEN, dll.path().filename().string().c_str(), aura.c_str(), WHITE);
-				if (fs::copy_file(dll.path(), aura, fs::copy_options::update_existing))
-				{
-					printf("%s copied to %s\n", dll.path().filename().string().c_str(), aura.c_str());
-				}
+				// if (fs::copy_file(dll.path(), aura, fs::copy_options::update_existing))
+				// {
+				// 	printf("%s copied to %s\n", dll.path().filename().string().c_str(), aura.c_str());
+				// }
 			}
 		}
 		if (!fs::exists(source))
