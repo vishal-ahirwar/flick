@@ -54,7 +54,7 @@ project(@name VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-option(STATIC_LINK "Enable static linking" OFF)
+option(STATIC_LINK "Enable static linking" ON)
 
 # Apply options only for Release mode
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
@@ -83,39 +83,34 @@ install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 #@link Warning: Do not remove this line
 
 )"};
-static std::string MAIN_CODE{
-    R"(
-        //Auto Genrated C++ file by aura CLI
-        //@COPYRIGHT
-        #include<iostream>
-        _HEADER_
-        int main(int argc,char*argv[])
-        {
-            std::cerr << "Hello, " << Project::COMPANY_NAME << std::endl;
-            std::cerr << Project::PROJECT_NAME << " v" << Project::VERSION_STRING << std::endl;
-            std::cerr << Project::COPYRIGHT_STRING << std::endl;
-            return 0;
-            };
-            
-            )"};
+static std::string MAIN_CODE{R"(//Auto Genrated C++ file by aura CLI
+//@COPYRIGHT
+#include<iostream>
+_HEADER_
+int main(int argc,char*argv[])
+{
+    std::cerr << "Hello, " << Project::COMPANY_NAME << std::endl;
+    std::cerr << Project::PROJECT_NAME << " v" << Project::VERSION_STRING << std::endl;
+    std::cerr << Project::COPYRIGHT_STRING << std::endl;
+    return 0;
+};)"};
 constexpr std::string_view CONFIG_CMAKE_ARGS{"-DBUILD_SHARED_LIBS=OFF -DSTATIC_LINK=ON -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang"};
 constexpr std::string_view TEST_CXX_CODE{R"(
-                #include <catch2/catch_test_macros.hpp>
-                
-                unsigned int Factorial(unsigned int number)
-                {
-                    return number <= 1 ? number : Factorial(number - 1) * number;
-                    }
-                    
-                    TEST_CASE("Factorials are computed", "[factorial]")
-                    {
-                        REQUIRE(Factorial(1) == 1);
-                        REQUIRE(Factorial(2) == 2);
-                        REQUIRE(Factorial(5) == 120);
-                        })"};
+#include <catch2/catch_test_macros.hpp>
+
+unsigned int Factorial(unsigned int number)
+{
+    return number <= 1 ? number : Factorial(number - 1) * number;
+}
+    
+TEST_CASE("Factorials are computed", "[factorial]")
+{
+    REQUIRE(Factorial(1) == 1);
+    REQUIRE(Factorial(2) == 2);
+    REQUIRE(Factorial(5) == 120);
+})"};
 
 constexpr std::string_view VIM_CONFIG{R"()"};
-
 
 constexpr std::string_view CMAKE_PRESETS{R"(
 {
@@ -126,7 +121,9 @@ constexpr std::string_view CMAKE_PRESETS{R"(
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build",
       "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+        "CMAKE_CXX_COMPILER":"clang++",
+        "CMAKE_C_COMPILER":"clang"
       }
     },
     {
