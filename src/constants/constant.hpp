@@ -27,7 +27,7 @@ set(CPACK_PACKAGE_VENDOR ${COMPANY})
 include(CPack))"};
 
 constexpr std::string_view GITIGNORE_CODE{
-    R"(
+    R"(.vs
 CMakeLists.txt.user
 CMakeCache.txt
 CMakeFiles
