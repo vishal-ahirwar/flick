@@ -135,10 +135,10 @@ void ProjectGenerator::generateCmakeFile()
 		if (file.is_open())
 		{
 			file << "namespace Project{" << std::endl;
-			file << ("const char*const VERSION_STRING=\"@" + _project_setting.getProjectName() + "_VERSION_MAJOR@.@" + _project_setting.getProjectName() + "_VERSION_MINOR@.@" + _project_setting.getProjectName() + "_VERSION_PATCH@\";") << std::endl;
-			file << ("const char*const COMPANY_NAME =\"@COMPANY@\";") << std::endl;
-			file << ("const char*const COPYRIGHT_STRING= \"@COPYRIGHT@\";") << std::endl;
-			file << ("const char*const PROJECT_NAME=\"@PROJECT_NAME@\";") << std::endl;
+			file << ("constexpr const char*const VERSION_STRING=\"@" + _project_setting.getProjectName() + "_VERSION_MAJOR@.@" + _project_setting.getProjectName() + "_VERSION_MINOR@.@" + _project_setting.getProjectName() + "_VERSION_PATCH@\";") << std::endl;
+			file << ("constexpr const char*const COMPANY_NAME =\"@COMPANY@\";") << std::endl;
+			file << ("constexpr const char*const COPYRIGHT_STRING= \"@COPYRIGHT@\";") << std::endl;
+			file << ("constexpr const char*const PROJECT_NAME=\"@PROJECT_NAME@\";") << std::endl;
 			file << "}";
 			file.close();
 		};

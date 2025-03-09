@@ -76,8 +76,7 @@ configure_file(@config_in @config_h)
 
 #@find Warning: Do not remove this line
 
-file(GLOB SOURCES "src/*.cxx")
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${PROJECT_NAME} "src/main.cxx")
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 #@link Warning: Do not remove this line
@@ -121,9 +120,7 @@ constexpr std::string_view CMAKE_PRESETS{R"(
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build",
       "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
-        "CMAKE_CXX_COMPILER":"clang++",
-        "CMAKE_C_COMPILER":"clang"
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
       }
     },
     {
@@ -137,14 +134,18 @@ constexpr std::string_view CMAKE_PRESETS{R"(
       "name": "linux",
       "inherits": "vcpkg",
       "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-linux"
+        "VCPKG_TARGET_TRIPLET": "x64-linux",
+        "CMAKE_CXX_COMPILER":"clang++",
+        "CMAKE_C_COMPILER":"clang"
       }
     },
     {
       "name": "osx",
       "inherits": "vcpkg",
       "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-osx"
+        "VCPKG_TARGET_TRIPLET": "x64-osx",
+        "CMAKE_CXX_COMPILER":"clang++",
+        "CMAKE_C_COMPILER":"clang"
       }
     }
   ]
@@ -171,11 +172,8 @@ constexpr std::string_view VSCODE_CONFIG{R"(    {
        ],
        "version": 4
    })"};
-constexpr std::string_view COMPILER_URL_64BIT{"https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/clang+llvm-19.1.7-x86_64-pc-windows-msvc.tar.xz"};
-constexpr std::string_view CMAKE_URL_64BIT{"https://github.com/Kitware/CMake/releases/download/v3.31.2/cmake-3.31.2-windows-x86_64.zip"};
+
 constexpr std::string_view UPDATER_URL{"https://github.com/vishal-ahirwar/aura/releases/latest/download/utool.exe"};
-constexpr std::string_view NINJA_URL_64BIT{"https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-win.zip"};
-constexpr std::string_view NSIS_URL{"https://cyfuture.dl.sourceforge.net/project/nsis/NSIS%203/3.10/nsis-3.10.zip?viasf=1"}; // TODO
 #else
 constexpr std::string_view VSCODE_CONFIG{R"(     {
        "configurations": [

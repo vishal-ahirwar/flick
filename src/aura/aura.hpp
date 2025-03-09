@@ -31,8 +31,7 @@ public:
     void addDeps();
 private:
     bool onSetup();
-    void setupVcpkg(const std::string&);
-    void installEssentialTools(bool &);
+    void setupVcpkg(const std::string&,bool&);
     void addToPathUnix();
     void addToPathWin();
     friend void test();
