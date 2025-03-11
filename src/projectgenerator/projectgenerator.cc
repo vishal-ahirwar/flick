@@ -33,10 +33,6 @@ void ProjectGenerator::generateProject()
 
 void ProjectGenerator::generateVcpkgFiles()
 {
-	std::string vcpkg{ "cd " + _project_setting.getProjectName() + " && vcpkg new --application" };
-	if (system(vcpkg.c_str())!=0) {
-		Log::log("failed to create new vcpkg application", Type::E_ERROR);
-	};
 	std::ofstream out(_project_setting.getProjectName() + "/CMakePresets.json");
 	if (!out.is_open())
 	{
@@ -94,7 +90,7 @@ void ProjectGenerator::createDir()
 void ProjectGenerator::generateCppTemplateFile()
 {
 	std::ofstream file;
-	file.open("./" + _project_setting.getProjectName() + "/src/main.cxx", std::ios::out);
+	file.open("./" + _project_setting.getProjectName() + "/src/main.cc", std::ios::out);
 
 	if (file.is_open())
 	{

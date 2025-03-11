@@ -10,7 +10,17 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -march=native -funroll-loops
 set(COMPANY "Vishal ahirwar")
 string(TIMESTAMP CURRENT_YEAR "%Y")
 set(COPYRIGHT "Copyright(c) ${CURRENT_YEAR} Vishal Ahirwar and all Contributors. All rights reserved.")
+option(STATIC_LINK "Enable static linking" ON)
 
+if(STATIC_LINK)
+    message(STATUS "Static linking enabled")
+    # Ensure static runtime linking on Windows
+    if (WIN32)
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    else()
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+    endif()
+endif()
 
 find_package(cpr CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)

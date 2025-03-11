@@ -4,67 +4,32 @@
 #include <thread>
 #include <chrono>
 #include <auraConfig.h>
-void Log::log(const std::string_view &msg, Type e_type, bool btype_effect)
+void Log::log(const std::string_view &formated_string, Type type,const std::string_view&end)
 {
-    if (btype_effect)
-    {
-        switch (e_type)
-        {
-        case Type::E_DISPLAY:
-        {
-            fmt::print(fmt::fg(fmt::color::light_green) | fmt::emphasis::bold, "[Display] ");
-            for (const auto &c : msg)
-            {
-                fmt::print(fmt::fg(fmt::color::light_green) | fmt::emphasis::bold, "{}", c);
-                std::this_thread::sleep_for(std::chrono::milliseconds(50));
-            }
-            fmt::println("");
-            break;
-        };
-        case Type::E_WARNING:
-        {
-            fmt::print(fmt::fg(fmt::color::light_green) | fmt::emphasis::bold, "[Warning] ");
-            for (const auto &c : msg)
-            {
-                fmt::print(fmt::fg(fmt::color::light_green) | fmt::emphasis::bold, "{}", c);
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            }
-            fmt::println("");
-            break;
-        };
-        case Type::E_ERROR:
-        {
-            fmt::print(fmt::fg(fmt::color::light_green) | fmt::emphasis::bold, "[Error] ");
-            for (const auto &c : msg)
-            {
-                fmt::print(fmt::fg(fmt::color::light_green) | fmt::emphasis::bold, "{}", c);
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            }
-            fmt::println("");
-            break;
-        };
-        };
-        return;
-    }
-    switch (e_type)
+    switch (type)
     {
     case Type::E_DISPLAY:
-    {
-        fmt::print(fmt::fg(fmt::color::light_green) | fmt::emphasis::bold, "[Display] {}\n", msg);
+        fmt::print(fmt::emphasis::bold | fmt::fg(fmt::color::white), "{:<8}:  ", "Info");
+        fmt::print(fmt::emphasis::faint | fmt::fg(fmt::color::white_smoke), "{}{}", formated_string,end);
         break;
-    };
-    case Type::E_WARNING:
-    {
-        fmt::print(fmt::fg(fmt::color::yellow) | fmt::emphasis::bold, "[Warning] {}\n", msg);
-        break;
-    };
     case Type::E_ERROR:
-    {
-        fmt::print(fmt::fg(fmt::color::crimson) | fmt::emphasis::bold, "[Error] {}\n", msg);
+        fmt::print(fmt::emphasis::bold | fmt::fg(fmt::color::red), "{:<8}:  ", "Error");
+        fmt::print(fmt::emphasis::faint | fmt::fg(fmt::color::white_smoke), "{}{}", formated_string,end);
         break;
-    };
-    };
-}
+    case Type::E_WARNING:
+        fmt::print(fmt::emphasis::bold | fmt::fg(fmt::color::yellow), "{:<8}:  ", "Warning");
+        fmt::print(fmt::emphasis::faint | fmt::fg(fmt::color::white_smoke), "{}{}", formated_string,end);
+        break;
+    case Type::E_NONE:
+        fmt::print(fmt::emphasis::bold | fmt::fg(fmt::color::lawn_green), "{:<8}:  ", "Info");
+        fmt::print(fmt::emphasis::faint | fmt::fg(fmt::color::lawn_green), "{}{}", formated_string,end);
+        break;
+    default:
+        break;
+    }
+    return;
+};
+
 void Log::about()
 {
     // Title and Description

@@ -22,17 +22,17 @@
 #include <regex>
 
 #if defined(_WIN32)
-	#include <windows.h>
-	#define USERNAME "USERPROFILE"// Windows environment variable
-	constexpr std::string_view VCPKG_TRIPLET{"windows"};
+#include <windows.h>
+#define USERNAME "USERPROFILE" // Windows environment variable
+constexpr std::string_view VCPKG_TRIPLET{"windows"};
 #elif defined(__linux__)
-	#include <unistd.h>
-	#define USERNAME "USER"// Linux environment variable
-	constexpr std::string_view VCPKG_TRIPLET{"linux"};
+#include <unistd.h>
+#define USERNAME "USER" // Linux environment variable
+constexpr std::string_view VCPKG_TRIPLET{"linux"};
 #elif defined(__APPLE__)
-	#include <unistd.h>  // For macOS
-	constexpr std::string_view VCPKG_TRIPLET{"osx"};
-    #define USERNAME "USER"  // macOS environment variable
+#include <unistd.h>		// For macOS
+constexpr std::string_view VCPKG_TRIPLET{"osx"};
+#define USERNAME "USER" // macOS environment variable
 #endif
 
 namespace fs = std::filesystem;
@@ -70,35 +70,20 @@ Aura::~Aura() {
 void Aura::createNewProject()
 {
 	ProjectGenerator generator{};
-	Log::log("Please Choose your Programming language (0.Quit)/(1=C)/(2=CXX)/(Default=CXX) : ", Type::E_DISPLAY);
-	int input{};
-	std::cin >> input;
+	Log::log("Please Choose your Programming language c/cc default=cc,q=quit > ", Type::E_DISPLAY, "");
+	std::string input{};
+	std::getline(std::cin, input);
 	ProjectGenerator::Lang lang{};
-	std::cerr << input << std::endl;
-	switch (input)
-	{
-	case 0:
-	{
-		Log::log("Aborting Project Creations!", Type::E_WARNING);
-		std::exit(0);
-		break;
-	}
-	case 1:
-	{
+	if (input.empty())
+		lang = ProjectGenerator::Lang::CXX;
+	else if (input == "c")
 		lang = ProjectGenerator::Lang::C;
-		break;
-	};
-	case 2:
-	{
+	else if (input == "cc")
 		lang = ProjectGenerator::Lang::CXX;
-		break;
-	};
-	default:
-	{
-		lang = ProjectGenerator::Lang::CXX;
-		break;
-	};
-	};
+	else if (input == "q"){
+		_rt.~RT();
+		std::exit(0);
+	}
 	generator.setProjectSetting(_project_setting, lang);
 	generator.generate();
 };
@@ -117,21 +102,22 @@ bool Aura::compile()
 
 	namespace fs = std::filesystem;
 	std::string cpu_threads{std::to_string(std::thread::hardware_concurrency() - 1)};
-	printf("%sThreads in use: %s%s\n", YELLOW, cpu_threads.c_str(), WHITE);
+	auto formated_string=std::format("Threads in use : {}",cpu_threads.c_str());
+	Log::log(formated_string,Type::E_DISPLAY);
 	if (!fs::exists(fs::current_path().string() + "/build/debug"))
 	{
 		// run cmake
 		Log::log("Compile Process has been started...", Type::E_DISPLAY);
-		executeCMake(std::string("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug --preset=")+std::string(VCPKG_TRIPLET)); // TODO
+		executeCMake(std::string("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug --preset=") + std::string(VCPKG_TRIPLET)); // TODO
 		// run ninja
 		if (!system(("cmake --build build/debug -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
 		{
-			Log::log("BUILD SUCCESSFULL", Type::E_DISPLAY);
+			Log::log("BUILD SUCCESSFULL");
 			return true;
 		}
 		else
 		{
-			Log::log("BUILD FAILED", Type::E_ERROR);
+			Log::log("BUILD FAILED",Type::E_ERROR);
 			return false;
 		}
 	}
@@ -140,13 +126,13 @@ bool Aura::compile()
 		// run ninja
 		if (!system(("cmake --build build/debug -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
 		{
-			Log::log("BUILD SUCCESSFULL", Type::E_DISPLAY);
+			Log::log("BUILD SUCCESSFULL");
 
 			return true;
 		}
 		else
 		{
-			Log::log("BUILD FAILED", Type::E_ERROR);
+			Log::log("BUILD FAILED",Type::E_ERROR);
 			return false;
 		}
 	}
@@ -371,7 +357,7 @@ void Aura::addToPathUnix()
 	};
 };
 
-void Aura::setupVcpkg(const std::string &home,bool&is_install)
+void Aura::setupVcpkg(const std::string &home, bool &is_install)
 {
 	try
 	{
@@ -405,9 +391,9 @@ void Aura::setupVcpkg(const std::string &home,bool&is_install)
 	is_install = true;
 };
 //// installing dev tools
-//void Aura::installEssentialTools(bool &isInstallationComplete)
+// void Aura::installEssentialTools(bool &isInstallationComplete)
 //{
-//#ifdef _WIN32
+// #ifdef _WIN32
 //	namespace fs = std::filesystem;
 //	Log::log("This will install Clang-LLVM Toolchain with cmake,  ninja and vcpkg package manager from Github,\nAre you sure you "
 //			 "want to "
@@ -450,15 +436,15 @@ void Aura::setupVcpkg(const std::string &home,bool&is_install)
 //	fs::remove((home + "\\nsis.zip"));
 //	isInstallationComplete = true;
 //	addToPathWin();
-//#else
-//#define DISTRO_INFO "/etc/os-release"
+// #else
+// #define DISTRO_INFO "/etc/os-release"
 //
 //	Log::log("Install C++ clang Compiler and build tools using ex.[ubuntu]sudo apt install git ninja-build cmake clang clang-tools", Type::E_WARNING);
 //	addToPathUnix();
 //	isInstallationComplete = true;
 //
-//#endif
-//};
+// #endif
+// };
 //
 void Aura::setup()
 {
@@ -476,13 +462,12 @@ void Aura::setup()
 #else
 	Log::log("[Attention] On Linux in order to use vcpkg packages without any issue please install pkgcofig, clang, lldb", Type::E_WARNING);
 #endif // _WIN32
-
 };
 
 // creating packaged build [with installer for windows] using cpack
 void Aura::createInstaller()
 {
-	if (!executeCMake("-Bbuild/release -DCMAKE_BUILD_TYPE=Release --preset="+std::string(VCPKG_TRIPLET)))
+	if (!executeCMake("-Bbuild/release -DCMAKE_BUILD_TYPE=Release --preset=" + std::string(VCPKG_TRIPLET)))
 	{
 		Log::log("Please First fix all the errors", Type::E_ERROR);
 		return;
@@ -563,7 +548,7 @@ bool Aura::onSetup()
 		file.open((home + "\\.aura\\.cconfig").c_str(), std::ios::out);
 		if (file.is_open())
 		{
-			setupVcpkg(home + "\\.aura",isInstallationComplete);
+			setupVcpkg(home + "\\.aura", isInstallationComplete);
 			file << isInstallationComplete;
 			file.close();
 			addToPathWin();
@@ -572,7 +557,7 @@ bool Aura::onSetup()
 	}
 	if (!isInstallationComplete)
 	{
-		setupVcpkg(home+"\\.aura",isInstallationComplete);
+		setupVcpkg(home + "\\.aura", isInstallationComplete);
 		file.open((home + "\\.aura\\.cconfig").c_str(), std::ios::out);
 		if (file.is_open())
 		{
@@ -781,21 +766,22 @@ bool Aura::release()
 
 	namespace fs = std::filesystem;
 	std::string cpu_threads{std::to_string(std::thread::hardware_concurrency() - 1)};
-	printf("%sThreads in use: %s%s\n", YELLOW, cpu_threads.c_str(), WHITE);
+	auto formated_string=std::format("Threads in use : {}",cpu_threads.c_str());
+	Log::log(formated_string,Type::E_DISPLAY);
 	if (!fs::exists(fs::current_path().string() + "/build/release"))
 	{
 		// run cmake
 		Log::log("Compile Process has been started...", Type::E_DISPLAY);
-		executeCMake(std::string("-Bbuild/release -DCMAKE_BUILD_TYPE=Release --preset=")+std::string(VCPKG_TRIPLET)); // TODO
+		executeCMake(std::string("-Bbuild/release -DCMAKE_BUILD_TYPE=Release --preset=") + std::string(VCPKG_TRIPLET)); // TODO
 		// run ninja
 		if (!system(("cmake --build build/release -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
 		{
-			Log::log("BUILD SUCCESSFULL", Type::E_DISPLAY);
+			Log::log("BUILD SUCCESSFULL");
 			return true;
 		}
 		else
 		{
-			Log::log("BUILD FAILED", Type::E_ERROR);
+			Log::log("BUILD FAILED",Type::E_ERROR);
 			return false;
 		}
 	}
@@ -804,13 +790,13 @@ bool Aura::release()
 		// run ninja
 		if (!system(("cmake --build build/release -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
 		{
-			Log::log("BUILD SUCCESSFULL", Type::E_DISPLAY);
+			Log::log("BUILD SUCCESSFULL");
 
 			return true;
 		}
 		else
 		{
-			Log::log("BUILD FAILED", Type::E_ERROR);
+			Log::log("BUILD FAILED",Type::E_ERROR);
 			return false;
 		}
 	}
@@ -849,7 +835,7 @@ void Aura::reBuild()
 	try
 	{
 		fs::remove_all("build");
-		executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug --preset="+std::string(VCPKG_TRIPLET));
+		executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug --preset=" + std::string(VCPKG_TRIPLET));
 		compile();
 	}
 	catch (std::exception &e)
@@ -860,7 +846,7 @@ void Aura::reBuild()
 
 void Aura::refresh()
 {
-	executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug --preset="+std::string(VCPKG_TRIPLET));
+	executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug --preset=" + std::string(VCPKG_TRIPLET));
 };
 void Aura::buildDeps()
 {
@@ -876,7 +862,8 @@ void Aura::addDeps()
 		return;
 	};
 	Deps deps;
-	if (deps.addDeps(_args.at(2))){
+	if (deps.addDeps(_args.at(2)))
+	{
 		deps.updateCMakeFile(_args.at(2));
 	}
 	else

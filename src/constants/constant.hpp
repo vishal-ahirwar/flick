@@ -56,15 +56,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 option(STATIC_LINK "Enable static linking" ON)
 
-# Apply options only for Release mode
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    message(STATUS "Configuring for Release mode: Enabling optimizations")
-    add_compile_options(-O3 -march=native -funroll-loops)
-endif()
 # Apply static linking if enabled
 if(STATIC_LINK)
-    message(STATUS "Static linking enabled")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+  message(STATUS "Static linking enabled")
+  # Ensure static runtime linking on Windows
+  if (WIN32)
+      set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+  else()
+      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+  endif()
 endif()
 
 set(COMPANY "@DeveloperName")
@@ -76,7 +76,9 @@ configure_file(@config_in @config_h)
 
 #@find Warning: Do not remove this line
 
-add_executable(${PROJECT_NAME} "src/main.cxx")
+file(GLOB SOURCES "src/*.cc" "src/*/*.cc")
+
+add_executable(${PROJECT_NAME} ${SOURCES})
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 #@link Warning: Do not remove this line
@@ -127,7 +129,9 @@ constexpr std::string_view CMAKE_PRESETS{R"(
       "name": "windows",
       "inherits": "vcpkg",
       "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md"
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static",
+        "CMAKE_CXX_COMPILER":"clang++",
+        "CMAKE_C_COMPILER":"clang"
       }
     },
     {
@@ -174,6 +178,11 @@ constexpr std::string_view VSCODE_CONFIG{R"(    {
    })"};
 
 constexpr std::string_view UPDATER_URL{"https://github.com/vishal-ahirwar/aura/releases/latest/download/utool.exe"};
+constexpr std::string_view COMPILER_URL{"https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/clang+llvm-19.1.7-x86_64-pc-windows-msvc.tar.xz"};
+constexpr std::string_view CMAKE_URL{"https://github.com/Kitware/CMake/releases/download/v3.31.5/cmake-3.31.5-windows-x86_64.zip"};
+constexpr std::string_view NINJA_URL{"https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-win.zip"};
+constexpr std::string_view VS_BUILD_TOOLS_INSTALLER_URL{"https://aka.ms/vs/17/release/vs_BuildTools.exe"};
+
 #else
 constexpr std::string_view VSCODE_CONFIG{R"(     {
        "configurations": [
