@@ -3,6 +3,9 @@
 [![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 ![image](https://github.com/user-attachments/assets/2a9185af-493d-404b-b42d-facb2f952e8b)
+![image](https://github.com/user-attachments/assets/a3e3571c-cb6c-40cf-b9ef-baebcdc2d41f)
+![image](https://github.com/user-attachments/assets/2bb80b7b-35be-47fc-a4fd-e6df1444c457)
+![image](https://github.com/user-attachments/assets/8e4f1653-873e-4c38-9fbd-e8212817c312)
 
 **Aura** is a powerful tool for C/C++ learners, designed to streamline the process of setting up and managing projects. With Aura, you can focus on learning and coding instead of dealing with repetitive tasks like creating folders, writing CMake files, or compiling manually.
 
