@@ -20,6 +20,7 @@
 #include <userinfo/userinfo.h>
 #include <unittester/unittester.h>
 #include <regex>
+#include<reproc++/reproc.hpp>
 
 #if defined(_WIN32)
 #include <windows.h>

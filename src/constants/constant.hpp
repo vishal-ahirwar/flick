@@ -67,6 +67,21 @@ if(STATIC_LINK)
   endif()
 endif()
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    message(STATUS "Enabling secure coding features for Clang")
+
+    target_compile_options(${PROJECT_NAME} PRIVATE
+        -Wall -Wextra -Wpedantic        # General warnings
+        -Wshadow -Wnon-virtual-dtor      # Detect OOP issues
+        -Wold-style-cast -Wcast-align    # Avoid unsafe casting
+        -Wnull-dereference -Wdouble-promotion  # Runtime safety
+        -Wformat=2 -Wformat-security     # Secure printf-like formatting
+        -fstack-protector-strong         # Stack protection
+        -D_FORTIFY_SOURCE=2              # Fortify source (buffer security)
+        -fno-common                      # Disallow common global variables
+    )
+endif()
+
 set(COMPANY "@DeveloperName")
 string(TIMESTAMP CURRENT_YEAR "%Y")
 set(COPYRIGHT "Copyright(c) ${CURRENT_YEAR} ${COMPANY}.")

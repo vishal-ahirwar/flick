@@ -4,6 +4,7 @@
   "dependencies": [
     "cpr",
     "fmt",
-    "nlohmann-json"
+    "nlohmann-json",
+    "reproc"
   ]
 }

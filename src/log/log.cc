@@ -4,6 +4,7 @@
 #include <thread>
 #include <chrono>
 #include <auraConfig.h>
+
 void Log::log(const std::string_view &formated_string, Type type,const std::string_view&end)
 {
     switch (type)
