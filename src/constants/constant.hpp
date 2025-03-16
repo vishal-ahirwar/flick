@@ -67,6 +67,20 @@ if(STATIC_LINK)
   endif()
 endif()
 
+
+set(COMPANY "@DeveloperName")
+string(TIMESTAMP CURRENT_YEAR "%Y")
+set(COPYRIGHT "Copyright(c) ${CURRENT_YEAR} ${COMPANY}.")
+
+include_directories(src ${CMAKE_BINARY_DIR})
+configure_file(@config_in @config_h)
+
+#@find Warning: Do not remove this line
+
+file(GLOB SOURCES "src/*.cc" "src/*/*.cc")
+
+add_executable(${PROJECT_NAME} ${SOURCES})
+
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     message(STATUS "Enabling secure coding features for Clang")
 
@@ -81,19 +95,6 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         -fno-common                      # Disallow common global variables
     )
 endif()
-
-set(COMPANY "@DeveloperName")
-string(TIMESTAMP CURRENT_YEAR "%Y")
-set(COPYRIGHT "Copyright(c) ${CURRENT_YEAR} ${COMPANY}.")
-
-include_directories(src ${CMAKE_BINARY_DIR})
-configure_file(@config_in @config_h)
-
-#@find Warning: Do not remove this line
-
-file(GLOB SOURCES "src/*.cc" "src/*/*.cc")
-
-add_executable(${PROJECT_NAME} ${SOURCES})
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 #@link Warning: Do not remove this line

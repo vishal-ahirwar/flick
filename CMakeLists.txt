@@ -35,6 +35,21 @@ file(GLOB SOURCES "src/*.cc" "src/*/*.cc")
 add_executable(${PROJECT_NAME} ${SOURCES})
 add_executable(utool utool/main.cc src/downloader/downloader.cc src/rt/rt.cc src/userinfo/userinfo.cc ./src/log/log.cc)
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    message(STATUS "Enabling secure coding features for Clang")
+
+    target_compile_options(${PROJECT_NAME} PRIVATE
+        -Wall -Wextra -Wpedantic        # General warnings
+        -Wshadow -Wnon-virtual-dtor      # Detect OOP issues
+        -Wold-style-cast -Wcast-align    # Avoid unsafe casting
+        -Wnull-dereference -Wdouble-promotion  # Runtime safety
+        -Wformat=2 -Wformat-security     # Secure printf-like formatting
+        -fstack-protector-strong         # Stack protection
+        -D_FORTIFY_SOURCE=2              # Fortify source (buffer security)
+        -fno-common                      # Disallow common global variables
+    )
+endif()
+
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE cpr::cpr)
