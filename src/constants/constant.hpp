@@ -1,6 +1,12 @@
 #ifndef _CONSTANT_
 #define _CONSTANT_
 #include <string>
+enum class Language
+{
+  CXX,
+  C
+};
+
 constexpr std::string_view LICENSE_TEXT{R"(
 Copyright (c) @_YEAR_, @_OWNER_
 All rights reserved.
@@ -42,9 +48,10 @@ _deps
 build
 install
 __pycache__
+log.txt
 )"};
 
-constexpr std::string_view CMAKE_CODE{
+constexpr std::string_view CMAKE_CODE[]{
     R"(
 #Auto Genrated CMake file by aura CLI
 #@COPYRIGHT
@@ -53,6 +60,70 @@ project(@name VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+option(STATIC_LINK "Enable static linking" ON)
+
+# Apply static linking if enabled
+if(STATIC_LINK)
+  message(STATUS "Static linking enabled")
+  # Ensure static runtime linking on Windows
+  if (WIN32)
+      set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+  else()
+      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+  endif()
+endif()
+
+set(COMPANY "@DeveloperName")
+string(TIMESTAMP CURRENT_YEAR "%Y")
+set(COPYRIGHT "Copyright(c) ${CURRENT_YEAR} ${COMPANY}.")
+
+include_directories(src ${CMAKE_BINARY_DIR})
+configure_file(@config_in @config_h)
+
+#@find Warning: Do not remove this line
+
+file(GLOB SOURCES "src/*.cc" "src/*/*.cc")
+
+add_executable(${PROJECT_NAME} ${SOURCES})
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    message(STATUS "Enabling secure coding features for Clang")
+
+    if (MSVC)
+        target_compile_options(${PROJECT_NAME} PRIVATE
+            /W4                      # Enable high warning level
+            /WX                      # Treat warnings as errors
+            /GS                      # Enable buffer security checks
+            /guard:cf                # Enable Control Flow Guard
+            /D_FORTIFY_SOURCE=2      # Enable buffer overflow checks
+        )
+    else()
+    target_compile_options(${PROJECT_NAME} PRIVATE
+        -Wall -Wextra -Wpedantic        # General warnings
+        -Wshadow -Wold-style-cast       # Detect potential issues
+        -Wcast-align -Wnull-dereference # Runtime safety
+        -Wformat=2 -Wformat-security    # Secure formatting
+        -fstack-protector-strong        # Stack protection
+        -D_FORTIFY_SOURCE=2             # Buffer security
+        -fno-common                     # Avoid common symbol issues
+        -Werror                         # Treat warnings as errors
+    )
+    endif()
+endif()
+
+install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+#@link Warning: Do not remove this line
+
+)",
+    R"(
+#Auto Genrated CMake file by aura CLI
+#@COPYRIGHT
+cmake_minimum_required(VERSION 3.6...3.31)
+project(@name VERSION 1.0.0 LANGUAGES C)
+
+set(CMAKE_C_STANDARD 23)
+set(CMAKE_C_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 option(STATIC_LINK "Enable static linking" ON)
 
@@ -77,22 +148,22 @@ configure_file(@config_in @config_h)
 
 #@find Warning: Do not remove this line
 
-file(GLOB SOURCES "src/*.cc" "src/*/*.cc")
+file(GLOB SOURCES "src/*.c" "src/*/*.c")
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+if(CMAKE_C_COMPILER_ID MATCHES "Clang")
     message(STATUS "Enabling secure coding features for Clang")
 
     target_compile_options(${PROJECT_NAME} PRIVATE
         -Wall -Wextra -Wpedantic        # General warnings
-        -Wshadow -Wnon-virtual-dtor      # Detect OOP issues
-        -Wold-style-cast -Wcast-align    # Avoid unsafe casting
-        -Wnull-dereference -Wdouble-promotion  # Runtime safety
-        -Wformat=2 -Wformat-security     # Secure printf-like formatting
-        -fstack-protector-strong         # Stack protection
-        -D_FORTIFY_SOURCE=2              # Fortify source (buffer security)
-        -fno-common                      # Disallow common global variables
+        -Wshadow -Wold-style-cast       # Detect potential issues
+        -Wcast-align -Wnull-dereference # Runtime safety
+        -Wformat=2 -Wformat-security    # Secure formatting
+        -fstack-protector-strong        # Stack protection
+        -D_FORTIFY_SOURCE=2             # Buffer security
+        -fno-common                     # Avoid common symbol issues
+        -Werror                         # Treat warnings as errors
     )
 endif()
 
@@ -100,7 +171,7 @@ install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 #@link Warning: Do not remove this line
 
 )"};
-static std::string MAIN_CODE{R"(//Auto Genrated C++ file by aura CLI
+static std::string MAIN_CODE[]{R"(//Auto Genrated C++ file by aura CLI
 //@COPYRIGHT
 #include<iostream>
 _HEADER_
@@ -109,9 +180,26 @@ int main(int argc,char*argv[])
     std::cerr << "Hello, " << Project::COMPANY_NAME << std::endl;
     std::cerr << Project::PROJECT_NAME << " v" << Project::VERSION_STRING << std::endl;
     std::cerr << Project::COPYRIGHT_STRING << std::endl;
+    for(int i=0;i<argc;++i){
+      std::cerr<<argv[i]<<std::endl;
+    }
     return 0;
-};)"};
-constexpr std::string_view CONFIG_CMAKE_ARGS{"-DBUILD_SHARED_LIBS=OFF -DSTATIC_LINK=ON -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang"};
+}
+)",
+R"(//Auto Genrated C file by aura CLI
+//@COPYRIGHT
+#include<stdio.h>
+_HEADER_
+int main(int argc,char*argv[])
+{
+    fprintf_s(stdout,"%s v%s %s\n",PROJECT_NAME,VERSION_STRING,COMPANY_NAME);
+    for(int i=0;i<argc;++i){
+      puts(argv[i]);
+    }
+    return 0;
+}
+)"};
+//constexpr std::string_view CONFIG_CMAKE_ARGS{"-DBUILD_SHARED_LIBS=OFF -DSTATIC_LINK=ON -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang"};
 constexpr std::string_view TEST_CXX_CODE{R"(
 #include <catch2/catch_test_macros.hpp>
 
@@ -129,7 +217,7 @@ TEST_CASE("Factorials are computed", "[factorial]")
 
 constexpr std::string_view VIM_CONFIG{R"()"};
 
-constexpr std::string_view CMAKE_PRESETS{R"(
+constexpr std::string_view CMAKE_PRESETS[]{R"(
 {
   "version": 2,
   "configurePresets": [
@@ -146,7 +234,44 @@ constexpr std::string_view CMAKE_PRESETS{R"(
       "inherits": "vcpkg",
       "cacheVariables": {
         "VCPKG_TARGET_TRIPLET": "x64-windows-static",
-        "CMAKE_CXX_COMPILER":"clang++",
+        "CMAKE_CXX_COMPILER":"clang-cl"
+      }
+    },
+    {
+      "name": "linux",
+      "inherits": "vcpkg",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-linux",
+        "CMAKE_CXX_COMPILER":"clang++"
+      }
+    },
+    {
+      "name": "osx",
+      "inherits": "vcpkg",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-osx",
+        "CMAKE_CXX_COMPILER":"clang++"
+      }
+    }
+  ]
+})",
+R"(
+{
+  "version": 2,
+  "configurePresets": [
+    {
+      "name": "vcpkg",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+      }
+    },
+    {
+      "name": "windows",
+      "inherits": "vcpkg",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static",
         "CMAKE_C_COMPILER":"clang"
       }
     },
@@ -155,7 +280,6 @@ constexpr std::string_view CMAKE_PRESETS{R"(
       "inherits": "vcpkg",
       "cacheVariables": {
         "VCPKG_TARGET_TRIPLET": "x64-linux",
-        "CMAKE_CXX_COMPILER":"clang++",
         "CMAKE_C_COMPILER":"clang"
       }
     },
@@ -164,7 +288,6 @@ constexpr std::string_view CMAKE_PRESETS{R"(
       "inherits": "vcpkg",
       "cacheVariables": {
         "VCPKG_TARGET_TRIPLET": "x64-osx",
-        "CMAKE_CXX_COMPILER":"clang++",
         "CMAKE_C_COMPILER":"clang"
       }
     }

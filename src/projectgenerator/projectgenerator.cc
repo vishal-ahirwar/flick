@@ -11,7 +11,7 @@ void ProjectGenerator::generate()
 	generateProject();
 }
 
-void ProjectGenerator::setProjectSetting(const ProjectSetting &project_setting, const Lang &lang)
+void ProjectGenerator::setProjectSetting(const ProjectSetting &project_setting, const Language &lang)
 {
 	_lang = lang;
 	_project_setting = project_setting;
@@ -22,7 +22,16 @@ void ProjectGenerator::generateProject()
 	Log::log("Creating directory..", Type::E_DISPLAY);
 	std::string cmdString{};
 	createDir();
-	Log::log("Generating Code for main.cxx and CMakeLists.txt..", Type::E_DISPLAY);
+	if (_lang == Language::C)
+	{
+
+		Log::log("Generating Starter Project C language", Type::E_DISPLAY);
+	}
+	if (_lang == Language::CXX)
+	{
+
+		Log::log("Generating Starter Project C++ language", Type::E_DISPLAY);
+	}
 	generateCppTemplateFile();
 	generateCmakeFile();
 	generateGitIgnoreFile();
@@ -39,7 +48,7 @@ void ProjectGenerator::generateVcpkgFiles()
 		Log::log("failed to generate CMakePresets.json", Type::E_ERROR);
 		return;
 	};
-	out << CMAKE_PRESETS;
+	out << CMAKE_PRESETS[static_cast<int>(_lang)];
 	out.close();
 };
 
@@ -90,8 +99,15 @@ void ProjectGenerator::createDir()
 void ProjectGenerator::generateCppTemplateFile()
 {
 	std::ofstream file;
-	file.open("./" + _project_setting.getProjectName() + "/src/main.cc", std::ios::out);
+	if (_lang == Language::CXX)
+	{
 
+		file.open("./" + _project_setting.getProjectName() + "/src/main.cc", std::ios::out);
+	}
+	else if (_lang == Language::C)
+	{
+		file.open("./" + _project_setting.getProjectName() + "/src/main.c", std::ios::out);
+	}
 	if (file.is_open())
 	{
 		std::string_view header{"_HEADER_"};
@@ -102,23 +118,23 @@ void ProjectGenerator::generateCppTemplateFile()
 		std::string cap("", _project_setting.getProjectName().length());
 		std::transform(_project_setting.getProjectName().begin(), _project_setting.getProjectName().end(), cap.begin(), ::toupper);
 
-		auto index = MAIN_CODE.find(header);
+		auto index = MAIN_CODE[static_cast<int>(_lang)].find(header);
 		if (index != std::string::npos)
-			MAIN_CODE.replace(index, header.length(), ("#include<" + _project_setting.getProjectName() + "config.h>"));
+			MAIN_CODE[static_cast<int>(_lang)].replace(index, header.length(), ("#include<" + _project_setting.getProjectName() + "config.h>"));
 
-		index = MAIN_CODE.find(copyright);
+		index = MAIN_CODE[static_cast<int>(_lang)].find(copyright);
 		if (index != std::string::npos)
-			MAIN_CODE.replace(index, copyright.length(), (cap + "_COPYRIGHT"));
+			MAIN_CODE[static_cast<int>(_lang)].replace(index, copyright.length(), (cap + "_COPYRIGHT"));
 
-		index = MAIN_CODE.find(project);
+		index = MAIN_CODE[static_cast<int>(_lang)].find(project);
 		if (index != std::string::npos)
-			MAIN_CODE.replace(index, project.length(), "\"" + _project_setting.getProjectName() + "\"");
+			MAIN_CODE[static_cast<int>(_lang)].replace(index, project.length(), "\"" + _project_setting.getProjectName() + "\"");
 
-		index = MAIN_CODE.find(comment);
+		index = MAIN_CODE[static_cast<int>(_lang)].find(comment);
 		if (index != std::string::npos)
-			MAIN_CODE.replace(index, comment.length(), _user_info.getUserName());
+			MAIN_CODE[static_cast<int>(_lang)].replace(index, comment.length(), _user_info.getUserName());
 
-		file << MAIN_CODE;
+		file << MAIN_CODE[static_cast<int>(_lang)];
 		file.close();
 	}
 }
@@ -127,6 +143,7 @@ void ProjectGenerator::generateCppTemplateFile()
 void ProjectGenerator::generateCmakeFile()
 {
 	std::string config{(_project_setting.getProjectName() + "/res/config.h.in")};
+	if (_lang == Language::CXX)
 	{
 		std::ofstream file;
 		std::string cap("", _project_setting.getProjectName().length());
@@ -143,6 +160,21 @@ void ProjectGenerator::generateCmakeFile()
 			file.close();
 		};
 	}
+	else if (_lang == Language::C)
+	{
+		std::ofstream file;
+		std::string cap("", _project_setting.getProjectName().length());
+		std::transform(_project_setting.getProjectName().begin(), _project_setting.getProjectName().end(), cap.begin(), ::toupper);
+		file.open(config, std::ios::out);
+		if (file.is_open())
+		{
+			file << ("const char*const VERSION_STRING=\"@" + _project_setting.getProjectName() + "_VERSION_MAJOR@.@" + _project_setting.getProjectName() + "_VERSION_MINOR@.@" + _project_setting.getProjectName() + "_VERSION_PATCH@\";") << std::endl;
+			file << ("const char*const COMPANY_NAME =\"@COMPANY@\";") << std::endl;
+			file << ("const char*const COPYRIGHT_STRING= \"@COPYRIGHT@\";") << std::endl;
+			file << ("const char*const PROJECT_NAME=\"@PROJECT_NAME@\";") << std::endl;
+			file.close();
+		};
+	}
 	{
 
 		std::ofstream file;
@@ -154,7 +186,7 @@ void ProjectGenerator::generateCmakeFile()
 		if (file.is_open())
 		{
 			constexpr std::string_view _name{"@name"};
-			std::string str(CMAKE_CODE);
+			std::string str(CMAKE_CODE[static_cast<int>(_lang)]);
 			auto index = str.find(_name);
 			if (index != std::string::npos)
 			{

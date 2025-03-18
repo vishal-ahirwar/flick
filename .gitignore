@@ -7,7 +7,7 @@ cmake-build-debug
 CMakeLists.txt.user
 /.vs
 /out
-
+log.txt
 .vscode
 build
 /cmake-build-minsizerel

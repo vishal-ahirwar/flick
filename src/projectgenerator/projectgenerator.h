@@ -10,18 +10,13 @@ private:
     inline static UserInfo _user_info{};
 
 public:
-    enum class Lang
-    {
-        C,
-        CXX
-    };
     void generate();
-    void setProjectSetting(const ProjectSetting &project_setting, const Lang &lang);
+    void setProjectSetting(const ProjectSetting &project_setting, const Language &lang);
     static void readProjectSettings(ProjectSetting *setting);
     static void writeProjectSettings(ProjectSetting *setting);
 
 private:
-    Lang _lang{Lang::CXX};
+Language _lang{Language::CXX};
 
 private:
     void generateProject();

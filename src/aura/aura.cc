@@ -20,7 +20,7 @@
 #include <userinfo/userinfo.h>
 #include <unittester/unittester.h>
 #include <regex>
-#include<reproc++/reproc.hpp>
+#include <reproc++/reproc.hpp>
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -74,14 +74,15 @@ void Aura::createNewProject()
 	Log::log("Please Choose your Programming language c/cc default=cc,q=quit > ", Type::E_DISPLAY, "");
 	std::string input{};
 	std::getline(std::cin, input);
-	ProjectGenerator::Lang lang{};
+	Language lang{};
 	if (input.empty())
-		lang = ProjectGenerator::Lang::CXX;
+		lang = Language::CXX;
 	else if (input == "c")
-		lang = ProjectGenerator::Lang::C;
+		lang = Language::C;
 	else if (input == "cc")
-		lang = ProjectGenerator::Lang::CXX;
-	else if (input == "q"){
+		lang = Language::CXX;
+	else if (input == "q")
+	{
 		_rt.~RT();
 		std::exit(0);
 	}
@@ -103,8 +104,8 @@ bool Aura::compile()
 
 	namespace fs = std::filesystem;
 	std::string cpu_threads{std::to_string(std::thread::hardware_concurrency() - 1)};
-	auto formated_string=std::format("Threads in use : {}",cpu_threads.c_str());
-	Log::log(formated_string,Type::E_DISPLAY);
+	auto formated_string = std::format("Threads in use : {}", cpu_threads.c_str());
+	Log::log(formated_string, Type::E_DISPLAY);
 	if (!fs::exists(fs::current_path().string() + "/build/debug"))
 	{
 		// run cmake
@@ -118,7 +119,7 @@ bool Aura::compile()
 		}
 		else
 		{
-			Log::log("BUILD FAILED",Type::E_ERROR);
+			Log::log("BUILD FAILED", Type::E_ERROR);
 			return false;
 		}
 	}
@@ -133,7 +134,7 @@ bool Aura::compile()
 		}
 		else
 		{
-			Log::log("BUILD FAILED",Type::E_ERROR);
+			Log::log("BUILD FAILED", Type::E_ERROR);
 			return false;
 		}
 	}
@@ -767,8 +768,8 @@ bool Aura::release()
 
 	namespace fs = std::filesystem;
 	std::string cpu_threads{std::to_string(std::thread::hardware_concurrency() - 1)};
-	auto formated_string=std::format("Threads in use : {}",cpu_threads.c_str());
-	Log::log(formated_string,Type::E_DISPLAY);
+	auto formated_string = std::format("Threads in use : {}", cpu_threads.c_str());
+	Log::log(formated_string, Type::E_DISPLAY);
 	if (!fs::exists(fs::current_path().string() + "/build/release"))
 	{
 		// run cmake
@@ -782,7 +783,7 @@ bool Aura::release()
 		}
 		else
 		{
-			Log::log("BUILD FAILED",Type::E_ERROR);
+			Log::log("BUILD FAILED", Type::E_ERROR);
 			return false;
 		}
 	}
@@ -797,7 +798,7 @@ bool Aura::release()
 		}
 		else
 		{
-			Log::log("BUILD FAILED",Type::E_ERROR);
+			Log::log("BUILD FAILED", Type::E_ERROR);
 			return false;
 		}
 	}
