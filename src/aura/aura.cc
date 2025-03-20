@@ -22,21 +22,6 @@
 #include <regex>
 #include <reproc++/reproc.hpp>
 
-#if defined(_WIN32)
-#include <windows.h>
-#define USERNAME "USERPROFILE" // Windows environment variable
-std::string_view VCPKG_TRIPLET{"windows-static-build"};
-#elif defined(__linux__)
-#include <unistd.h>
-#define USERNAME "USER" // Linux environment variable
-std::string_view VCPKG_TRIPLET{"linux-static-build"};
-#elif defined(__APPLE__)
-#include <unistd.h> // For macOS
-#include "aura.hpp"
-std::string_view VCPKG_TRIPLET{"osx-static-build"};
-#define USERNAME "USER" // macOS environment variable
-#endif
-
 namespace fs = std::filesystem;
 Aura::Aura(const std::vector<std::string> &args)
 {
@@ -536,9 +521,9 @@ void Aura::test()
 {
 	UnitTester tester(_user_info);
 	tester.setupUnitTestingFramework();
-	tester.runUnitTesting();
+	tester.runUnitTesting(_args);
 #ifdef _WIN32
-	system(".\\build\\debug\\tests.exe");
+	system(".\\build\\tests\\tests.exe");
 #else
 	system("./build/debug/tests");
 #endif

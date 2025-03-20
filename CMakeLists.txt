@@ -1,15 +1,14 @@
 cmake_minimum_required(VERSION 3.6...3.31)
-
 project(aura VERSION 3.0.0)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -march=native -funroll-loops")
 set(COMPANY "Vishal ahirwar")
 string(TIMESTAMP CURRENT_YEAR "%Y")
 set(COPYRIGHT "Copyright(c) ${CURRENT_YEAR} Vishal Ahirwar and all Contributors. All rights reserved.")
+
 option(STATIC_LINK "Enable static linking" ON)
+option(ENABLE_TESTS "Enable tests" OFF)
 
 if(STATIC_LINK)
     message(STATUS "Static linking enabled")
@@ -28,40 +27,49 @@ find_package(reproc++ CONFIG REQUIRED)
 
 include_directories(src ${CMAKE_BINARY_DIR})
 configure_file(res/auraConfig.h.in auraConfig.h)
-
-file(GLOB SOURCES "src/*.cc" "src/*/*.cc")
-
-add_executable(${PROJECT_NAME} ${SOURCES})
-add_executable(utool utool/main.cc src/downloader/downloader.cc src/rt/rt.cc src/userinfo/userinfo.cc ./src/log/log.cc)
-
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+if(NOT ENABLE_TESTS)
+    message(STATUS "Tests are disabled")
+    file(GLOB SOURCES "src/*.cc" "src/*/*.cc")
+    add_executable(${PROJECT_NAME} ${SOURCES})
+    add_executable(utool utool/main.cc src/downloader/downloader.cc src/rt/rt.cc src/userinfo/userinfo.cc ./src/log/log.cc)
+    
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     message(STATUS "Enabling secure coding features for Clang")
-
+    
     target_compile_options(${PROJECT_NAME} PRIVATE
-        -Wall -Wextra -Wpedantic        # General warnings
-        -Wshadow -Wnon-virtual-dtor      # Detect OOP issues
-        -Wold-style-cast -Wcast-align    # Avoid unsafe casting
-        -Wnull-dereference -Wdouble-promotion  # Runtime safety
-        -Wformat=2 -Wformat-security     # Secure printf-like formatting
-        -fstack-protector-strong         # Stack protection
-        -D_FORTIFY_SOURCE=2              # Fortify source (buffer security)
-        -fno-common                      # Disallow common global variables
+    -Wall -Wextra -Wpedantic        # General warnings
+    -Wshadow -Wnon-virtual-dtor      # Detect OOP issues
+    -Wold-style-cast -Wcast-align    # Avoid unsafe casting
+    -Wnull-dereference -Wdouble-promotion  # Runtime safety
+    -Wformat=2 -Wformat-security     # Secure printf-like formatting
+    -fstack-protector-strong         # Stack protection
+    -D_FORTIFY_SOURCE=2              # Fortify source (buffer security)
+    -fno-common                      # Disallow common global variables
     )
+    endif()
+    
+    install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+    
+    target_link_libraries(${PROJECT_NAME} PRIVATE cpr::cpr)
+    target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
+    target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
+    target_link_libraries(${PROJECT_NAME} PRIVATE reproc++)
+    target_link_libraries(utool PRIVATE cpr::cpr)
+    target_link_libraries(utool PRIVATE fmt::fmt)
+    target_link_libraries(utool PRIVATE reproc++)
+    
+    include(InstallRequiredSystemLibraries)
+    set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/License.txt")
+    set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
+    set(CPACK_PACKAGE_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
+    set(CPACK_PACKAGE_VENDOR ${COMPANY})
+    include(CPack)
+else()
+    message(STATUS "Tests are enabled")
+    find_package(Catch2)
+    enable_testing()
+    file(GLOB TEST_SOURCES "tests/*.cc")
+    add_executable(tests ${TEST_SOURCES})
+    target_link_libraries(tests Catch2::Catch2WithMain)
+    add_test(NAME MyUnitTests COMMAND tests)
 endif()
-
-install(TARGETS ${PROJECT_NAME} DESTINATION bin)
-
-target_link_libraries(${PROJECT_NAME} PRIVATE cpr::cpr)
-target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
-target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
-target_link_libraries(${PROJECT_NAME} PRIVATE reproc++)
-target_link_libraries(utool PRIVATE cpr::cpr)
-target_link_libraries(utool PRIVATE fmt::fmt)
-target_link_libraries(utool PRIVATE reproc++)
-
-include(InstallRequiredSystemLibraries)
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/License.txt")
-set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
-set(CPACK_PACKAGE_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
-set(CPACK_PACKAGE_VENDOR ${COMPANY})
-include(CPack)

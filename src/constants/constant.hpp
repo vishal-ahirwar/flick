@@ -1,6 +1,22 @@
 #ifndef _CONSTANT_
 #define _CONSTANT_
 #include <string>
+
+#if defined(_WIN32)
+#include <windows.h>
+#define USERNAME "USERPROFILE" // Windows environment variable
+static std::string_view VCPKG_TRIPLET{"windows-static-build"};
+#elif defined(__linux__)
+#include <unistd.h>
+#define USERNAME "USER" // Linux environment variable
+static std::string_view VCPKG_TRIPLET{"linux-static-build"};
+#elif defined(__APPLE__)
+#include <unistd.h> // For macOS
+#include "aura.hpp"
+static std::string_view VCPKG_TRIPLET{"osx-static-build"};
+#define USERNAME "USER" // macOS environment variable
+#endif
+
 enum class Language
 {
   CXX,
@@ -31,6 +47,53 @@ set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
 set(CPACK_PACKAGE_VENDOR ${COMPANY})
 include(CPack))"};
+constexpr std::string_view UNIT_TEST_CODE[]{
+    R"(
+    #include <gtest/gtest.h>
+    int add(int a,int b){return a+b;};
+    int subtract(int a,int b){return a-b;};
+    TEST(CalculatorTest, Addition) {
+    EXPECT_EQ(add(3, 4), 7);
+    EXPECT_EQ(add(-1, 5), 4);
+}
+
+TEST(CalculatorTest, Subtraction) {
+    EXPECT_EQ(subtract(10, 3), 7);
+    EXPECT_EQ(subtract(7, 7), 0);
+}
+
+int main(int argc, char **argv) {
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
+  )",
+    R"(#include <stdarg.h>
+#include <stddef.h>
+#include <setjmp.h>
+#include <cmocka.h>
+int add(int a,int b){return a+b;};
+int subtract(int a,int b){return a-b;};
+
+static void test_add(void **state) {
+    (void) state; // Unused
+    assert_int_equal(add(3, 4), 7);
+    assert_int_equal(add(-1, 5), 4);
+}
+
+static void test_subtract(void **state) {
+    (void) state; // Unused
+    assert_int_equal(subtract(10, 3), 7);
+    assert_int_equal(subtract(7, 7), 0);
+}
+
+int main(void) {
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_add),
+        cmocka_unit_test(test_subtract),
+    };
+
+    return cmocka_run_group_tests(tests, NULL, NULL);
+})"};
 
 constexpr std::string_view GITIGNORE_CODE{
     R"(.vs
@@ -61,7 +124,9 @@ project(@name VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 option(STATIC_LINK "Enable static linking" ON)
+option(ENABLE_TESTS "Enable tests" OFF)
 
 # Apply static linking if enabled
 if(STATIC_LINK)
@@ -83,6 +148,8 @@ configure_file(@config_in @config_h)
 
 #@find Warning: Do not remove this line
 
+if(NOT ENABLE_TESTS)
+    message(STATUS "Tests are disabled")
 file(GLOB SOURCES "src/*.cc" "src/*/*.cc")
 add_executable(${PROJECT_NAME} ${SOURCES})
 
@@ -103,6 +170,14 @@ endif()
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 #@link Warning: Do not remove this line
 
+else()
+    message(STATUS "Tests are enabled")
+    find_package(GTest)
+    enable_testing()
+    file(GLOB TEST_SOURCES "tests/*.cc")
+    add_executable(tests ${TEST_SOURCES})
+    target_link_libraries(tests GTest::GTest GTest::Main)
+endif()
 )",
     R"(
 #Auto Genrated CMake file by aura CLI
@@ -113,7 +188,9 @@ project(@name VERSION 1.0.0 LANGUAGES C)
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 option(STATIC_LINK "Enable static linking" ON)
+option(ENABLE_TESTS "Enable tests" OFF)
 
 # Apply static linking if enabled
 if(STATIC_LINK)
@@ -126,7 +203,6 @@ if(STATIC_LINK)
   endif()
 endif()
 
-
 set(COMPANY "@DeveloperName")
 string(TIMESTAMP CURRENT_YEAR "%Y")
 set(COPYRIGHT "Copyright(c) ${CURRENT_YEAR} ${COMPANY}.")
@@ -135,6 +211,9 @@ include_directories(src ${CMAKE_BINARY_DIR})
 configure_file(@config_in @config_h)
 
 #@find Warning: Do not remove this line
+
+if(NOT ENABLE_TESTS)
+    message(STATUS "Tests are disabled")
 
 file(GLOB SOURCES "src/*.c" "src/*/*.c")
 
@@ -156,8 +235,15 @@ endif()
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 #@link Warning: Do not remove this line
-
+else()
+    message(STATUS "Tests are enabled")
+    find_package(cmocka REQUIRED)
+    file(GLOB TEST_SOURCES "tests/*.c")
+    add_executable(tests ${TEST_SOURCES})
+    target_link_libraries(tests cmocka::cmocka)
+endif()
 )"};
+
 static std::string MAIN_CODE[]{R"(//Auto Genrated C++ file by aura CLI
 //@COPYRIGHT
 #include<iostream>
@@ -173,7 +259,7 @@ int main(int argc,char*argv[])
     return 0;
 }
 )",
-R"(//Auto Genrated C file by aura CLI
+                               R"(//Auto Genrated C file by aura CLI
 //@COPYRIGHT
 #include<stdio.h>
 _HEADER_
@@ -186,21 +272,6 @@ int main(int argc,char*argv[])
     return 0;
 }
 )"};
-//constexpr std::string_view CONFIG_CMAKE_ARGS{"-DBUILD_SHARED_LIBS=OFF -DSTATIC_LINK=ON -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang"};
-constexpr std::string_view TEST_CXX_CODE{R"(
-#include <catch2/catch_test_macros.hpp>
-
-unsigned int Factorial(unsigned int number)
-{
-    return number <= 1 ? number : Factorial(number - 1) * number;
-}
-    
-TEST_CASE("Factorials are computed", "[factorial]")
-{
-    REQUIRE(Factorial(1) == 1);
-    REQUIRE(Factorial(2) == 2);
-    REQUIRE(Factorial(5) == 120);
-})"};
 
 constexpr std::string_view VIM_CONFIG{R"()"};
 
@@ -244,7 +315,7 @@ constexpr std::string_view CMAKE_PRESETS[]{R"(
     }
   ]
 })",
-R"(
+                                           R"(
 {
   "version": 2,
   "configurePresets": [

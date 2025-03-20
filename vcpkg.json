@@ -5,6 +5,7 @@
     "cpr",
     "fmt",
     "nlohmann-json",
-    "reproc"
+    "reproc",
+    "catch2"
   ]
 }

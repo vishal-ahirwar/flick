@@ -101,7 +101,7 @@ void Log::about()
     fmt::print(fmt::fg(fmt::color::yellow),
                "  utest          - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
-               "Enable unit testing. Example: aura create test --test\n");
+               "Enable unit testing. Example: aura utest\n");
 
     fmt::print(fmt::fg(fmt::color::yellow),
                "  createinstaller- ");

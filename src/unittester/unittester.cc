@@ -4,13 +4,45 @@
 #include <constants/constant.hpp>
 #include <format>
 #include <chrono>
-#include<filesystem>
+#include <filesystem>
+#include <iostream>
+#include <deps/deps.h>
+#include <vector>
+#include <thread>
+
+namespace fs = std::filesystem;
 UnitTester::UnitTester(const UserInfo &user_info)
 {
     _user_info = user_info;
 }
-void UnitTester::runUnitTesting() {
+void UnitTester::runUnitTesting(const std::vector<std::string> &_args)
+{
 
+    namespace fs = std::filesystem;
+    std::string cpu_threads{std::to_string(std::thread::hardware_concurrency() - 1)};
+    auto formated_string = std::format("Threads in use : {}", cpu_threads.c_str());
+    Log::log(formated_string, Type::E_DISPLAY);
+    if (!fs::exists(fs::current_path().string() + "/build/tests"))
+    {
+        for (auto &arg : _args)
+        {
+            if (arg.find("--nostatic") != std::string::npos)
+            {
+                VCPKG_TRIPLET = "default";
+                break;
+            }
+        };
+        // run cmake
+        Log::log("Compile Process has been started...", Type::E_DISPLAY);
+        system((std::string("cmake . -Bbuild/tests -DENABLE_TESTS=ON --preset=") + std::string(VCPKG_TRIPLET)).c_str()); // TODO
+        // run ninja
+        system(("cmake --build build/tests -j" + cpu_threads).c_str()); // if there is any kind of error then don't clear the terminal
+    }
+    else
+    {
+        // run ninja
+        system(("cmake --build build/tests -j" + cpu_threads).c_str()); // if there is any kind of error then don't clear the terminal
+    }
 };
 //
 
@@ -19,33 +51,51 @@ Make sure to call rebuild after calling this method
 */
 void UnitTester::setupUnitTestingFramework()
 {
+
     namespace fs = std::filesystem;
     auto path = fs::current_path().string() + "/tests/";
     if (fs::exists(path))
     {
         return;
     };
+    Log::log("Please Choose your Programming language c/cc default=cc,q=quit > ", Type::E_DISPLAY, "");
+    std::string input{};
+    std::getline(std::cin, input);
+    Language lang{};
+    if (input.empty())
+        lang = Language::CXX;
+    else if (input == "c")
+        lang = Language::C;
+    else if (input == "cc")
+        lang = Language::CXX;
+    else if (input == "q")
+    {
+        std::exit(0);
+    }
     fs::create_directory(path);
+    Deps deps;
+    switch (lang)
+    {
+    case Language::C:
 
-    std::fstream testFile(path + "main.cc", std::ios::out);
+        [&]() -> void
+        {std::fstream testFile(path + "main.c", std::ios::out);
+        if (testFile.is_open())
+        {
+            testFile << UNIT_TEST_CODE[static_cast<int>(lang)];
+            testFile.close();
+            deps.addDeps("cmocka");
+        }; }();
+        break;
+    case Language::CXX:
+        [&]() -> void
+        {std::fstream testFile(path + "main.cc", std::ios::out);
     if (testFile.is_open())
     {
-        testFile << TEST_CXX_CODE;
+        testFile << UNIT_TEST_CODE[static_cast<int>(lang)];
         testFile.close();
-    };
-    std::ofstream file{"./CMakeLists.txt", std::ios::app};
-    if (file.is_open())
-    {
-        file << "#Unit Testing CMake Section\n";
-        file << "find_package(Catch2)\n";
-        file << "add_executable(tests ./tests/main.cc)\n";
-        file << "target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)\n";
+        deps.addDeps("gtest");
+    }; }();
+        break;
     }
-    else
-    {
-        Log::log("Failed to open CMakeLists.txt", Type::E_ERROR);
-        return;
-    };
-    file.close();
-    Log::log("unit testing template code added to project run tests with : UnitTester utest", Type::E_DISPLAY);
 };
