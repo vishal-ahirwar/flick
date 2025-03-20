@@ -84,21 +84,10 @@ configure_file(@config_in @config_h)
 #@find Warning: Do not remove this line
 
 file(GLOB SOURCES "src/*.cc" "src/*/*.cc")
-
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     message(STATUS "Enabling secure coding features for Clang")
-
-    if (MSVC)
-        target_compile_options(${PROJECT_NAME} PRIVATE
-            /W4                      # Enable high warning level
-            /WX                      # Treat warnings as errors
-            /GS                      # Enable buffer security checks
-            /guard:cf                # Enable Control Flow Guard
-            /D_FORTIFY_SOURCE=2      # Enable buffer overflow checks
-        )
-    else()
     target_compile_options(${PROJECT_NAME} PRIVATE
         -Wall -Wextra -Wpedantic        # General warnings
         -Wshadow -Wold-style-cast       # Detect potential issues
@@ -107,9 +96,8 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         -fstack-protector-strong        # Stack protection
         -D_FORTIFY_SOURCE=2             # Buffer security
         -fno-common                     # Avoid common symbol issues
-        -Werror                         # Treat warnings as errors
+        #-Werror                         # Treat warnings as errors
     )
-    endif()
 endif()
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
@@ -154,7 +142,6 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 
 if(CMAKE_C_COMPILER_ID MATCHES "Clang")
     message(STATUS "Enabling secure coding features for Clang")
-
     target_compile_options(${PROJECT_NAME} PRIVATE
         -Wall -Wextra -Wpedantic        # General warnings
         -Wshadow -Wold-style-cast       # Detect potential issues
@@ -163,7 +150,7 @@ if(CMAKE_C_COMPILER_ID MATCHES "Clang")
         -fstack-protector-strong        # Stack protection
         -D_FORTIFY_SOURCE=2             # Buffer security
         -fno-common                     # Avoid common symbol issues
-        -Werror                         # Treat warnings as errors
+        #-Werror                         # Treat warnings as errors
     )
 endif()
 
@@ -222,34 +209,12 @@ constexpr std::string_view CMAKE_PRESETS[]{R"(
   "version": 2,
   "configurePresets": [
     {
-      "name": "vcpkg",
+      "name": "default",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build",
       "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
-      }
-    },
-    {
-      "name": "windows",
-      "inherits": "vcpkg",
-      "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-windows-static",
-        "CMAKE_CXX_COMPILER":"clang-cl"
-      }
-    },
-    {
-      "name": "linux",
-      "inherits": "vcpkg",
-      "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-linux",
-        "CMAKE_CXX_COMPILER":"clang++"
-      }
-    },
-    {
-      "name": "osx",
-      "inherits": "vcpkg",
-      "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-osx",
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+        "STATIC_LINK":false,
         "CMAKE_CXX_COMPILER":"clang++"
       }
     }
@@ -260,34 +225,12 @@ R"(
   "version": 2,
   "configurePresets": [
     {
-      "name": "vcpkg",
+      "name": "default",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build",
       "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
-      }
-    },
-    {
-      "name": "windows",
-      "inherits": "vcpkg",
-      "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-windows-static",
-        "CMAKE_C_COMPILER":"clang"
-      }
-    },
-    {
-      "name": "linux",
-      "inherits": "vcpkg",
-      "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-linux",
-        "CMAKE_C_COMPILER":"clang"
-      }
-    },
-    {
-      "name": "osx",
-      "inherits": "vcpkg",
-      "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-osx",
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+        "STATIC_LINK":false,
         "CMAKE_C_COMPILER":"clang"
       }
     }

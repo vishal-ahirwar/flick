@@ -25,14 +25,14 @@
 #if defined(_WIN32)
 #include <windows.h>
 #define USERNAME "USERPROFILE" // Windows environment variable
-constexpr std::string_view VCPKG_TRIPLET{"windows"};
+constexpr std::string_view VCPKG_TRIPLET{"default"};
 #elif defined(__linux__)
 #include <unistd.h>
 #define USERNAME "USER" // Linux environment variable
-constexpr std::string_view VCPKG_TRIPLET{"linux"};
+constexpr std::string_view VCPKG_TRIPLET{"default"};
 #elif defined(__APPLE__)
 #include <unistd.h>		// For macOS
-constexpr std::string_view VCPKG_TRIPLET{"osx"};
+constexpr std::string_view VCPKG_TRIPLET{"default"};
 #define USERNAME "USER" // macOS environment variable
 #endif
 
