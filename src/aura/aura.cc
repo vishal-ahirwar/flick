@@ -399,62 +399,58 @@ void Aura::setupVcpkg(const std::string &home, bool &is_install)
 #endif
 	is_install = true;
 };
-//// installing dev tools
-// void Aura::installEssentialTools(bool &isInstallationComplete)
-//{
-// #ifdef _WIN32
-//	namespace fs = std::filesystem;
-//	Log::log("This will install Clang-LLVM Toolchain with cmake,  ninja and vcpkg package manager from Github,\nAre you sure you "
-//			 "want to "
-//			 "continue??[y/n]",
-//			 Type::E_DISPLAY);
-//	char c;
-//	while (true)
-//	{
-//
-//		fscanf(stdin, "%c", &c);
-//		if (c != '\n')
-//			break;
-//	};
-//	if (tolower(c) != 'y')
-//		exit(0);
-//	std::string home = getenv(USERNAME);
-//	if (!home.c_str())
-//		return;
-//	home += "\\.aura";
-//	// system(("start " + std::string(VS_URL)).c_str());
-//	// Log::log("Make sure you download Desktop Development in C++ from Visual Studio Installer", Type::E_WARNING);
-//	setupVcpkg(home);
-//	Downloader::download(std::string(COMPILER_URL_64BIT), home + "\\compiler.tar.xz");
-//	Downloader::download(std::string(CMAKE_URL_64BIT), home + "\\cmake.zip");
-//	Downloader::download(std::string(NINJA_URL_64BIT), home + "\\ninja.zip");
-//	Downloader::download(std::string(NSIS_URL), home + "\\nsis.zip");
-//	printf("%sextracting file at %s%s\n", BLUE, home.c_str(), WHITE);
-//	if (system((std::string("tar -xvjf ") + "\"" + home + "\\compiler.tar.xz\"" + " -C " + "\"" + home + "\"").c_str()))
-//		return;
-//	if (system((std::string("tar -xf ") + "\"" + home + "\\cmake.zip\"" + " -C " + "\"" + home + "\"").c_str()))
-//		return;
-//	if (system((std::string("tar -xf ") + "\"" + home + "\\ninja.zip\"" + " -C " + "\"" + home + "\"").c_str()))
-//		return;
-//	if (system((std::string("tar -xf ") + "\"" + home + "\\nsis.zip\"" + " -C " + "\"" + home + "\"").c_str()))
-//		return;
-//	Log::log("removing downloaded archives...", Type::E_DISPLAY);
-//	fs::remove((home + "\\compiler.tar.xz"));
-//	fs::remove((home + "\\cmake.zip"));
-//	fs::remove((home + "\\ninja.zip"));
-//	fs::remove((home + "\\nsis.zip"));
-//	isInstallationComplete = true;
-//	addToPathWin();
-// #else
-// #define DISTRO_INFO "/etc/os-release"
-//
-//	Log::log("Install C++ clang Compiler and build tools using ex.[ubuntu]sudo apt install git ninja-build cmake clang clang-tools", Type::E_WARNING);
-//	addToPathUnix();
-//	isInstallationComplete = true;
-//
-// #endif
-// };
-//
+// installing dev tools
+void Aura::installTools(bool &isInstallationComplete)
+{
+#ifdef _WIN32
+	namespace fs = std::filesystem;
+	Log::log("This will install Clang-LLVM Toolchain with cmake,  ninja and vcpkg package manager from Github,\nAre you sure you "
+			 "want to "
+			 "continue??[y/n]",
+			 Type::E_DISPLAY);
+	char c;
+	while (true)
+	{
+
+		fscanf(stdin, "%c", &c);
+		if (c != '\n')
+			break;
+	};
+	if (tolower(c) != 'y')
+		exit(0);
+	std::string home = getenv(USERNAME);
+	if (!home.c_str())
+		return;
+	home += "\\.aura";
+	// system(("start " + std::string(VS_URL)).c_str());
+	// Log::log("Make sure you download Desktop Development in C++ from Visual Studio Installer", Type::E_WARNING);
+	Downloader::download(std::string(COMPILER_URL), home + "\\compiler.tar.xz");
+	Downloader::download(std::string(CMAKE_URL), home + "\\cmake.zip");
+	Downloader::download(std::string(NINJA_URL), home + "\\ninja.zip");
+	printf("%sextracting file at %s%s\n", BLUE, home.c_str(), WHITE);
+	if (system((std::string("tar -xvjf ") + "\"" + home + "\\compiler.tar.xz\"" + " -C " + "\"" + home + "\"").c_str()))
+	return;
+	if (system((std::string("tar -xf ") + "\"" + home + "\\cmake.zip\"" + " -C " + "\"" + home + "\"").c_str()))
+	return;
+	if (system((std::string("tar -xf ") + "\"" + home + "\\ninja.zip\"" + " -C " + "\"" + home + "\"").c_str()))
+	return;
+	Log::log("removing downloaded archives...", Type::E_DISPLAY);
+	fs::remove((home + "\\compiler.tar.xz"));
+	fs::remove((home + "\\cmake.zip"));
+	fs::remove((home + "\\ninja.zip"));
+	isInstallationComplete = true;
+	setupVcpkg(home,isInstallationComplete);
+	addToPathWin();
+#else
+#define DISTRO_INFO "/etc/os-release"
+
+	Log::log("Install C++ clang Compiler and build tools using ex.[ubuntu]sudo apt install git ninja-build cmake clang clang-tools", Type::E_WARNING);
+	addToPathUnix();
+	isInstallationComplete = true;
+
+#endif
+};
+
 void Aura::setup()
 {
 	if (system("git --version") == 0)
@@ -565,7 +561,7 @@ bool Aura::onSetup()
 		file.open((home + "\\.aura\\.cconfig").c_str(), std::ios::out);
 		if (file.is_open())
 		{
-			setupVcpkg(home + "\\.aura", isInstallationComplete);
+			installTools(isInstallationComplete);
 			file << isInstallationComplete;
 			file.close();
 			addToPathWin();
@@ -574,7 +570,7 @@ bool Aura::onSetup()
 	}
 	if (!isInstallationComplete)
 	{
-		setupVcpkg(home + "\\.aura", isInstallationComplete);
+		installTools(isInstallationComplete);
 		file.open((home + "\\.aura\\.cconfig").c_str(), std::ios::out);
 		if (file.is_open())
 		{
@@ -612,7 +608,7 @@ bool Aura::onSetup()
 		Log::log("config file doesn't exist, creating one", Type::E_ERROR);
 	};
 
-	setupVcpkg(home + "/.aura", isInstallationComplete);
+	installTools(isInstallationComplete);
 
 	file.open((home + std::string("/.aura/.cconfig")).c_str(), std::ios::out);
 	if (file.is_open())

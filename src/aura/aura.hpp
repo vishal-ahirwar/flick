@@ -33,6 +33,7 @@ public:
 private:
     bool onSetup();
     void setupVcpkg(const std::string&,bool&);
+    void installTools(bool&);
     void addToPathUnix();
     void addToPathWin();
     friend void test();
