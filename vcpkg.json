@@ -6,6 +6,6 @@
     "fmt",
     "nlohmann-json",
     "reproc",
-    "catch2"
+    "gtest"
   ]
 }
