@@ -53,7 +53,7 @@ namespace CLI
         {
             aura.test();
         }
-        else if (args.at(1) == ("fix"))
+        else if (args.at(1) == ("doctor"))
         {
             aura.fixInstallation();
         }
@@ -88,6 +88,10 @@ namespace CLI
         else if (args.at(1) == "adddeps")
         {
             aura.addDeps();
+        }
+        else if (args.at(1) == "cmake-preset")
+        {
+            aura.genCMakePreset();
         }
         else
         {

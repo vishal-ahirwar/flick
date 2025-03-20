@@ -14,7 +14,7 @@ public:
     void setProjectSetting(const ProjectSetting &project_setting, const Language &lang);
     static void readProjectSettings(ProjectSetting *setting);
     static void writeProjectSettings(ProjectSetting *setting);
-
+    static void generateCMakePreset(const Language&);
 private:
 Language _lang{Language::CXX};
 

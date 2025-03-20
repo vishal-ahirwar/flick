@@ -25,14 +25,15 @@
 #if defined(_WIN32)
 #include <windows.h>
 #define USERNAME "USERPROFILE" // Windows environment variable
-constexpr std::string_view VCPKG_TRIPLET{"default"};
+constexpr std::string_view VCPKG_TRIPLET{"windows-static-build"};
 #elif defined(__linux__)
 #include <unistd.h>
 #define USERNAME "USER" // Linux environment variable
-constexpr std::string_view VCPKG_TRIPLET{"default"};
+constexpr std::string_view VCPKG_TRIPLET{"linux-static-build"};
 #elif defined(__APPLE__)
-#include <unistd.h>		// For macOS
-constexpr std::string_view VCPKG_TRIPLET{"default"};
+#include <unistd.h> // For macOS
+#include "aura.hpp"
+constexpr std::string_view VCPKG_TRIPLET{"osx-static-build"};
 #define USERNAME "USER" // macOS environment variable
 #endif
 
@@ -61,7 +62,7 @@ Aura::Aura(const std::vector<std::string> &args)
 		_project_setting.set(_args.at(2));
 		return;
 	};
-	if (cmd != "setup" && cmd != "fix" && cmd != "update" && cmd != "builddeps")
+	if (cmd != "setup" && cmd != "doctor" && cmd != "update" && cmd != "builddeps")
 		ProjectGenerator::readProjectSettings(&this->_project_setting);
 };
 Aura::~Aura() {
@@ -621,36 +622,7 @@ bool Aura::onSetup()
 // remove the ~/aura and reinstall the aura again with all the tools like cmake,g++ compiler,ninja,nsis
 void Aura::fixInstallation()
 {
-	Log::log("Are you sure you "
-			 "want to "
-			 "continue??[y/n]\n",
-			 Type::E_DISPLAY);
-	char c;
-	while (true)
-	{
-
-		fscanf(stdin, "%c", &c);
-		if (c != '\n')
-			break;
-	};
-
-	if (tolower(c) != 'y')
-		return;
-#ifdef _WIN32
-	std::string home = getenv(USERNAME);
-#else
-	std::string home{"/home/"};
-	home += getenv(USERNAME);
-#endif
-	namespace fs = std::filesystem;
-	Log::log("reseting aura...", Type::E_WARNING);
-#ifdef _WIN32
-	fs::remove_all((home + "\\.aura"));
-#else
-	fs::remove_all((home + "/.aura"));
-#endif
-	Log::log("all clean!", Type::E_DISPLAY);
-	setup();
+	//TODO
 };
 
 // cross-platform : creating processs to start the update
@@ -870,4 +842,18 @@ void Aura::addDeps()
 	}
 	else
 		Log::log("Failed to add " + _args.at(2) + "make sure you solve those errors or remove it from external directory!", Type::E_ERROR);
+}
+void Aura::genCMakePreset()
+{
+	Log::log("Please Choose your Programming language c/cc default=cc,q=quit > ", Type::E_DISPLAY, "");
+	std::string input{};
+	std::getline(std::cin, input);
+	Language lang{};
+	if (input.empty())
+		lang = Language::CXX;
+	else if (input == "c")
+		lang = Language::C;
+	else if (input == "cc")
+		lang = Language::CXX;
+	ProjectGenerator::generateCMakePreset(lang);
 };

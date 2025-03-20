@@ -6,6 +6,7 @@
 #include <chrono>
 #include <format>
 #include <assert.h>
+#include "projectgenerator.h"
 void ProjectGenerator::generate()
 {
 	generateProject();
@@ -72,6 +73,18 @@ void ProjectGenerator::writeProjectSettings(ProjectSetting *setting)
 	deps.getSetting().write(setting->getProjectName());
 };
 
+void ProjectGenerator::generateCMakePreset(const Language&lang)
+{
+	std::ofstream out("CMakePresets.json");
+
+	if (!out.is_open())
+	{
+		Log::log("failed to generate CMakePresets.json", Type::E_ERROR);
+		return;
+	};
+	out << CMAKE_PRESETS[static_cast<int>(lang)];
+	out.close();
+}
 // creating folder structure for project
 void ProjectGenerator::createDir()
 {

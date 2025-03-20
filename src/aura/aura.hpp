@@ -29,6 +29,7 @@ public:
     void refresh();
     void buildDeps();
     void addDeps();
+    void genCMakePreset();
 private:
     bool onSetup();
     void setupVcpkg(const std::string&,bool&);

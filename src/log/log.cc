@@ -5,25 +5,25 @@
 #include <chrono>
 #include <auraConfig.h>
 
-void Log::log(const std::string_view &formated_string, Type type,const std::string_view&end)
+void Log::log(const std::string_view &formated_string, Type type, const std::string_view &end)
 {
     switch (type)
     {
     case Type::E_DISPLAY:
         fmt::print(fmt::emphasis::bold | fmt::fg(fmt::color::white), "{:<8}:  ", "Info");
-        fmt::print(fmt::emphasis::faint | fmt::fg(fmt::color::white_smoke), "{}{}", formated_string,end);
+        fmt::print(fmt::emphasis::faint | fmt::fg(fmt::color::white_smoke), "{}{}", formated_string, end);
         break;
     case Type::E_ERROR:
         fmt::print(fmt::emphasis::bold | fmt::fg(fmt::color::red), "{:<8}:  ", "Error");
-        fmt::print(fmt::emphasis::faint | fmt::fg(fmt::color::white_smoke), "{}{}", formated_string,end);
+        fmt::print(fmt::emphasis::faint | fmt::fg(fmt::color::white_smoke), "{}{}", formated_string, end);
         break;
     case Type::E_WARNING:
         fmt::print(fmt::emphasis::bold | fmt::fg(fmt::color::yellow), "{:<8}:  ", "Warning");
-        fmt::print(fmt::emphasis::faint | fmt::fg(fmt::color::white_smoke), "{}{}", formated_string,end);
+        fmt::print(fmt::emphasis::faint | fmt::fg(fmt::color::white_smoke), "{}{}", formated_string, end);
         break;
     case Type::E_NONE:
         fmt::print(fmt::emphasis::bold | fmt::fg(fmt::color::lawn_green), "{:<8}:  ", "Info");
-        fmt::print(fmt::emphasis::faint | fmt::fg(fmt::color::lawn_green), "{}{}", formated_string,end);
+        fmt::print(fmt::emphasis::faint | fmt::fg(fmt::color::lawn_green), "{}{}", formated_string, end);
         break;
     default:
         break;
@@ -135,9 +135,12 @@ void Log::about()
                "  vscode         - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
                "Generate VSCode C/C++ configuration files.\n");
-
     fmt::print(fmt::fg(fmt::color::yellow),
-               "  fix            - ");
+               "  cmake-preset   - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
-               "Fix the Aura installation.\n");
+               "Generate CMakePresets.json configuration files.\n");
+    fmt::print(fmt::fg(fmt::color::yellow),
+               "  doctor         - ");
+    fmt::print(fmt::fg(fmt::color::white_smoke),
+               "Check if All the tools required for C++ Developemnt are installed or install the required tools\n");
 }

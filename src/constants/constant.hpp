@@ -214,8 +214,32 @@ constexpr std::string_view CMAKE_PRESETS[]{R"(
       "binaryDir": "${sourceDir}/build",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
-        "STATIC_LINK":false,
-        "CMAKE_CXX_COMPILER":"clang++"
+        "CMAKE_CXX_COMPILER": "clang++",
+        "STATIC_LINK": false
+      }
+    },
+    {
+      "name": "windows-static-build",
+      "inherits": "default",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static",
+        "STATIC_LINK": true
+      }
+    },
+    {
+      "name": "linux-static-build",
+      "inherits": "default",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-linux",
+        "STATIC_LINK": true
+      }
+    },
+    {
+      "name": "osx-static-build",
+      "inherits": "default",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-osx",
+        "STATIC_LINK": true
       }
     }
   ]
@@ -230,8 +254,32 @@ R"(
       "binaryDir": "${sourceDir}/build",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
-        "STATIC_LINK":false,
-        "CMAKE_C_COMPILER":"clang"
+        "CMAKE_C_COMPILER": "clang",
+        "STATIC_LINK": false
+      }
+    },
+    {
+      "name": "windows-static-build",
+      "inherits": "default",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static",
+        "STATIC_LINK": true
+      }
+    },
+    {
+      "name": "linux-static-build",
+      "inherits": "default",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-linux",
+        "STATIC_LINK": true
+      }
+    },
+    {
+      "name": "osx-static-build",
+      "inherits": "default",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-osx",
+        "STATIC_LINK": true
       }
     }
   ]
