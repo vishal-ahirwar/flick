@@ -25,15 +25,15 @@
 #if defined(_WIN32)
 #include <windows.h>
 #define USERNAME "USERPROFILE" // Windows environment variable
-constexpr std::string_view VCPKG_TRIPLET{"windows-static-build"};
+std::string_view VCPKG_TRIPLET{"windows-static-build"};
 #elif defined(__linux__)
 #include <unistd.h>
 #define USERNAME "USER" // Linux environment variable
-constexpr std::string_view VCPKG_TRIPLET{"linux-static-build"};
+std::string_view VCPKG_TRIPLET{"linux-static-build"};
 #elif defined(__APPLE__)
 #include <unistd.h> // For macOS
 #include "aura.hpp"
-constexpr std::string_view VCPKG_TRIPLET{"osx-static-build"};
+std::string_view VCPKG_TRIPLET{"osx-static-build"};
 #define USERNAME "USER" // macOS environment variable
 #endif
 
@@ -109,6 +109,14 @@ bool Aura::compile()
 	Log::log(formated_string, Type::E_DISPLAY);
 	if (!fs::exists(fs::current_path().string() + "/build/debug"))
 	{
+		for (auto &arg : _args)
+		{
+			if (arg.find("--nostatic") != std::string::npos)
+			{
+				VCPKG_TRIPLET = "default";
+				break;
+			}
+		};
 		// run cmake
 		Log::log("Compile Process has been started...", Type::E_DISPLAY);
 		executeCMake(std::string("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug --preset=") + std::string(VCPKG_TRIPLET)); // TODO
@@ -144,7 +152,6 @@ bool Aura::compile()
 void Aura::run()
 {
 	std::string run{};
-	// printf("%s%s: \n%s", YELLOW, projectName.c_str(),WHITE);
 #ifdef _WIN32
 	run += ".\\build\\debug\\";
 	run += _project_setting.getProjectName();
@@ -153,10 +160,24 @@ void Aura::run()
 	run += "./build/debug/";
 	run += _project_setting.getProjectName();
 #endif // _WIN32
-	for (int i = 2; i < _args.size(); ++i)
+	bool is_arg{false};
+	for (auto &arg : _args)
 	{
-		run += " ";
-		run += _args.at(i);
+		if (arg.find("--args") != std::string::npos)
+		{
+			is_arg = true;
+			continue;
+		}
+		else if (arg.find("--nostatic")!=std::string::npos)
+		{
+			is_arg = false;
+			continue;
+		};
+		if (is_arg)
+		{
+			run += " ";
+			run+=arg;
+		};
 	}
 	if (system(run.c_str()))
 	{
@@ -470,6 +491,14 @@ void Aura::setup()
 // creating packaged build [with installer for windows] using cpack
 void Aura::createInstaller()
 {
+	for (auto &arg : _args)
+	{
+		if (arg.find("--nostatic") != std::string::npos)
+		{
+			VCPKG_TRIPLET = "default";
+			break;
+		}
+	};
 	if (!executeCMake("-Bbuild/release -DCMAKE_BUILD_TYPE=Release --preset=" + std::string(VCPKG_TRIPLET)))
 	{
 		Log::log("Please First fix all the errors", Type::E_ERROR);
@@ -620,9 +649,8 @@ bool Aura::onSetup()
 }
 // TODO
 // remove the ~/aura and reinstall the aura again with all the tools like cmake,g++ compiler,ninja,nsis
-void Aura::fixInstallation()
-{
-	//TODO
+void Aura::fixInstallation() {
+	// TODO
 };
 
 // cross-platform : creating processs to start the update
@@ -742,6 +770,14 @@ bool Aura::release()
 	std::string cpu_threads{std::to_string(std::thread::hardware_concurrency() - 1)};
 	auto formated_string = std::format("Threads in use : {}", cpu_threads.c_str());
 	Log::log(formated_string, Type::E_DISPLAY);
+	for (auto &arg : _args)
+	{
+		if (arg.find("--nostatic") != std::string::npos)
+		{
+			VCPKG_TRIPLET = "default";
+			break;
+		}
+	};
 	if (!fs::exists(fs::current_path().string() + "/build/release"))
 	{
 		// run cmake
@@ -805,6 +841,14 @@ void Aura::vsCode()
 // it will simply delete the whole build folder and compile the project again
 void Aura::reBuild()
 {
+	for (auto &arg : _args)
+	{
+		if (arg.find("--nostatic") != std::string::npos)
+		{
+			VCPKG_TRIPLET = "default";
+			break;
+		}
+	};
 	namespace fs = std::filesystem;
 	try
 	{
@@ -820,6 +864,14 @@ void Aura::reBuild()
 
 void Aura::refresh()
 {
+	for (auto &arg : _args)
+	{
+		if (arg.find("--nostatic") != std::string::npos)
+		{
+			VCPKG_TRIPLET = "default";
+			break;
+		}
+	};
 	executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug --preset=" + std::string(VCPKG_TRIPLET));
 };
 void Aura::buildDeps()
