@@ -10,7 +10,7 @@ public:
     void writeUserInfo();
     UserInfo();
     std::string getUserName() const;
-    static void askUserinfo(struct UserInfo *user);
+    static void askUserinfo(UserInfo *user);
     static void readUserInfoFromConfigFile(UserInfo *user);
     static void writeUserInfoToConfigFile(UserInfo *user);
 };
