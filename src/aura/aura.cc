@@ -283,6 +283,7 @@ void Aura::addToPathWin()
 //
 void Aura::addToPathUnix()
 {
+
 	namespace fs = std::filesystem;
 	std::string aura{"/home/"};
 	aura += getenv(USERNAME);
@@ -429,17 +430,24 @@ void Aura::installTools(bool &isInstallationComplete)
 	Downloader::download(std::string(NINJA_URL), home + "\\ninja.zip");
 	printf("%sextracting file at %s%s\n", BLUE, home.c_str(), WHITE);
 	if (system((std::string("tar -xvjf ") + "\"" + home + "\\compiler.tar.xz\"" + " -C " + "\"" + home + "\"").c_str()))
-	return;
+		return;
 	if (system((std::string("tar -xf ") + "\"" + home + "\\cmake.zip\"" + " -C " + "\"" + home + "\"").c_str()))
-	return;
+		return;
 	if (system((std::string("tar -xf ") + "\"" + home + "\\ninja.zip\"" + " -C " + "\"" + home + "\"").c_str()))
-	return;
+		return;
 	Log::log("removing downloaded archives...", Type::E_DISPLAY);
 	fs::remove((home + "\\compiler.tar.xz"));
 	fs::remove((home + "\\cmake.zip"));
 	fs::remove((home + "\\ninja.zip"));
+	Downloader::download(std::string(VS_BUILD_TOOLS_INSTALLER_URL),home+"\\vs.exe");
+	if(system((home+"\\vs.exe --quiet --wait --add Microsoft.VisualStudio.Workload.NativeDesktop").c_str())){
+		Log::log("installing Visual Studio C++ Build Tools failed!",Type::E_ERROR);
+	}else{
+		Log::log("Visual Studio C++ Build Tools has been installed!",Type::E_DISPLAY);
+		fs::remove((home + "\\vs.exe"));
+	};
 	isInstallationComplete = true;
-	setupVcpkg(home,isInstallationComplete);
+	setupVcpkg(home, isInstallationComplete);
 	addToPathWin();
 #else
 #define DISTRO_INFO "/etc/os-release"
