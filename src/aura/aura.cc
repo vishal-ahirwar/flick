@@ -521,7 +521,7 @@ void Aura::test()
 #ifdef _WIN32
 	system(".\\build\\tests\\tests.exe");
 #else
-	system("./build/debug/tests");
+	system("./build/tests/tests");
 #endif
 };
 
