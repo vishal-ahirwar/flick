@@ -440,7 +440,7 @@ void Aura::installTools(bool &isInstallationComplete)
 	fs::remove((home + "\\cmake.zip"));
 	fs::remove((home + "\\ninja.zip"));
 	Downloader::download(std::string(VS_BUILD_TOOLS_INSTALLER_URL),home+"\\vs.exe");
-	if(system((home+"\\vs.exe --quiet --wait --add Microsoft.VisualStudio.Workload.NativeDesktop").c_str())){
+	if(system((home+"\\vs.exe --quiet --wait --add Microsoft.VisualStudio.Workload.NativeDesktop --includeRecommended --includeOptional").c_str())){
 		Log::log("installing Visual Studio C++ Build Tools failed!",Type::E_ERROR);
 	}else{
 		Log::log("Visual Studio C++ Build Tools has been installed!",Type::E_DISPLAY);
