@@ -1,17 +1,71 @@
-
 #include <gtest/gtest.h>
-int add(int a, int b) { return a + b; };
-int subtract(int a, int b) { return a - b; };
-TEST(CalculatorTest, Addition)
+#include<projectgenerator/projectgenerator.h>
+TEST(ProjectGenerator,getConfig)
 {
-    EXPECT_EQ(add(3, 4), 7);
-    EXPECT_EQ(add(-1, 5), 4);
+    ProjectGenerator project_generator;
+    std::string result{};
+    EXPECT_EQ(project_generator.getFromConfig("cpp/project/console/cc",result),true);
+    EXPECT_EQ(project_generator.getFromConfig("c/project/console/cmake",result),true);
+    EXPECT_EQ(project_generator.getFromConfig("cpp/preset",result),true);
+    EXPECT_EQ(project_generator.getFromConfig("username",result),true);
+    EXPECT_EQ(project_generator.getFromConfig("cpp/test",result),true);
+    EXPECT_EQ(project_generator.getFromConfig("c/test",result),true);
+    EXPECT_EQ(project_generator.getFromConfig("license",result),true);
+    EXPECT_EQ(project_generator.getFromConfig("windows/urls",result),false);
+    EXPECT_EQ(project_generator.getFromConfig("urls/windows/compiler",result),true);
+    EXPECT_EQ(project_generator.getFromConfig("urls/linux/compiler",result),true);
+    EXPECT_EQ(project_generator.getFromConfig("urls/windows/cmake",result),true);
+    EXPECT_EQ(project_generator.getFromConfig("urls/windows/ninja",result),true);
+    EXPECT_EQ(project_generator.getFromConfig("urls/linux/utool",result),true);
+    EXPECT_EQ(project_generator.getFromConfig("urls/windows/vs_build_tools",result),true);
 }
-
-TEST(CalculatorTest, Subtraction)
+TEST(ProcessManager,startProcess)
 {
-    EXPECT_EQ(subtract(10, 3), 7);
-    EXPECT_EQ(subtract(7, 7), 0);
+
+}
+TEST(ProjectSetting,readConfig)
+{
+
+}
+TEST(ProcessSetting,writeConfig)
+{
+
+}
+TEST(Utils,get)
+{
+
+}
+TEST(Utils,set)
+{
+
+}
+TEST(Downloader,download)
+{
+
+}
+TEST(Deps,read)
+{
+
+}
+TEST(Deps,write)
+{
+
+}
+TEST(Utool,start)
+{
+
+}
+TEST(UnitTester,run)
+{
+
+}
+TEST(UnitTester,setup)
+{
+
+}
+TEST(RT,init)
+{
+
 }
 
 int main(int argc, char **argv)

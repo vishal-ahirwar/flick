@@ -49,10 +49,10 @@ set(CPACK_PACKAGE_VENDOR ${COMPANY})
 include(CPack))"};
 constexpr std::string_view UNIT_TEST_CODE[]{
     R"(
-    #include <gtest/gtest.h>
-    int add(int a,int b){return a+b;};
-    int subtract(int a,int b){return a-b;};
-    TEST(CalculatorTest, Addition) {
+#include <gtest/gtest.h>
+int add(int a,int b){return a+b;};
+int subtract(int a,int b){return a-b;};
+TEST(CalculatorTest, Addition) {
     EXPECT_EQ(add(3, 4), 7);
     EXPECT_EQ(add(-1, 5), 4);
 }

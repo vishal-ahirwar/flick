@@ -5,8 +5,68 @@
 #include <fstream>
 #include <chrono>
 #include <format>
-#include <assert.h>
-#include "projectgenerator.h"
+#include <iostream>
+#include<utils/utils.h>
+namespace fs=std::filesystem;
+ProjectGenerator::ProjectGenerator()
+{
+	if (!fs::exists(Utils::getAuraPath()))
+	{
+		Log::log("aura is not initialized yet run 'aura init'",Type::E_ERROR);
+		std::exit(EXIT_FAILURE);
+	}else if (!fs::exists(Utils::getAuraPath()+"/config.json"))
+	{
+		Log::log("config.json not found run 'aura doctor' to fix this",Type::E_ERROR);
+		std::exit(EXIT_FAILURE);
+	};
+	std::ifstream ifs(Utils::getAuraPath()+"/config.json");
+	if (!ifs.is_open())
+	{
+		Log::log("failed to open config file",Type::E_ERROR);
+		std::exit(EXIT_FAILURE);
+	};
+	ifs>>_config;
+	ifs.close();
+};
+bool ProjectGenerator::getFromConfig(const std::string& key, std::string& result)
+{
+	std::vector<std::string>tokens{};
+	std::istringstream ss(key);
+	std::string token;
+	while (std::getline(ss,token,'/'))
+	{
+		tokens.push_back(token);
+	};
+	nlohmann::json json;
+	for (const auto&token:tokens)
+	{
+		if (json.is_null())
+		{
+			if (!_config.contains(token))
+			{
+				return false;
+			}
+			json=_config[token];
+		}else
+		{
+			if (!json.contains(token))
+			{
+				return false;
+			}
+			json=json[token];
+		}
+	};
+	if (json.is_string())
+	{
+		result = json.get<std::string>();
+	}else
+	{
+		Log::log(token+" is not a string",Type::E_ERROR);
+		return false;
+	}
+	return true;
+}
+
 void ProjectGenerator::generate()
 {
 	generateProject();
