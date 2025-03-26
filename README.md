@@ -1,6 +1,8 @@
 ---
 # Aura
 [![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+![image](https://github.com/user-attachments/assets/5deb2a3b-fb6e-471e-ac2c-3a3e894aff1a)
+![image](https://github.com/user-attachments/assets/285d0fdf-10c2-4e24-937e-c5181b5f7670)
 
 ![image](https://github.com/user-attachments/assets/2a9185af-493d-404b-b42d-facb2f952e8b)
 ![image](https://github.com/user-attachments/assets/a3e3571c-cb6c-40cf-b9ef-baebcdc2d41f)
