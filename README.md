@@ -1,15 +1,25 @@
 ---
 # Aura
 [![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
-| ![Image 1](https://github.com/user-attachments/assets/5deb2a3b-fb6e-471e-ac2c-3a3e894aff1a) | ![Image 2](https://github.com/user-attachments/assets/285d0fdf-10c2-4e24-937e-c5181b5f7670) | ![Image 3](https://github.com/user-attachments/assets/2a9185af-493d-404b-b42d-facb2f952e8b) |
-|---|---|---|
-| ![Image 4](https://github.com/user-attachments/assets/a3e3571c-cb6c-40cf-b9ef-baebcdc2d41f) | ![Image 5](https://github.com/user-attachments/assets/2bb80b7b-35be-47fc-a4fd-e6df1444c457) | ![Image 6](https://github.com/user-attachments/assets/8e4f1653-873e-4c38-9fbd-e8212817c312) |
-
-
 **Aura** is a powerful tool for C/C++ learners, designed to streamline the process of setting up and managing projects. With Aura, you can focus on learning and coding instead of dealing with repetitive tasks like creating folders, writing CMake files, or compiling manually.
 
 ---
-
+```
+📦 project-name
+ ├── 📂 res
+ ├── 📄 vcpkg.json
+ ├── 📄 CMakeLists.txt
+ ├── 📂 external
+ ├── 📂 [project-name]
+ │   ├── 📂 src
+ │   ├── 📄 CMakeLists.txt
+ ├── 📂 sub-project-1
+ │   ├── 📂 src
+ │   ├── 📄 CMakeLists.txt
+ ├── 📂 sub-project-2
+     ├── 📂 src
+     ├── 📄 CMakeLists.txt
+```
 ## About
 
 Learning C/C++ and tired of manually managing files, folders, and compilation? Aura automates these tasks by:
