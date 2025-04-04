@@ -145,20 +145,20 @@ void Aura::run()
 	run += "./build/debug/";
 	run += _project_setting.getProjectName();
 #endif // _WIN32
-	bool is_arg{false};
+	bool isArg{false};
 	for (auto &arg : mArgs)
 	{
 		if (arg.find("--args") != std::string::npos)
 		{
-			is_arg = true;
+			isArg = true;
 			continue;
 		}
 		else if (arg.find("--nostatic")!=std::string::npos)
 		{
-			is_arg = false;
+			isArg = false;
 			continue;
 		};
-		if (is_arg)
+		if (isArg)
 		{
 			run += " ";
 			run+=arg;
