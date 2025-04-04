@@ -1,10 +1,14 @@
-#include <deps/deps.h>
-#include <nlohmann/json.hpp>
-#include <fstream>
-#include <log/log.h>
 #include <filesystem>
 #include <sstream>
+#include <nlohmann/json.hpp>
+#include <fstream>
 #include <thread>
+
+#include"log/log.h"
+#include"extractor.h"
+#include "deps.h"
+#include"processmanager/processmanager.h"
+
 namespace fs = std::filesystem;
 bool Deps::buildDeps()
 {
@@ -76,7 +80,7 @@ bool Deps::addDeps(const std::string &url)
     return system(("vcpkg add port " + url).c_str()) == 0;
 };
 
-bool Deps::updateCMakeFile(const std::string &libName)
+bool Deps::updateCMakeFile(const std::string &vcpkgLog)
 {
     std::ifstream in("CMakeLists.txt");
     if (!in.is_open())
@@ -88,45 +92,27 @@ bool Deps::updateCMakeFile(const std::string &libName)
     std::string line{};
     while (std::getline(in, line)) // reading whole file in vector to easily update the file
     {
-        if (line.find(libName) != std::string::npos)
-        {
-            in.close();
-            return false;
-        };
         lines.push_back(line);
     };
     in.close();
-    auto pos = lines.size() - 1;
-    for (int i = 0; i < lines.size(); ++i)
+    Extractor extractor;
+    if(!extractor.extract(vcpkgLog))
     {
-        if (lines[i].find("#@find") != std::string::npos)
-        {
-            pos = ++i; // add the find_package(name) after this line
-            break;
-        };
-    };
-    lines.insert(lines.begin() + pos, "find_package(" + libName + " CONFIG REQUIRED)"); // NOTE
-    for (int i = 0; i < lines.size(); ++i)
-    {
-        if (lines[i].find("@link") != std::string::npos)
-        {
-            pos = ++i; // add the target_link_libraries(${PROJECT_NAME} after this line
-            break;
-        }
-    };
-    lines.insert(lines.begin() + pos, "target_link_libraries(${PROJECT_NAME} " + libName + "::" + libName + ")"); // NOTE
-    std::ofstream out("CMakeLists.txt");
-    if (!out.is_open())
+        Log::log("Extraction failed!",Type::E_ERROR);
         return false;
-    for (const auto &l : lines) // writing back to file the updated contents
-    {
-        out << l << "\n";
     };
-    out.close();
-    Log::log(libName+" added to CMakeLists.txt",Type::E_DISPLAY);
+    auto packages{extractor.getPackages()};
+    for(const auto&[packageName,values]:packages)
+    {
+        Log::log(packageName,Type::E_DISPLAY);
+    };
     return true;
 }
 
+bool Deps::installDeps(std::string &vcpkgLog,const std::string_view&TRIPLET)
+{
+    return system(("vcpkg install "+std::string(TRIPLET)).c_str())==0; 
+}
 void Deps::findCMakeConfig(const std::string &root, std::vector<std::string> &configs)
 {
     if (!fs::exists(root + "/build/install/lib/cmake"))

@@ -18,8 +18,8 @@ public:
     bool buildDeps();
     bool addDeps(const std::string &url);
     DepsSetting &getSetting();
-    bool updateCMakeFile(const std::string &libName);
-
+    bool updateCMakeFile(const std::string &vcpkgLog);
+    bool installDeps(std::string&vcpkgLog,const std::string_view&TRIPLET);
 private:
     bool updateConfig(const std::string &libName, const std::string &libPath);
     void findCMakeConfig(const std::string &root, std::vector<std::string> &configs);

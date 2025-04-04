@@ -153,7 +153,7 @@ void Aura::run()
 			isArg = true;
 			continue;
 		}
-		else if (arg.find("--nostatic")!=std::string::npos)
+		else if (arg.find("--nostatic") != std::string::npos)
 		{
 			isArg = false;
 			continue;
@@ -161,7 +161,7 @@ void Aura::run()
 		if (isArg)
 		{
 			run += " ";
-			run+=arg;
+			run += arg;
 		};
 	}
 	if (system(run.c_str()))
@@ -175,6 +175,7 @@ void Aura::run()
 //
 void Aura::build()
 {
+	std::string compileLog{};
 	if (!this->compile())
 		return;
 	this->run();
@@ -439,12 +440,15 @@ void Aura::installTools(bool &isInstallationComplete)
 	fs::remove((home + "\\compiler.tar.xz"));
 	fs::remove((home + "\\cmake.zip"));
 	fs::remove((home + "\\ninja.zip"));
-	Downloader::download(std::string(VS_BUILD_TOOLS_INSTALLER_URL),home+"\\vs.exe");
-	Downloader::download("https://github.com/vishal-ahirwar/aura/blob/master/res/aura.vsconfig",home+"\\aura.vsconfig");
-	if(system((home+"\\vs.exe --quiet --wait --config "+home+"\\aura.vsconfig").c_str())){
-		Log::log("installing Visual Studio C++ Build Tools failed!",Type::E_ERROR);
-	}else{
-		Log::log("Visual Studio C++ Build Tools has been installed!",Type::E_DISPLAY);
+	Downloader::download(std::string(VS_BUILD_TOOLS_INSTALLER_URL), home + "\\vs.exe");
+	Downloader::download("https://github.com/vishal-ahirwar/aura/blob/master/res/aura.vsconfig", home + "\\aura.vsconfig");
+	if (system((home + "\\vs.exe --quiet --wait --config " + home + "\\aura.vsconfig").c_str()))
+	{
+		Log::log("installing Visual Studio C++ Build Tools failed!", Type::E_ERROR);
+	}
+	else
+	{
+		Log::log("Visual Studio C++ Build Tools has been installed!", Type::E_DISPLAY);
 		fs::remove((home + "\\vs.exe"));
 	};
 	isInstallationComplete = true;
@@ -880,10 +884,26 @@ void Aura::addDeps()
 	Deps deps;
 	if (deps.addDeps(mArgs.at(2)))
 	{
-		deps.updateCMakeFile(mArgs.at(2));
+		std::string vcpkgLog{};
+		for (auto &arg : mArgs)
+		{
+			if (arg.find("--nostatic") != std::string::npos)
+			{
+				VCPKG_TRIPLET = "default";
+				break;
+			}
+		};
+		if (!deps.installDeps(vcpkgLog, VCPKG_TRIPLET))
+		{
+			Log::log("failed to install some packages read build/build.log for more info!", Type::E_ERROR);
+			return;
+		};
+		deps.updateCMakeFile(vcpkgLog);
 	}
 	else
+	{
 		Log::log("Failed to add " + mArgs.at(2) + "make sure you solve those errors or remove it from external directory!", Type::E_ERROR);
+	}
 }
 void Aura::genCMakePreset()
 {
@@ -908,5 +928,5 @@ void Aura::createSubProject()
 	Language lang{};
 	if (input.empty())
 		return;
-	Log::log("subproject name is "+input, Type::E_DISPLAY, "");
+	Log::log("subproject name is " + input, Type::E_DISPLAY, "");
 }
