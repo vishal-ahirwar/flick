@@ -68,6 +68,6 @@ file(GLOB SOURCES "src/*.cc" "src/*/*.cc")
     enable_testing()
     file(GLOB TEST_SOURCES "tests/*.cc")
     add_executable(tests ${TEST_SOURCES} ${SOURCES})
-    target_link_libraries(tests GTest::GTest GTest::Main cpr::cpr fmt::fmt nlohmann_json::nlohmann_json)
+    target_link_libraries(tests GTest::GTest GTest::Main cpr::cpr fmt::fmt nlohmann_json::nlohmann_json reproc++)
     add_test(NAME MyUnitTests COMMAND tests)
 

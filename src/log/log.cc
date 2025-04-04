@@ -121,10 +121,6 @@ void Log::about()
     fmt::print(fmt::fg(fmt::color::white_smoke),
                "Remove the build directory and recompile the project, use --nostatic flag to build project with dynamic linking\n\t\t\tExample : aura rebuild --nostatic\n");
     fmt::print(fmt::fg(fmt::color::yellow),
-               "  ref            - ");
-    fmt::print(fmt::fg(fmt::color::white_smoke),
-               "Only run cmake again to generate cmake files, use --nostatic flag to build project with dynamic linking\n\t\t\tExample : aura ref --nostatic\n");
-    fmt::print(fmt::fg(fmt::color::yellow),
                "  debug          - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
                "Compile in Debug mode and Start the lldb debugger, use --nostatic flag to build project with dynamic linking\n\t\t\tExample : aura debug --nostatic\n");

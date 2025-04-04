@@ -4,10 +4,10 @@
 #include <fstream>
 #include <thread>
 
-#include"log/log.h"
-#include"extractor.h"
+#include "log/log.h"
+#include "extractor.h"
 #include "deps.h"
-#include"processmanager/processmanager.h"
+#include "processmanager/processmanager.h"
 
 namespace fs = std::filesystem;
 bool Deps::buildDeps()
@@ -76,7 +76,7 @@ bool Deps::addDeps(const std::string &url)
     // if (url.find(".git") != std::string::npos)
     //     return system(("cd external && git clone " + url).c_str()) == 0;
     // will use pipe for that
-    Log::log(url+" added to vcpkg.json",Type::E_DISPLAY);
+    Log::log(url + " added to vcpkg.json", Type::E_DISPLAY);
     return system(("vcpkg add port " + url).c_str()) == 0;
 };
 
@@ -96,22 +96,54 @@ bool Deps::updateCMakeFile(const std::string &vcpkgLog)
     };
     in.close();
     Extractor extractor;
-    if(!extractor.extract(vcpkgLog))
+    if (extractor.extract(vcpkgLog))
     {
-        Log::log("Extraction failed!",Type::E_ERROR);
+        Log::log("Extraction failed!", Type::E_ERROR);
         return false;
     };
     auto packages{extractor.getPackages()};
-    for(const auto&[packageName,values]:packages)
+    Log::log("Packages :", Type::E_DISPLAY);
+    for (const auto &[packageName, values] : packages)
     {
-        Log::log(packageName,Type::E_DISPLAY);
+        if(packageName.empty())continue;
+        Log::log(packageName, Type::E_DISPLAY);
+        for (const auto &package : values)
+        {
+            bool shouldAdd{true};
+            for (const auto &line : lines)
+            {
+                if (line.find(package) != std::string::npos)
+                {
+                    shouldAdd = false;
+                }
+            }
+            if (shouldAdd)
+            {
+                lines.push_back(package);
+            }
+        }
     };
+    std::fstream out{"CMakeLists.txt", std::ios::out};
+    if (out.is_open())
+    {
+        for (const auto &line : lines)
+        {
+            out << line << "\n";
+        };
+        out.close();
+    }
     return true;
 }
 
-bool Deps::installDeps(std::string &vcpkgLog,const std::string_view&TRIPLET)
+bool Deps::installDeps(std::string &vcpkgLog, const std::string_view &TRIPLET)
 {
-    return system(("vcpkg install "+std::string(TRIPLET)).c_str())==0; 
+    std::vector<std::string> args{};
+    args.push_back("vcpkg");
+    args.push_back("install");
+    args.push_back("--triplet");
+    args.push_back(std::string(TRIPLET));
+    Log::log("Installing Remaining packages...", Type::E_DISPLAY);
+    return ProcessManager::startProcess(args, vcpkgLog, false) == 0;
 }
 void Deps::findCMakeConfig(const std::string &root, std::vector<std::string> &configs)
 {

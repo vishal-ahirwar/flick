@@ -77,10 +77,6 @@ namespace CLI
         {
             aura.reBuild();
         }
-        else if (args.at(1) == "ref")
-        {
-            aura.refresh();
-        }
         else if (args.at(1) == "builddeps")
         {
             aura.buildDeps();

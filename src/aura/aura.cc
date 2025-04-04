@@ -21,7 +21,7 @@
 #include <unittester/unittester.h>
 #include <regex>
 #include <reproc++/reproc.hpp>
-
+#include <processmanager/processmanager.h>
 namespace fs = std::filesystem;
 Aura::Aura(const std::vector<std::string> &args)
 {
@@ -76,11 +76,15 @@ void Aura::createNewProject()
 	generator.generate();
 };
 
-bool Aura::executeCMake(const std::string &additionalCMakeArg)
+bool Aura::executeCMake(const std::vector<std::string> &additionalCMakeArg)
 {
-	std::string cmd{"cmake -S . -G \"Ninja\" "};
-	cmd += additionalCMakeArg;
-	return system(cmd.c_str()) == 0;
+	std::string processLog{};
+	std::vector<std::string> args{"cmake", "-S", ".", "-G", "Ninja"};
+	for (const auto &cmake : additionalCMakeArg)
+	{
+		args.push_back(cmake);
+	};
+	return ProcessManager::startProcess(args, processLog) == 0;
 };
 
 // TODO : add compile option
@@ -92,6 +96,7 @@ bool Aura::compile()
 	std::string cpuThreads{std::to_string(std::thread::hardware_concurrency() - 1)};
 	auto formatedString = std::format("Threads in use : {}", cpuThreads.c_str());
 	Log::log(formatedString, Type::E_DISPLAY);
+	Log::log("Compile Process has been started...", Type::E_DISPLAY);
 	if (!fs::exists(fs::current_path().string() + "/build/debug"))
 	{
 		for (auto &arg : mArgs)
@@ -103,10 +108,21 @@ bool Aura::compile()
 			}
 		};
 		// run cmake
-		Log::log("Compile Process has been started...", Type::E_DISPLAY);
-		executeCMake(std::string("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug --preset=") + std::string(VCPKG_TRIPLET)); // TODO
+		std::vector<std::string> args{"-Bbuild/debug", "-DCMAKE_BUILD_TYPE=Debug", "--preset=" + std::string(VCPKG_TRIPLET)};
+		Log::log(VCPKG_TRIPLET);
+		if (executeCMake(args))
+		{
+			Log::log("There are some errors in your CMakeLists.txt read build/build.log for more info", Type::E_ERROR);
+			return false;
+		}; // TODO
 		// run ninja
-		if (!system(("cmake --build build/debug -j" + cpuThreads).c_str())) // if there is any kind of error then don't clear the terminal
+		std::string pLog{};
+		args.clear();
+		args.push_back("cmake");
+		args.push_back("--build");
+		args.push_back("build/debug");
+		args.push_back("-j" + cpuThreads);
+		if (ProcessManager::startProcess(args, pLog) == 0) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL");
 			return true;
@@ -119,8 +135,14 @@ bool Aura::compile()
 	}
 	else
 	{
+		std::string pLog{};
+		std::vector<std::string> args{};
+		args.push_back("cmake");
+		args.push_back("--build");
+		args.push_back("build/debug");
+		args.push_back("-j" + cpuThreads);
 		// run ninja
-		if (!system(("cmake --build build/debug -j" + cpuThreads).c_str())) // if there is any kind of error then don't clear the terminal
+		if (ProcessManager::startProcess(args, pLog) == 0) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL");
 
@@ -175,7 +197,6 @@ void Aura::run()
 //
 void Aura::build()
 {
-	std::string compileLog{};
 	if (!this->compile())
 		return;
 	this->run();
@@ -493,7 +514,8 @@ void Aura::createInstaller()
 			break;
 		}
 	};
-	if (!executeCMake("-Bbuild/release -DCMAKE_BUILD_TYPE=Release --preset=" + std::string(VCPKG_TRIPLET)))
+	std::vector<std::string> args{"-Bbuild/release", "-DCMAKE_BUILD_TYPE=Release", "--preset=" + std::string(VCPKG_TRIPLET)};
+	if (executeCMake(args))
 	{
 		Log::log("Please First fix all the errors", Type::E_ERROR);
 		return;
@@ -764,6 +786,7 @@ bool Aura::release()
 	std::string cpuThreads{std::to_string(std::thread::hardware_concurrency() - 1)};
 	auto formatedString = std::format("Threads in use : {}", cpuThreads.c_str());
 	Log::log(formatedString, Type::E_DISPLAY);
+	Log::log("Compile Process has been started...", Type::E_DISPLAY);
 	for (auto &arg : mArgs)
 	{
 		if (arg.find("--nostatic") != std::string::npos)
@@ -774,11 +797,20 @@ bool Aura::release()
 	};
 	if (!fs::exists(fs::current_path().string() + "/build/release"))
 	{
-		// run cmake
-		Log::log("Compile Process has been started...", Type::E_DISPLAY);
-		executeCMake(std::string("-Bbuild/release -DCMAKE_BUILD_TYPE=Release --preset=") + std::string(VCPKG_TRIPLET)); // TODO
+		std::vector<std::string> args{"-Bbuild/release", "-DCMAKE_BUILD_TYPE=Release", "--preset=" + std::string(VCPKG_TRIPLET)};
+		if (executeCMake(args))
+		{
+			Log::log("There are some errors in your CMakeLists.txt read build/build.log for more info", Type::E_ERROR);
+			return false;
+		}; // TODO
 		// run ninja
-		if (!system(("cmake --build build/release -j" + cpuThreads).c_str())) // if there is any kind of error then don't clear the terminal
+		std::string pLog{};
+		args.clear();
+		args.push_back("cmake");
+		args.push_back("--build");
+		args.push_back("build/release");
+		args.push_back("-j" + cpuThreads);
+		if (ProcessManager::startProcess(args, pLog) == 0) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL");
 			return true;
@@ -791,8 +823,14 @@ bool Aura::release()
 	}
 	else
 	{
+		std::string pLog{};
+		std::vector<std::string> args{};
+		args.push_back("cmake");
+		args.push_back("--build");
+		args.push_back("build/release");
+		args.push_back("-j" + cpuThreads);
 		// run ninja
-		if (!system(("cmake --build build/release -j" + cpuThreads).c_str())) // if there is any kind of error then don't clear the terminal
+		if (ProcessManager::startProcess(args, pLog) == 0) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL");
 
@@ -847,7 +885,8 @@ void Aura::reBuild()
 	try
 	{
 		fs::remove_all("build");
-		executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug --preset=" + std::string(VCPKG_TRIPLET));
+		std::vector<std::string> args{"-Bbuild/debug", "-DCMAKE_BUILD_TYPE=Debug", "--preset=" + std::string(VCPKG_TRIPLET)};
+		executeCMake(args);
 		compile();
 	}
 	catch (std::exception &e)
@@ -856,18 +895,6 @@ void Aura::reBuild()
 	};
 };
 
-void Aura::refresh()
-{
-	for (auto &arg : mArgs)
-	{
-		if (arg.find("--nostatic") != std::string::npos)
-		{
-			VCPKG_TRIPLET = "default";
-			break;
-		}
-	};
-	executeCMake("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug --preset=" + std::string(VCPKG_TRIPLET));
-};
 void Aura::buildDeps()
 {
 	// building cmake external libraries
@@ -891,6 +918,16 @@ void Aura::addDeps()
 			{
 				VCPKG_TRIPLET = "default";
 				break;
+			}
+			else
+			{
+#if defined(_WIN32)
+				VCPKG_TRIPLET = "x64-windows-static";
+#elif defined(__linux__)
+				VCPKG_TRIPLET = "x64-linux";
+#elif defined(__APPLE__)
+				VCPKG_TRIPLET = "x64-osx";
+#endif
 			}
 		};
 		if (!deps.installDeps(vcpkgLog, VCPKG_TRIPLET))

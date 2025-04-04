@@ -26,7 +26,6 @@ public:
     bool release();
     void vsCode();
     void reBuild();
-    void refresh();
     void buildDeps();
     void addDeps();
     void genCMakePreset();
@@ -38,7 +37,7 @@ private:
     void addToPathUnix();
     void addToPathWin();
     friend void test();
-    bool executeCMake(const std::string&);
+    bool executeCMake(const std::vector<std::string> &additionalCMakeArg);
 public:
     Aura(const std::vector<std::string>&args={});
     ~Aura();
