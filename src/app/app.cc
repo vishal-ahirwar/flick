@@ -92,6 +92,9 @@ namespace CLI
         else if (args.at(1) == "cmake-preset")
         {
             aura.genCMakePreset();
+        }else if (args.at(1)=="subproject")
+        {
+            aura.createSubProject();
         }
         else
         {

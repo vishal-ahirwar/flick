@@ -13,9 +13,9 @@ std::string Utils::getAuraPath()
 {
     std::string path{std::getenv(USERNAME)};
 #ifdef _WIN32
-    path += "\\.aura";
+    path += "\\aura";
 #else
-    path += "/.aura";
+    path += "/aura";
 #endif
     if (!fs::exists(path))
         return nullptr;

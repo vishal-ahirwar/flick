@@ -5,6 +5,6 @@
 class ProcessManager
 {
 public:
-    static int startProcess(const std::vector<std::string_view> args,bool b_log=false);
+    static int startProcess(const std::vector<std::string_view> args,bool bLog=false);
 };
 #endif

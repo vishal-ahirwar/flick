@@ -4,9 +4,9 @@
 #include<string>
 class RT
 {
-    std::chrono::time_point<std::chrono::high_resolution_clock> _start{};
-    std::chrono::time_point<std::chrono::high_resolution_clock> _end{};
-    std::string _msg{};
+    std::chrono::time_point<std::chrono::high_resolution_clock> mStart{};
+    std::chrono::time_point<std::chrono::high_resolution_clock> mEnd{};
+    std::string mMsg{};
 public:
     RT(const std::string&msg);
     ~RT();

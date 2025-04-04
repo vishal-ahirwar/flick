@@ -4,11 +4,11 @@
 #include<vector>
 class UnitTester
 {
-    UserInfo _user_info{};
+    UserInfo mUserInfo{};
 
 public:
     UnitTester(const UserInfo &);
     void setupUnitTestingFramework();
-    void runUnitTesting(const std::vector<std::string>&_args);
+    void runUnitTesting(const std::vector<std::string>&args);
 };
 #endif // UNITTESTER_H

@@ -4,6 +4,6 @@
 class Downloader
 {
     public:
-    static void download(const std::string&,const std::string&);
+    static void download(const std::string&url,const std::string&filePath);
 };
 #endif

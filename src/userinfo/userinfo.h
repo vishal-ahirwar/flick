@@ -3,7 +3,7 @@
 #include <string>
 class UserInfo
 {
-    std::string _user_name{};
+    std::string mUserName{};
 
 public:
     void readUserInfo();

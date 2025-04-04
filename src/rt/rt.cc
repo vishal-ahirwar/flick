@@ -2,14 +2,14 @@
 #include <cstdio>
 #include <constants/colors.hpp>
 #include <log/log.h>
-RT::RT(const std::string &msg) : _msg{msg}
+RT::RT(const std::string &msg) : mMsg{msg}
 {
-    _start = std::chrono::high_resolution_clock::now();
+    mStart = std::chrono::high_resolution_clock::now();
 };
 RT::~RT()
 {
-    _end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elaped_time{_end - _start};
-    auto formated_string=std::format("Time taken by {} {:.2f}s\n", _msg.c_str(), elaped_time.count());
-    Log::log(formated_string,Type::E_DISPLAY);
+    mEnd = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapedTime{mEnd - mStart};
+    auto formatedString=std::format("Time taken by {} {:.2f}s\n", mMsg.c_str(), elapedTime.count());
+    Log::log(formatedString,Type::E_DISPLAY);
 };

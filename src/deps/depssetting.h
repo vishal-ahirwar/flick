@@ -1,15 +1,15 @@
 #ifndef DEPS_SETTING_H
 #define DEPS_SETTING_H
 #include <string>
-constexpr std::string_view deps_json{"external/deps.json"};
+constexpr std::string_view DEPS_JSON{"external/deps.json"};
 class DepsSetting
 {
-    std::string _cmake_args{};
+    std::string mCmakeArgs{};
 
 public:
-    void set(const std::string &cmake_args);
+    void set(const std::string &cmakeArgs);
     std::string getCMakeArgs() const;
     bool read();
-    void write(const std::string &project_name);
+    void write(const std::string &projectName);
 };
 #endif

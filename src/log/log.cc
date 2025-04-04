@@ -65,7 +65,10 @@ void Log::about()
                "  create         - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
                "Create a new C/C++ project. Example: aura create projectName\n");
-
+    fmt::print(fmt::fg(fmt::color::yellow),
+               "  subproject     - ");
+    fmt::print(fmt::fg(fmt::color::white_smoke),
+               "Create a new C/C++ sub-project. Example: aura subproject name\n");
     fmt::print(fmt::fg(fmt::color::yellow),
                "  compile        - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),

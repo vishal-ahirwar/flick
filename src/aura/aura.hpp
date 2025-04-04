@@ -8,10 +8,10 @@
 class Aura
 {
 private:
-    ProjectSetting _project_setting{};
-    UserInfo _user_info{};
-    RT _rt{"Aura"};
-    std::vector<std::string>_args{};
+    ProjectSetting mProjectSetting{};
+    UserInfo mUserInfo{};
+    RT mRt{"Aura"};
+    std::vector<std::string>mArgs{};
 public:
     void createNewProject();
     bool compile();
@@ -30,6 +30,7 @@ public:
     void buildDeps();
     void addDeps();
     void genCMakePreset();
+    void createSubProject();
 private:
     bool onSetup();
     void setupVcpkg(const std::string&,bool&);

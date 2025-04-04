@@ -3,10 +3,10 @@
 #include<string>
 class ProjectSetting
 {
-    std::string _project_name{};
+    std::string mProjectName{};
 public:
     const std::string& getProjectName()const;
-    void set(const std::string&project_name);
+    void set(const std::string&projectName);
     bool readConfig();
     bool writeConfig(const std::string&path="");
 };

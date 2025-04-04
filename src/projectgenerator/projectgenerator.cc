@@ -7,6 +7,23 @@
 #include <format>
 #include <iostream>
 #include<utils/utils.h>
+
+/*
+ *root cmake [project-name]
+ *--res
+ *--vcpkg.json
+ *--cmakelist.txt
+ *--external
+ *--project-name
+ *----src
+ *----cmakelist.txt
+ *--sub-project-1
+ *----src
+ *----cmakelist.txt
+ *--sub-project-2
+ *----src
+ *----cmakelist.txt
+ */
 namespace fs=std::filesystem;
 ProjectGenerator::ProjectGenerator()
 {
