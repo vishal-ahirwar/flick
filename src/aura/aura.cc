@@ -84,7 +84,7 @@ bool Aura::executeCMake(const std::vector<std::string> &additionalCMakeArg)
 	{
 		args.push_back(cmake);
 	};
-	return ProcessManager::startProcess(args, processLog) == 0;
+	return ProcessManager::startProcess(args, processLog,"Compile Process has been started") == 0;
 };
 
 // TODO : add compile option
@@ -96,7 +96,6 @@ bool Aura::compile()
 	std::string cpuThreads{std::to_string(std::thread::hardware_concurrency() - 1)};
 	auto formatedString = std::format("Threads in use : {}", cpuThreads.c_str());
 	Log::log(formatedString, Type::E_DISPLAY);
-	Log::log("Compile Process has been started...", Type::E_DISPLAY);
 	if (!fs::exists(fs::current_path().string() + "/build/debug"))
 	{
 		for (auto &arg : mArgs)
@@ -122,7 +121,7 @@ bool Aura::compile()
 		args.push_back("--build");
 		args.push_back("build/debug");
 		args.push_back("-j" + cpuThreads);
-		if (ProcessManager::startProcess(args, pLog) == 0) // if there is any kind of error then don't clear the terminal
+		if (ProcessManager::startProcess(args, pLog,"Compiling") == 0) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL");
 			return true;
@@ -142,7 +141,7 @@ bool Aura::compile()
 		args.push_back("build/debug");
 		args.push_back("-j" + cpuThreads);
 		// run ninja
-		if (ProcessManager::startProcess(args, pLog) == 0) // if there is any kind of error then don't clear the terminal
+		if (ProcessManager::startProcess(args, pLog,"Compiling") == 0) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL");
 
@@ -745,10 +744,10 @@ void Aura::update()
 	aura += getenv(USERNAME);
 #endif
 #ifdef _WIN32
-	aura += "\\.aura";
+	aura += "\\aura";
 	std::string source{aura + "\\utool.exe"};
 #else
-	aura += "/.aura";
+	aura += "/aura";
 	std::string source{aura + "/utool"};
 #endif
 	Log::log("updating aura...", Type::E_DISPLAY);
@@ -810,7 +809,7 @@ bool Aura::release()
 		args.push_back("--build");
 		args.push_back("build/release");
 		args.push_back("-j" + cpuThreads);
-		if (ProcessManager::startProcess(args, pLog) == 0) // if there is any kind of error then don't clear the terminal
+		if (ProcessManager::startProcess(args, pLog,"Compiling") == 0) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL");
 			return true;
@@ -830,7 +829,7 @@ bool Aura::release()
 		args.push_back("build/release");
 		args.push_back("-j" + cpuThreads);
 		// run ninja
-		if (ProcessManager::startProcess(args, pLog) == 0) // if there is any kind of error then don't clear the terminal
+		if (ProcessManager::startProcess(args, pLog,"Compiling") == 0) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL");
 
@@ -918,16 +917,6 @@ void Aura::addDeps()
 			{
 				VCPKG_TRIPLET = "default";
 				break;
-			}
-			else
-			{
-#if defined(_WIN32)
-				VCPKG_TRIPLET = "x64-windows-static";
-#elif defined(__linux__)
-				VCPKG_TRIPLET = "x64-linux";
-#elif defined(__APPLE__)
-				VCPKG_TRIPLET = "x64-osx";
-#endif
 			}
 		};
 		if (!deps.installDeps(vcpkgLog, VCPKG_TRIPLET))

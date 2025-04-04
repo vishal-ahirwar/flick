@@ -6,9 +6,11 @@
 #include <array>
 #include "log/log.h"
 
+const char SHAPES[]{'/','+','-','\\'};
+const int SIZE{sizeof(SHAPES)};
 // b_log -- should log the msg to the file to print on the termnial ;)
 
-int ProcessManager::startProcess(const std::vector<std::string>&args, std::string &processLog, bool b_log)
+int ProcessManager::startProcess(const std::vector<std::string>&args, std::string &processLog,const std::string&msg, bool b_log)
 {
     reproc::process process;
     reproc::options options;
@@ -38,6 +40,7 @@ int ProcessManager::startProcess(const std::vector<std::string>&args, std::strin
 
         std::string_view chunk(reinterpret_cast<char *>(buffer.data()), bytesRead);
         processLog.append(chunk);
+        Log::log(msg+".."+SHAPES[rand()%SIZE],Type::E_DISPLAY,"\r");
         if (b_log)
         {
             Log::log(chunk, Type::E_DISPLAY);
@@ -52,5 +55,6 @@ int ProcessManager::startProcess(const std::vector<std::string>&args, std::strin
     process.close(reproc::stream::err);
     if (logFile.is_open())
         logFile.close();
+    puts("");
     return exitCode;
 }

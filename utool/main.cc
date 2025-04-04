@@ -20,11 +20,11 @@ int main()
     RT rt("utool");
 #ifdef _WIN32
     std::string home = getenv(USERNAME);
-    home += "\\.aura";
+    home += "\\aura";
 #else
     std::string home{"/home/"};
     home += getenv(USERNAME);
-    home += "/.aura";
+    home += "/aura";
 #endif
     Log::log("updating aura...", Type::E_DISPLAY);
 #ifdef _WIN32

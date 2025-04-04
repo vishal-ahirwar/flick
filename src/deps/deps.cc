@@ -138,12 +138,11 @@ bool Deps::updateCMakeFile(const std::string &vcpkgLog)
 bool Deps::installDeps(std::string &vcpkgLog, const std::string_view &TRIPLET)
 {
     std::vector<std::string> args{};
-    args.push_back("vcpkg");
-    args.push_back("install");
-    args.push_back("--triplet");
+    args.push_back("cmake");
+    args.push_back("--preset");
     args.push_back(std::string(TRIPLET));
-    Log::log("Installing Remaining packages...", Type::E_DISPLAY);
-    return ProcessManager::startProcess(args, vcpkgLog, false) == 0;
+    args.push_back("-Bbuild/debug");
+    return ProcessManager::startProcess(args, vcpkgLog,"Installing Remaining packages") == 0;
 }
 void Deps::findCMakeConfig(const std::string &root, std::vector<std::string> &configs)
 {
