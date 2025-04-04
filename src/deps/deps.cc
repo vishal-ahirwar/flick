@@ -64,7 +64,7 @@ bool Deps::buildDeps()
 DepsSetting &Deps::getSetting()
 {
     // TODO: insert return statement here
-    return _deps_setting;
+    return mDepsSetting;
 };
 
 bool Deps::addDeps(const std::string &url)
@@ -76,7 +76,7 @@ bool Deps::addDeps(const std::string &url)
     return system(("vcpkg add port " + url).c_str()) == 0;
 };
 
-bool Deps::updateCMakeFile(const std::string &lib_name)
+bool Deps::updateCMakeFile(const std::string &libName)
 {
     std::ifstream in("CMakeLists.txt");
     if (!in.is_open())
@@ -88,7 +88,7 @@ bool Deps::updateCMakeFile(const std::string &lib_name)
     std::string line{};
     while (std::getline(in, line)) // reading whole file in vector to easily update the file
     {
-        if (line.find(lib_name) != std::string::npos)
+        if (line.find(libName) != std::string::npos)
         {
             in.close();
             return false;
@@ -105,7 +105,7 @@ bool Deps::updateCMakeFile(const std::string &lib_name)
             break;
         };
     };
-    lines.insert(lines.begin() + pos, "find_package(" + lib_name + " CONFIG REQUIRED)"); // NOTE
+    lines.insert(lines.begin() + pos, "find_package(" + libName + " CONFIG REQUIRED)"); // NOTE
     for (int i = 0; i < lines.size(); ++i)
     {
         if (lines[i].find("@link") != std::string::npos)
@@ -114,7 +114,7 @@ bool Deps::updateCMakeFile(const std::string &lib_name)
             break;
         }
     };
-    lines.insert(lines.begin() + pos, "target_link_libraries(${PROJECT_NAME} " + lib_name + "::" + lib_name + ")"); // NOTE
+    lines.insert(lines.begin() + pos, "target_link_libraries(${PROJECT_NAME} " + libName + "::" + libName + ")"); // NOTE
     std::ofstream out("CMakeLists.txt");
     if (!out.is_open())
         return false;
@@ -123,7 +123,7 @@ bool Deps::updateCMakeFile(const std::string &lib_name)
         out << l << "\n";
     };
     out.close();
-    Log::log(lib_name+" added to CMakeLists.txt",Type::E_DISPLAY);
+    Log::log(libName+" added to CMakeLists.txt",Type::E_DISPLAY);
     return true;
 }
 

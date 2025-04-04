@@ -42,7 +42,7 @@ ProjectGenerator::ProjectGenerator()
 		Log::log("failed to open config file",Type::E_ERROR);
 		std::exit(EXIT_FAILURE);
 	};
-	ifs>>_config;
+	ifs>>mConfig;
 	ifs.close();
 };
 bool ProjectGenerator::getFromConfig(const std::string& key, std::string& result)
@@ -59,11 +59,11 @@ bool ProjectGenerator::getFromConfig(const std::string& key, std::string& result
 	{
 		if (json.is_null())
 		{
-			if (!_config.contains(token))
+			if (!mConfig.contains(token))
 			{
 				return false;
 			}
-			json=_config[token];
+			json=mConfig[token];
 		}else
 		{
 			if (!json.contains(token))
@@ -89,10 +89,10 @@ void ProjectGenerator::generate()
 	generateProject();
 }
 
-void ProjectGenerator::setProjectSetting(const ProjectSetting &project_setting, const Language &lang)
+void ProjectGenerator::setProjectSetting(const ProjectSetting &projectSetting, const Language &lang)
 {
 	_lang = lang;
-	_project_setting = project_setting;
+	mProjectSetting = projectSetting;
 }
 
 void ProjectGenerator::generateProject()
@@ -114,13 +114,13 @@ void ProjectGenerator::generateProject()
 	generateCmakeFile();
 	generateGitIgnoreFile();
 	generateVcpkgFiles();
-	writeProjectSettings(&_project_setting);
+	writeProjectSettings(&mProjectSetting);
 	Log::log("happy Coding :)", Type::E_DISPLAY);
 }
 
 void ProjectGenerator::generateVcpkgFiles()
 {
-	std::ofstream out(_project_setting.getProjectName() + "/CMakePresets.json");
+	std::ofstream out(mProjectSetting.getProjectName() + "/CMakePresets.json");
 	if (!out.is_open())
 	{
 		Log::log("failed to generate CMakePresets.json", Type::E_ERROR);
@@ -167,7 +167,7 @@ void ProjectGenerator::createDir()
 {
 	namespace fs = std::filesystem;
 	std::string cmdString{};
-	cmdString += _project_setting.getProjectName();
+	cmdString += mProjectSetting.getProjectName();
 	if (fs::create_directory(cmdString.c_str()))
 	{
 		cmdString += "/src";
@@ -192,11 +192,11 @@ void ProjectGenerator::generateCppTemplateFile()
 	if (_lang == Language::CXX)
 	{
 
-		file.open("./" + _project_setting.getProjectName() + "/src/main.cc", std::ios::out);
+		file.open("./" + mProjectSetting.getProjectName() + "/src/main.cc", std::ios::out);
 	}
 	else if (_lang == Language::C)
 	{
-		file.open("./" + _project_setting.getProjectName() + "/src/main.c", std::ios::out);
+		file.open("./" + mProjectSetting.getProjectName() + "/src/main.c", std::ios::out);
 	}
 	if (file.is_open())
 	{
@@ -205,12 +205,12 @@ void ProjectGenerator::generateCppTemplateFile()
 		std::string_view project{"_PROJECT_"};
 		std::string_view comment{"@COPYRIGHT"};
 
-		std::string cap("", _project_setting.getProjectName().length());
-		std::transform(_project_setting.getProjectName().begin(), _project_setting.getProjectName().end(), cap.begin(), ::toupper);
+		std::string cap("", mProjectSetting.getProjectName().length());
+		std::transform(mProjectSetting.getProjectName().begin(), mProjectSetting.getProjectName().end(), cap.begin(), ::toupper);
 
 		auto index = MAIN_CODE[static_cast<int>(_lang)].find(header);
 		if (index != std::string::npos)
-			MAIN_CODE[static_cast<int>(_lang)].replace(index, header.length(), ("#include<" + _project_setting.getProjectName() + "config.h>"));
+			MAIN_CODE[static_cast<int>(_lang)].replace(index, header.length(), ("#include<" + mProjectSetting.getProjectName() + "config.h>"));
 
 		index = MAIN_CODE[static_cast<int>(_lang)].find(copyright);
 		if (index != std::string::npos)
@@ -218,11 +218,11 @@ void ProjectGenerator::generateCppTemplateFile()
 
 		index = MAIN_CODE[static_cast<int>(_lang)].find(project);
 		if (index != std::string::npos)
-			MAIN_CODE[static_cast<int>(_lang)].replace(index, project.length(), "\"" + _project_setting.getProjectName() + "\"");
+			MAIN_CODE[static_cast<int>(_lang)].replace(index, project.length(), "\"" + mProjectSetting.getProjectName() + "\"");
 
 		index = MAIN_CODE[static_cast<int>(_lang)].find(comment);
 		if (index != std::string::npos)
-			MAIN_CODE[static_cast<int>(_lang)].replace(index, comment.length(), _user_info.getUserName());
+			MAIN_CODE[static_cast<int>(_lang)].replace(index, comment.length(), mUserInfo.getUserName());
 
 		file << MAIN_CODE[static_cast<int>(_lang)];
 		file.close();
@@ -232,17 +232,17 @@ void ProjectGenerator::generateCppTemplateFile()
 //
 void ProjectGenerator::generateCmakeFile()
 {
-	std::string config{(_project_setting.getProjectName() + "/res/config.h.in")};
+	std::string config{(mProjectSetting.getProjectName() + "/res/config.h.in")};
 	if (_lang == Language::CXX)
 	{
 		std::ofstream file;
-		std::string cap("", _project_setting.getProjectName().length());
-		std::transform(_project_setting.getProjectName().begin(), _project_setting.getProjectName().end(), cap.begin(), ::toupper);
+		std::string cap("", mProjectSetting.getProjectName().length());
+		std::transform(mProjectSetting.getProjectName().begin(), mProjectSetting.getProjectName().end(), cap.begin(), ::toupper);
 		file.open(config, std::ios::out);
 		if (file.is_open())
 		{
 			file << "namespace Project{" << std::endl;
-			file << ("constexpr const char*const VERSION_STRING=\"@" + _project_setting.getProjectName() + "_VERSION_MAJOR@.@" + _project_setting.getProjectName() + "_VERSION_MINOR@.@" + _project_setting.getProjectName() + "_VERSION_PATCH@\";") << std::endl;
+			file << ("constexpr const char*const VERSION_STRING=\"@" + mProjectSetting.getProjectName() + "_VERSION_MAJOR@.@" + mProjectSetting.getProjectName() + "_VERSION_MINOR@.@" + mProjectSetting.getProjectName() + "_VERSION_PATCH@\";") << std::endl;
 			file << ("constexpr const char*const COMPANY_NAME =\"@COMPANY@\";") << std::endl;
 			file << ("constexpr const char*const COPYRIGHT_STRING= \"@COPYRIGHT@\";") << std::endl;
 			file << ("constexpr const char*const PROJECT_NAME=\"@PROJECT_NAME@\";") << std::endl;
@@ -253,12 +253,12 @@ void ProjectGenerator::generateCmakeFile()
 	else if (_lang == Language::C)
 	{
 		std::ofstream file;
-		std::string cap("", _project_setting.getProjectName().length());
-		std::transform(_project_setting.getProjectName().begin(), _project_setting.getProjectName().end(), cap.begin(), ::toupper);
+		std::string cap("", mProjectSetting.getProjectName().length());
+		std::transform(mProjectSetting.getProjectName().begin(), mProjectSetting.getProjectName().end(), cap.begin(), ::toupper);
 		file.open(config, std::ios::out);
 		if (file.is_open())
 		{
-			file << ("const char*const VERSION_STRING=\"@" + _project_setting.getProjectName() + "_VERSION_MAJOR@.@" + _project_setting.getProjectName() + "_VERSION_MINOR@.@" + _project_setting.getProjectName() + "_VERSION_PATCH@\";") << std::endl;
+			file << ("const char*const VERSION_STRING=\"@" + mProjectSetting.getProjectName() + "_VERSION_MAJOR@.@" + mProjectSetting.getProjectName() + "_VERSION_MINOR@.@" + mProjectSetting.getProjectName() + "_VERSION_PATCH@\";") << std::endl;
 			file << ("const char*const COMPANY_NAME =\"@COMPANY@\";") << std::endl;
 			file << ("const char*const COPYRIGHT_STRING= \"@COPYRIGHT@\";") << std::endl;
 			file << ("const char*const PROJECT_NAME=\"@PROJECT_NAME@\";") << std::endl;
@@ -268,7 +268,7 @@ void ProjectGenerator::generateCmakeFile()
 	{
 
 		std::ofstream file;
-		file.open("./" + _project_setting.getProjectName() + "/CMakeLists.txt", std::ios::out);
+		file.open("./" + mProjectSetting.getProjectName() + "/CMakeLists.txt", std::ios::out);
 		constexpr std::string_view config_in{"@config_in"};
 		constexpr std::string_view config_h{"@config_h"};
 		constexpr std::string_view comment{"@COPYRIGHT"};
@@ -280,20 +280,20 @@ void ProjectGenerator::generateCmakeFile()
 			auto index = str.find(_name);
 			if (index != std::string::npos)
 			{
-				str.replace(index, _name.size(), _project_setting.getProjectName());
+				str.replace(index, _name.size(), mProjectSetting.getProjectName());
 			};
 			index = str.find(config_h);
 			if (index != std::string::npos)
-				str.replace(index, config_h.length(), (_project_setting.getProjectName() + "config.h"));
+				str.replace(index, config_h.length(), (mProjectSetting.getProjectName() + "config.h"));
 			index = str.find(config_in);
 			if (index != std::string::npos)
 				str.replace(index, config_in.length(), "res/config.h.in");
 			index = str.find(comment);
 			if (index != std::string::npos)
-				str.replace(index, comment.length(), _user_info.getUserName());
+				str.replace(index, comment.length(), mUserInfo.getUserName());
 			index = str.find(developer);
 			if (index != std::string::npos)
-				str.replace(index, developer.length(), _user_info.getUserName());
+				str.replace(index, developer.length(), mUserInfo.getUserName());
 			file << str;
 			file.close();
 		};
@@ -303,7 +303,7 @@ void ProjectGenerator::generateCmakeFile()
 void ProjectGenerator::generateGitIgnoreFile()
 {
 	std::ofstream file;
-	file.open("./" + _project_setting.getProjectName() + "/.gitignore", std::ios::out);
+	file.open("./" + mProjectSetting.getProjectName() + "/.gitignore", std::ios::out);
 	if (file.is_open())
 	{
 		file << GITIGNORE_CODE;

@@ -5,19 +5,19 @@
 #include <sstream>
 #include <map>
 constexpr std::string_view CONFIG_CMAKE_ARGS{"-DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang"};
-void DepsSetting::set(const std::string &cmake_args)
+void DepsSetting::set(const std::string &cmakeArgs)
 {
-    if (_cmake_args != cmake_args)
-        _cmake_args = cmake_args;
+    if (mCmakeArgs != cmakeArgs)
+        mCmakeArgs = cmakeArgs;
 }
 std::string DepsSetting::getCMakeArgs() const
 
 {
-    return _cmake_args;
+    return mCmakeArgs;
 }
 bool DepsSetting::read()
 {
-    std::ifstream in{std::string(deps_json)};
+    std::ifstream in{std::string(DEPS_JSON)};
     if (!in.is_open())
     {
         Log::log("deps.json doesn't exist in external aborting!", Type::E_ERROR);
@@ -28,8 +28,8 @@ bool DepsSetting::read()
     if (data.contains("cmakeArgs"))
         for (auto &args : data["cmakeArgs"])
         {
-            _cmake_args += " ";
-            _cmake_args += args;
+            mCmakeArgs += " ";
+            mCmakeArgs += args;
         };
     in.close();
     return true;
@@ -67,9 +67,9 @@ bool DepsSetting::read()
 }
 }*/
 // TODO
-void DepsSetting::write(const std::string &project_name)
+void DepsSetting::write(const std::string &projectName)
 {
-    std::ofstream out{project_name + "/" + std::string(deps_json)};
+    std::ofstream out{projectName + "/" + std::string(DEPS_JSON)};
     Log::log("Generating deps.json", Type::E_DISPLAY);
     nlohmann::json data;
     std::istringstream ss{std::string(CONFIG_CMAKE_ARGS)};

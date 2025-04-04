@@ -11,20 +11,20 @@
 #include <thread>
 
 namespace fs = std::filesystem;
-UnitTester::UnitTester(const UserInfo &user_info)
+UnitTester::UnitTester(const UserInfo &userInfo)
 {
-    _user_info = user_info;
+    mUserInfo = userInfo;
 }
-void UnitTester::runUnitTesting(const std::vector<std::string> &_args)
+void UnitTester::runUnitTesting(const std::vector<std::string> &args)
 {
 
     namespace fs = std::filesystem;
-    std::string cpu_threads{std::to_string(std::thread::hardware_concurrency() - 1)};
-    auto formated_string = std::format("Threads in use : {}", cpu_threads.c_str());
-    Log::log(formated_string, Type::E_DISPLAY);
+    std::string cpuThreads{std::to_string(std::thread::hardware_concurrency() - 1)};
+    auto formatedString = std::format("Threads in use : {}", cpuThreads.c_str());
+    Log::log(formatedString, Type::E_DISPLAY);
     if (!fs::exists(fs::current_path().string() + "/build/tests"))
     {
-        for (auto &arg : _args)
+        for (auto &arg : args)
         {
             if (arg.find("--nostatic") != std::string::npos)
             {
@@ -36,12 +36,12 @@ void UnitTester::runUnitTesting(const std::vector<std::string> &_args)
         Log::log("Compile Process has been started...", Type::E_DISPLAY);
         system((std::string("cmake . -Bbuild/tests -DENABLE_TESTS=ON --preset=") + std::string(VCPKG_TRIPLET)).c_str()); // TODO
         // run ninja
-        system(("cmake --build build/tests -j" + cpu_threads).c_str()); // if there is any kind of error then don't clear the terminal
+        system(("cmake --build build/tests -j" + cpuThreads).c_str()); // if there is any kind of error then don't clear the terminal
     }
     else
     {
         // run ninja
-        system(("cmake --build build/tests -j" + cpu_threads).c_str()); // if there is any kind of error then don't clear the terminal
+        system(("cmake --build build/tests -j" + cpuThreads).c_str()); // if there is any kind of error then don't clear the terminal
     }
 };
 //

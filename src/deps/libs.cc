@@ -1,6 +1,6 @@
 #include <deps/libs.h>
 
-Libs::Libs(const std::string &name, const std::string &url, const std::string &custom_cmake_args)
+Libs::Libs(const std::string &name, const std::string &url, const std::string &cmakeCustomArgs)
 {
 }
 std::string Libs::getName() const
@@ -17,5 +17,5 @@ std::string Libs::getCustomCMakeArgs() const
 };
 bool Libs::bBuildLocal()const
 {
-    return _bbuild_local;
+    return mBBuildLocal;
 };

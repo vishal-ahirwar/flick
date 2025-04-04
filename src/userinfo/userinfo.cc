@@ -7,13 +7,13 @@ void UserInfo::readUserInfo()
 void UserInfo::writeUserInfo()
 {
 }
-UserInfo::UserInfo() : _user_name{"None"}
+UserInfo::UserInfo() : mUserName{"None"}
 {
 }
 
 std::string UserInfo::getUserName() const
 {
-    return _user_name;
+    return mUserName;
 }
 
 

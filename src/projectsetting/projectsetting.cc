@@ -3,21 +3,21 @@
 #include <nlohmann/json.hpp>
 #include <sstream>
 #include <log/log.h>
-constexpr std::string_view config_json{"vcpkg.json"};
+constexpr std::string_view CONFIG_JSON{"vcpkg.json"};
 
 const std::string &ProjectSetting::getProjectName() const
 {
-    return _project_name;
+    return mProjectName;
 }
 
-void ProjectSetting::set(const std::string &project_name)
+void ProjectSetting::set(const std::string &projectName)
 {
-    if (_project_name != project_name)
-        _project_name = project_name;
+    if (mProjectName != projectName)
+        mProjectName = projectName;
 }
 bool ProjectSetting::readConfig()
 {
-    std::ifstream in{std::string(config_json)};
+    std::ifstream in{std::string(CONFIG_JSON)};
     if (!in.is_open())
         return false;
     nlohmann::json data{};
@@ -36,11 +36,11 @@ bool ProjectSetting::readConfig()
 }
 bool ProjectSetting::writeConfig(const std::string &path)
 {
-    std::ofstream out{path + std::string(config_json)};
+    std::ofstream out{path + std::string(CONFIG_JSON)};
     if (!out.is_open())
         return false;
     nlohmann::json data{};
-    data["name"] = _project_name;
+    data["name"] = mProjectName;
     data["version"] = "1.0.0";
     data["dependencies"]=std::vector<std::string>();
     out << data;

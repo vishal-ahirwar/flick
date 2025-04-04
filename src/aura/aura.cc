@@ -25,9 +25,9 @@
 namespace fs = std::filesystem;
 Aura::Aura(const std::vector<std::string> &args)
 {
-	_args = args;
+	mArgs = args;
 	std::string cmd{args.at(1)};
-	UserInfo::readUserInfoFromConfigFile(&this->_user_info);
+	UserInfo::readUserInfoFromConfigFile(&this->mUserInfo);
 	if (cmd == "create")
 	{
 		if (args.size() < 3)
@@ -35,20 +35,20 @@ Aura::Aura(const std::vector<std::string> &args)
 			Log::log("No name for project! are you serious?", Type::E_ERROR);
 			exit(0);
 		};
-		auto project_name{_args.at(2)};
+		auto projectName{mArgs.at(2)};
 		std::regex pattern("^[a-z][a-z0-9-]*$");
 		// if (std::any_of(project_name.begin(), project_name.end(), [](const char &c)
 		// 				{ return !((c >= 'a' && c <= 'z') || isdigit(c) || c == '-'); }))
-		if (!std::regex_match(project_name, pattern))
+		if (!std::regex_match(projectName, pattern))
 		{
 			Log::log("Project name must be in lowercase with no space and special characters allowed name : ^[a-z][a-z0-9-]*$", Type::E_ERROR);
 			std::exit(0);
 		};
-		_project_setting.set(_args.at(2));
+		mProjectSetting.set(mArgs.at(2));
 		return;
 	};
 	if (cmd != "setup" && cmd != "doctor" && cmd != "update" && cmd != "builddeps")
-		ProjectGenerator::readProjectSettings(&this->_project_setting);
+		ProjectGenerator::readProjectSettings(&this->mProjectSetting);
 };
 Aura::~Aura() {
 
@@ -69,17 +69,17 @@ void Aura::createNewProject()
 		lang = Language::CXX;
 	else if (input == "q")
 	{
-		_rt.~RT();
+		mRt.~RT();
 		std::exit(0);
 	}
-	generator.setProjectSetting(_project_setting, lang);
+	generator.setProjectSetting(mProjectSetting, lang);
 	generator.generate();
 };
 
-bool Aura::executeCMake(const std::string &additional_cmake_arg)
+bool Aura::executeCMake(const std::string &additionalCMakeArg)
 {
 	std::string cmd{"cmake -S . -G \"Ninja\" "};
-	cmd += additional_cmake_arg;
+	cmd += additionalCMakeArg;
 	return system(cmd.c_str()) == 0;
 };
 
@@ -89,12 +89,12 @@ bool Aura::compile()
 	// Temp Soln
 
 	namespace fs = std::filesystem;
-	std::string cpu_threads{std::to_string(std::thread::hardware_concurrency() - 1)};
-	auto formated_string = std::format("Threads in use : {}", cpu_threads.c_str());
-	Log::log(formated_string, Type::E_DISPLAY);
+	std::string cpuThreads{std::to_string(std::thread::hardware_concurrency() - 1)};
+	auto formatedString = std::format("Threads in use : {}", cpuThreads.c_str());
+	Log::log(formatedString, Type::E_DISPLAY);
 	if (!fs::exists(fs::current_path().string() + "/build/debug"))
 	{
-		for (auto &arg : _args)
+		for (auto &arg : mArgs)
 		{
 			if (arg.find("--nostatic") != std::string::npos)
 			{
@@ -106,7 +106,7 @@ bool Aura::compile()
 		Log::log("Compile Process has been started...", Type::E_DISPLAY);
 		executeCMake(std::string("-Bbuild/debug -DCMAKE_BUILD_TYPE=Debug --preset=") + std::string(VCPKG_TRIPLET)); // TODO
 		// run ninja
-		if (!system(("cmake --build build/debug -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
+		if (!system(("cmake --build build/debug -j" + cpuThreads).c_str())) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL");
 			return true;
@@ -120,7 +120,7 @@ bool Aura::compile()
 	else
 	{
 		// run ninja
-		if (!system(("cmake --build build/debug -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
+		if (!system(("cmake --build build/debug -j" + cpuThreads).c_str())) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL");
 
@@ -139,14 +139,14 @@ void Aura::run()
 	std::string run{};
 #ifdef _WIN32
 	run += ".\\build\\debug\\";
-	run += _project_setting.getProjectName();
+	run += mProjectSetting.getProjectName();
 	run += ".exe";
 #else
 	run += "./build/debug/";
 	run += _project_setting.getProjectName();
 #endif // _WIN32
 	bool is_arg{false};
-	for (auto &arg : _args)
+	for (auto &arg : mArgs)
 	{
 		if (arg.find("--args") != std::string::npos)
 		{
@@ -481,7 +481,7 @@ void Aura::setup()
 // creating packaged build [with installer for windows] using cpack
 void Aura::createInstaller()
 {
-	for (auto &arg : _args)
+	for (auto &arg : mArgs)
 	{
 		if (arg.find("--nostatic") != std::string::npos)
 		{
@@ -509,7 +509,7 @@ void Aura::createInstaller()
 		file.close();
 		if (!fs::exists("License.txt"))
 		{
-			ProjectGenerator::generateLicenceFile(_user_info);
+			ProjectGenerator::generateLicenceFile(mUserInfo);
 		};
 		if (system("cd build/release && cpack"))
 			Log::log("CPack added to cmake run 'aura createinstaller' command again",
@@ -524,9 +524,9 @@ void Aura::createInstaller()
 // running utest
 void Aura::test()
 {
-	UnitTester tester(_user_info);
+	UnitTester tester(mUserInfo);
 	tester.setupUnitTestingFramework();
-	tester.runUnitTesting(_args);
+	tester.runUnitTesting(mArgs);
 #ifdef _WIN32
 	system(".\\build\\tests\\tests.exe");
 #else
@@ -746,7 +746,7 @@ void Aura::debug()
 	if (!compile())
 		return;
 #ifdef _WIN32
-	system(("lldb ./build/debug/" + _project_setting.getProjectName() + ".exe").c_str());
+	system(("lldb ./build/debug/" + mProjectSetting.getProjectName() + ".exe").c_str());
 #else
 	system(("lldb ./build/debug/" + _project_setting.getProjectName()).c_str());
 #endif
@@ -757,10 +757,10 @@ bool Aura::release()
 {
 
 	namespace fs = std::filesystem;
-	std::string cpu_threads{std::to_string(std::thread::hardware_concurrency() - 1)};
-	auto formated_string = std::format("Threads in use : {}", cpu_threads.c_str());
-	Log::log(formated_string, Type::E_DISPLAY);
-	for (auto &arg : _args)
+	std::string cpuThreads{std::to_string(std::thread::hardware_concurrency() - 1)};
+	auto formatedString = std::format("Threads in use : {}", cpuThreads.c_str());
+	Log::log(formatedString, Type::E_DISPLAY);
+	for (auto &arg : mArgs)
 	{
 		if (arg.find("--nostatic") != std::string::npos)
 		{
@@ -774,7 +774,7 @@ bool Aura::release()
 		Log::log("Compile Process has been started...", Type::E_DISPLAY);
 		executeCMake(std::string("-Bbuild/release -DCMAKE_BUILD_TYPE=Release --preset=") + std::string(VCPKG_TRIPLET)); // TODO
 		// run ninja
-		if (!system(("cmake --build build/release -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
+		if (!system(("cmake --build build/release -j" + cpuThreads).c_str())) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL");
 			return true;
@@ -788,7 +788,7 @@ bool Aura::release()
 	else
 	{
 		// run ninja
-		if (!system(("cmake --build build/release -j" + cpu_threads).c_str())) // if there is any kind of error then don't clear the terminal
+		if (!system(("cmake --build build/release -j" + cpuThreads).c_str())) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL");
 
@@ -831,7 +831,7 @@ void Aura::vsCode()
 // it will simply delete the whole build folder and compile the project again
 void Aura::reBuild()
 {
-	for (auto &arg : _args)
+	for (auto &arg : mArgs)
 	{
 		if (arg.find("--nostatic") != std::string::npos)
 		{
@@ -854,7 +854,7 @@ void Aura::reBuild()
 
 void Aura::refresh()
 {
-	for (auto &arg : _args)
+	for (auto &arg : mArgs)
 	{
 		if (arg.find("--nostatic") != std::string::npos)
 		{
@@ -872,18 +872,18 @@ void Aura::buildDeps()
 }
 void Aura::addDeps()
 {
-	if (_args.size() < 3)
+	if (mArgs.size() < 3)
 	{
 		Log::log("You have to provide github url! make sure it has CMakeList.txt", Type::E_ERROR);
 		return;
 	};
 	Deps deps;
-	if (deps.addDeps(_args.at(2)))
+	if (deps.addDeps(mArgs.at(2)))
 	{
-		deps.updateCMakeFile(_args.at(2));
+		deps.updateCMakeFile(mArgs.at(2));
 	}
 	else
-		Log::log("Failed to add " + _args.at(2) + "make sure you solve those errors or remove it from external directory!", Type::E_ERROR);
+		Log::log("Failed to add " + mArgs.at(2) + "make sure you solve those errors or remove it from external directory!", Type::E_ERROR);
 }
 void Aura::genCMakePreset()
 {
