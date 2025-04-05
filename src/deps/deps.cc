@@ -73,11 +73,9 @@ DepsSetting &Deps::getSetting()
 
 bool Deps::addDeps(const std::string &url)
 {
-    // if (url.find(".git") != std::string::npos)
-    //     return system(("cd external && git clone " + url).c_str()) == 0;
-    // will use pipe for that
-    Log::log(url + " added to vcpkg.json", Type::E_DISPLAY);
-    return system(("vcpkg add port " + url).c_str()) == 0;
+    std::string processLog{};
+    std::vector<std::string> args{"vcpkg", "add", "port", url};
+    return ProcessManager::startProcess(args, processLog,"") == 0;
 };
 
 bool Deps::updateCMakeFile(const std::string &vcpkgLog)
@@ -105,8 +103,10 @@ bool Deps::updateCMakeFile(const std::string &vcpkgLog)
     Log::log("Packages :", Type::E_DISPLAY);
     for (const auto &[packageName, values] : packages)
     {
-        if(packageName.empty())continue;
-        Log::log(packageName, Type::E_DISPLAY);
+        if (packageName.empty())
+            continue;
+        Log::log("\t+" + packageName, Type::E_DISPLAY);
+
         for (const auto &package : values)
         {
             bool shouldAdd{true};
@@ -119,7 +119,28 @@ bool Deps::updateCMakeFile(const std::string &vcpkgLog)
             }
             if (shouldAdd)
             {
-                lines.push_back(package);
+                if (package.find("find") != std::string::npos)
+                {
+                    for (int i = 0; i < lines.size(); ++i)
+                    {
+                        if (lines.at(i).find("@find") != std::string::npos)
+                        {
+                            lines.insert(lines.begin() + i + 1, package);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < lines.size(); ++i)
+                    {
+                        if (lines.at(i).find("@link") != std::string::npos)
+                        {
+                            lines.insert(lines.begin() + i + 1, package);
+                            break;
+                        }
+                    }
+                }
             }
         }
     };
@@ -142,8 +163,9 @@ bool Deps::installDeps(std::string &vcpkgLog, const std::string_view &TRIPLET)
     args.push_back("--preset");
     args.push_back(std::string(TRIPLET));
     args.push_back("-Bbuild/debug");
-    return ProcessManager::startProcess(args, vcpkgLog,"Installing Remaining packages") == 0;
+    return ProcessManager::startProcess(args, vcpkgLog, "Installing Remaining packages") == 0;
 }
+[[deprecated("Will be removed in future")]]
 void Deps::findCMakeConfig(const std::string &root, std::vector<std::string> &configs)
 {
     if (!fs::exists(root + "/build/install/lib/cmake"))
@@ -159,32 +181,32 @@ void Deps::findCMakeConfig(const std::string &root, std::vector<std::string> &co
         };
     };
 };
-
+[[deprecated("Will be removed in future")]]
 bool Deps::checkIfLibIsPresentInGlobalDir(const std::string &url)
 {
     return false;
 }
-
+[[deprecated("Will be removed in future")]]
 bool Deps::checkIfLibIsPresentInLocalDir(const std::string &url)
 {
     return false;
 }
-
+[[deprecated("Will be removed in future")]]
 bool Deps::installLocally(const std::string &url)
 {
     return false;
 }
-
+[[deprecated("Will be removed in future")]]
 bool Deps::installGlobally(const std::string &url)
 {
     return false;
 }
-
+[[deprecated("Will be removed in future")]]
 bool Deps::addToConfig(const std::string &path)
 {
     return false;
 }
-
+[[deprecated("Will be removed in future")]]
 bool Deps::rebuildDeps(const std::string &url)
 {
     return false;

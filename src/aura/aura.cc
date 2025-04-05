@@ -84,7 +84,7 @@ bool Aura::executeCMake(const std::vector<std::string> &additionalCMakeArg)
 	{
 		args.push_back(cmake);
 	};
-	return ProcessManager::startProcess(args, processLog,"Compile Process has been started") == 0;
+	return ProcessManager::startProcess(args, processLog, "Compile Process has been started") == 0;
 };
 
 // TODO : add compile option
@@ -109,7 +109,7 @@ bool Aura::compile()
 		// run cmake
 		std::vector<std::string> args{"-Bbuild/debug", "-DCMAKE_BUILD_TYPE=Debug", "--preset=" + std::string(VCPKG_TRIPLET)};
 		Log::log(VCPKG_TRIPLET);
-		if (executeCMake(args))
+		if (!executeCMake(args))
 		{
 			Log::log("There are some errors in your CMakeLists.txt read build/build.log for more info", Type::E_ERROR);
 			return false;
@@ -121,7 +121,7 @@ bool Aura::compile()
 		args.push_back("--build");
 		args.push_back("build/debug");
 		args.push_back("-j" + cpuThreads);
-		if (ProcessManager::startProcess(args, pLog,"Compiling") == 0) // if there is any kind of error then don't clear the terminal
+		if (ProcessManager::startProcess(args, pLog, "Compiling") == 0) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL");
 			return true;
@@ -141,7 +141,7 @@ bool Aura::compile()
 		args.push_back("build/debug");
 		args.push_back("-j" + cpuThreads);
 		// run ninja
-		if (ProcessManager::startProcess(args, pLog,"Compiling") == 0) // if there is any kind of error then don't clear the terminal
+		if (ProcessManager::startProcess(args, pLog, "Compiling") == 0) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL");
 
@@ -551,7 +551,8 @@ void Aura::test()
 {
 	UnitTester tester(mUserInfo);
 	tester.setupUnitTestingFramework();
-	tester.runUnitTesting(mArgs);
+	if (!tester.runUnitTesting(mArgs))
+		return;
 #ifdef _WIN32
 	system(".\\build\\tests\\tests.exe");
 #else
@@ -785,7 +786,6 @@ bool Aura::release()
 	std::string cpuThreads{std::to_string(std::thread::hardware_concurrency() - 1)};
 	auto formatedString = std::format("Threads in use : {}", cpuThreads.c_str());
 	Log::log(formatedString, Type::E_DISPLAY);
-	Log::log("Compile Process has been started...", Type::E_DISPLAY);
 	for (auto &arg : mArgs)
 	{
 		if (arg.find("--nostatic") != std::string::npos)
@@ -797,7 +797,7 @@ bool Aura::release()
 	if (!fs::exists(fs::current_path().string() + "/build/release"))
 	{
 		std::vector<std::string> args{"-Bbuild/release", "-DCMAKE_BUILD_TYPE=Release", "--preset=" + std::string(VCPKG_TRIPLET)};
-		if (executeCMake(args))
+		if (!executeCMake(args))
 		{
 			Log::log("There are some errors in your CMakeLists.txt read build/build.log for more info", Type::E_ERROR);
 			return false;
@@ -809,7 +809,7 @@ bool Aura::release()
 		args.push_back("--build");
 		args.push_back("build/release");
 		args.push_back("-j" + cpuThreads);
-		if (ProcessManager::startProcess(args, pLog,"Compiling") == 0) // if there is any kind of error then don't clear the terminal
+		if (ProcessManager::startProcess(args, pLog, "Compiling") == 0) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL");
 			return true;
@@ -829,7 +829,7 @@ bool Aura::release()
 		args.push_back("build/release");
 		args.push_back("-j" + cpuThreads);
 		// run ninja
-		if (ProcessManager::startProcess(args, pLog,"Compiling") == 0) // if there is any kind of error then don't clear the terminal
+		if (ProcessManager::startProcess(args, pLog, "Compiling") == 0) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL");
 
@@ -921,14 +921,9 @@ void Aura::addDeps()
 		};
 		if (!deps.installDeps(vcpkgLog, VCPKG_TRIPLET))
 		{
-			Log::log("failed to install some packages read build/build.log for more info!", Type::E_ERROR);
 			return;
 		};
 		deps.updateCMakeFile(vcpkgLog);
-	}
-	else
-	{
-		Log::log("Failed to add " + mArgs.at(2) + "make sure you solve those errors or remove it from external directory!", Type::E_ERROR);
 	}
 }
 void Aura::genCMakePreset()

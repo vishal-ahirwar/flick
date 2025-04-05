@@ -10,20 +10,20 @@ void Log::log(const std::string_view &formated_string, Type type, const std::str
     switch (type)
     {
     case Type::E_DISPLAY:
-        fmt::print(fmt::emphasis::bold | fmt::fg(fmt::color::white), "{:<8}:  ", "Info");
-        fmt::print(fmt::emphasis::faint | fmt::fg(fmt::color::white_smoke), "{}{}", formated_string, end);
+        fmt::print(fmt::emphasis::bold | fmt::fg(fmt::color::white), "{:<8}", "Info");
+        fmt::print(fmt::emphasis::faint | fmt::fg(fmt::color::white_smoke), ": {}{}", formated_string, end);
         break;
     case Type::E_ERROR:
-        fmt::print(fmt::emphasis::bold | fmt::fg(fmt::color::red), "{:<8}:  ", "Error");
-        fmt::print(fmt::emphasis::faint | fmt::fg(fmt::color::white_smoke), "{}{}", formated_string, end);
+        fmt::print(fmt::emphasis::bold | fmt::fg(fmt::color::red), "{:<8}", "Error");
+        fmt::print(fmt::emphasis::faint | fmt::fg(fmt::color::white_smoke), ": {}{}", formated_string, end);
         break;
     case Type::E_WARNING:
-        fmt::print(fmt::emphasis::bold | fmt::fg(fmt::color::yellow), "{:<8}:  ", "Warning");
-        fmt::print(fmt::emphasis::faint | fmt::fg(fmt::color::white_smoke), "{}{}", formated_string, end);
+        fmt::print(fmt::emphasis::bold | fmt::fg(fmt::color::yellow), "{:<8}", "Warning");
+        fmt::print(fmt::emphasis::faint | fmt::fg(fmt::color::white_smoke), ": {}{}", formated_string, end);
         break;
     case Type::E_NONE:
-        fmt::print(fmt::emphasis::bold | fmt::fg(fmt::color::lawn_green), "{:<8}:  ", "Info");
-        fmt::print(fmt::emphasis::faint | fmt::fg(fmt::color::lawn_green), "{}{}", formated_string, end);
+        fmt::print(fmt::emphasis::bold | fmt::fg(fmt::color::lawn_green), "{:<8}", "OK!");
+        fmt::print(fmt::emphasis::faint | fmt::fg(fmt::color::lawn_green), ": {}{}", formated_string, end);
         break;
     default:
         break;

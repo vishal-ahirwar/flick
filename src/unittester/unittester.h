@@ -9,6 +9,6 @@ class UnitTester
 public:
     UnitTester(const UserInfo &);
     void setupUnitTestingFramework();
-    void runUnitTesting(const std::vector<std::string>&args);
+    bool runUnitTesting(const std::vector<std::string>&args);
 };
 #endif // UNITTESTER_H

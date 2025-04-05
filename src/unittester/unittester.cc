@@ -9,13 +9,13 @@
 #include <deps/deps.h>
 #include <vector>
 #include <thread>
-
+#include <processmanager/processmanager.h>
 namespace fs = std::filesystem;
 UnitTester::UnitTester(const UserInfo &userInfo)
 {
     mUserInfo = userInfo;
 }
-void UnitTester::runUnitTesting(const std::vector<std::string> &args)
+bool UnitTester::runUnitTesting(const std::vector<std::string> &args)
 {
 
     namespace fs = std::filesystem;
@@ -33,15 +33,27 @@ void UnitTester::runUnitTesting(const std::vector<std::string> &args)
             }
         };
         // run cmake
-        Log::log("Compile Process has been started...", Type::E_DISPLAY);
-        system((std::string("cmake . -Bbuild/tests -DENABLE_TESTS=ON --preset=") + std::string(VCPKG_TRIPLET)).c_str()); // TODO
+        std::string processLog{};
+        std::vector<std::string> args{"cmake", ".", "-Bbuild/tests", "-DENABLE_TESTS=ON", "--preset=" + std::string(VCPKG_TRIPLET)};
+        if (ProcessManager::startProcess(args, processLog, "Compile Process has been started") != 0)
+            return false;
         // run ninja
-        system(("cmake --build build/tests -j" + cpuThreads).c_str()); // if there is any kind of error then don't clear the terminal
+        args.clear();
+        args.push_back("cmake");
+        args.push_back("--build");
+        args.push_back("build/tests");
+        args.push_back("-j" + cpuThreads);
+        return ProcessManager::startProcess(args, processLog, "")==0; // if there is any kind of error then don't clear the terminal
     }
     else
     {
-        // run ninja
-        system(("cmake --build build/tests -j" + cpuThreads).c_str()); // if there is any kind of error then don't clear the terminal
+        std::string processLog{};
+        std::vector<std::string> args{};
+        args.push_back("cmake");
+        args.push_back("--build");
+        args.push_back("build/tests");
+        args.push_back("-j" + cpuThreads);
+        return ProcessManager::startProcess(args, processLog, "")==0; // if there is any kind of error then don't clear the terminal
     }
 };
 //
