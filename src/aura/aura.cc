@@ -207,7 +207,7 @@ void Aura::addToPathWin()
 #ifdef _WIN32
 	namespace fs = std::filesystem;
 	std::string aura{getenv(USERNAME)};
-	aura += "\\.aura";
+	aura += "\\aura";
 	std::string source{fs::current_path().string() + "\\aura.exe"};
 	std::string destination{(aura + "\\aura.exe").c_str()};
 	if (source.compare(destination) != 0)
@@ -308,7 +308,7 @@ void Aura::addToPathUnix()
 	namespace fs = std::filesystem;
 	std::string aura{"/home/"};
 	aura += getenv(USERNAME);
-	aura += "/.aura";
+	aura += "/aura";
 	std::string source{fs::current_path().string() + "/aura"};
 	std::string destination{(aura + "/aura").c_str()};
 	if (source.compare(destination) != 0)
@@ -443,7 +443,7 @@ void Aura::installTools(bool &isInstallationComplete)
 	std::string home = getenv(USERNAME);
 	if (!home.c_str())
 		return;
-	home += "\\.aura";
+	home += "\\aura";
 	// system(("start " + std::string(VS_URL)).c_str());
 	// Log::log("Make sure you download Desktop Development in C++ from Visual Studio Installer", Type::E_WARNING);
 	Downloader::download(std::string(COMPILER_URL), home + "\\compiler.tar.xz");
@@ -576,11 +576,11 @@ bool Aura::onSetup()
 		return false;
 	std::fstream file;
 #ifdef _WIN32
-	if (!fs::create_directory(home + "\\.aura"))
+	if (!fs::create_directory(home + "\\aura"))
 	{
-		Log::log(".aura dir alread exist", Type::E_WARNING);
+		Log::log("aura dir alread exist", Type::E_WARNING);
 	};
-	file.open((home + "\\.aura\\.cconfig").c_str(), std::ios::in);
+	file.open((home + "\\aura\\.cconfig").c_str(), std::ios::in);
 	if (file.is_open())
 	{
 		file >> isInstallationComplete;
@@ -593,7 +593,7 @@ bool Aura::onSetup()
 	}
 	else
 	{
-		file.open((home + "\\.aura\\.cconfig").c_str(), std::ios::out);
+		file.open((home + "\\aura\\.cconfig").c_str(), std::ios::out);
 		if (file.is_open())
 		{
 			installTools(isInstallationComplete);
@@ -606,7 +606,7 @@ bool Aura::onSetup()
 	if (!isInstallationComplete)
 	{
 		installTools(isInstallationComplete);
-		file.open((home + "\\.aura\\.cconfig").c_str(), std::ios::out);
+		file.open((home + "\\aura\\.cconfig").c_str(), std::ios::out);
 		if (file.is_open())
 		{
 			file << isInstallationComplete;
@@ -618,16 +618,16 @@ bool Aura::onSetup()
 	};
 	return true;
 #else
-	if (!fs::create_directory(home + "/.aura"))
+	if (!fs::create_directory(home + "/aura"))
 	{
-		Log::log(".aura dir alread exist", Type::E_WARNING);
+		Log::log("aura dir alread exist", Type::E_WARNING);
 	}
 	else
 	{
 		printf("%sCreating aura dir at %s %s\n", BLUE, home.c_str(), WHITE);
 	};
 
-	file.open((home + "/.aura/.cconfig").c_str(), std::ios::in);
+	file.open((home + "/aura/.cconfig").c_str(), std::ios::in);
 	if (file.is_open())
 	{
 		file >> isInstallationComplete;
@@ -645,7 +645,7 @@ bool Aura::onSetup()
 
 	installTools(isInstallationComplete);
 
-	file.open((home + std::string("/.aura/.cconfig")).c_str(), std::ios::out);
+	file.open((home + std::string("/aura/.cconfig")).c_str(), std::ios::out);
 	if (file.is_open())
 	{
 		Log::log("writing to config file!", Type::E_DISPLAY);
