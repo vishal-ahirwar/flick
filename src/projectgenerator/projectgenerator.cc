@@ -27,23 +27,24 @@
 namespace fs=std::filesystem;
 ProjectGenerator::ProjectGenerator()
 {
-	if (!fs::exists(Utils::getAuraPath()))
-	{
-		Log::log("aura is not initialized yet run 'aura init'",Type::E_ERROR);
-		std::exit(EXIT_FAILURE);
-	}else if (!fs::exists(Utils::getAuraPath()+"/config.json"))
-	{
-		Log::log("config.json not found run 'aura doctor' to fix this",Type::E_ERROR);
-		std::exit(EXIT_FAILURE);
-	};
-	std::ifstream ifs(Utils::getAuraPath()+"/config.json");
-	if (!ifs.is_open())
-	{
-		Log::log("failed to open config file",Type::E_ERROR);
-		std::exit(EXIT_FAILURE);
-	};
-	ifs>>mConfig;
-	ifs.close();
+	// if(Utils::getAuraPath().empty())return;
+	// if (!fs::exists(Utils::getAuraPath()))
+	// {
+	// 	Log::log("aura is not initialized yet run 'aura init'",Type::E_ERROR);
+	// 	std::exit(EXIT_FAILURE);
+	// }else if (!fs::exists(Utils::getAuraPath()+"/config.json"))
+	// {
+	// 	Log::log("config.json not found run 'aura doctor' to fix this",Type::E_ERROR);
+	// 	std::exit(EXIT_FAILURE);
+	// };
+	// std::ifstream ifs(Utils::getAuraPath()+"/config.json");
+	// if (!ifs.is_open())
+	// {
+	// 	Log::log("failed to open config file",Type::E_ERROR);
+	// 	std::exit(EXIT_FAILURE);
+	// };
+	// ifs>>mConfig;
+	// ifs.close();
 };
 bool ProjectGenerator::getFromConfig(const std::string& key, std::string& result)
 {

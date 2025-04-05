@@ -18,7 +18,7 @@ std::string Utils::getAuraPath()
     path += "/aura";
 #endif
     if (!fs::exists(path))
-        return nullptr;
+        return "";
     return path;
 };
 
