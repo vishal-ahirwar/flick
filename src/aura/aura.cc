@@ -108,7 +108,6 @@ bool Aura::compile()
 		};
 		// run cmake
 		std::vector<std::string> args{"-Bbuild/debug", "-DCMAKE_BUILD_TYPE=Debug", "--preset=" + std::string(VCPKG_TRIPLET)};
-		Log::log(VCPKG_TRIPLET);
 		if (!executeCMake(args))
 		{
 			Log::log("There are some errors in your CMakeLists.txt read build/build.log for more info", Type::E_ERROR);
