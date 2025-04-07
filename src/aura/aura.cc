@@ -163,7 +163,7 @@ void Aura::run()
 	run += ".exe";
 #else
 	run += "./build/debug/";
-	run += _project_setting.getProjectName();
+	run += mProjectSetting.getProjectName();
 #endif // _WIN32
 	bool isArg{false};
 	for (auto &arg : mArgs)
@@ -773,7 +773,7 @@ void Aura::debug()
 #ifdef _WIN32
 	system(("lldb ./build/debug/" + mProjectSetting.getProjectName() + ".exe").c_str());
 #else
-	system(("lldb ./build/debug/" + _project_setting.getProjectName()).c_str());
+	system(("lldb ./build/debug/" + mProjectSetting.getProjectName()).c_str());
 #endif
 };
 // TODO
