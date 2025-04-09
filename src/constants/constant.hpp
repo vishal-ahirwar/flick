@@ -1,19 +1,16 @@
 #ifndef _CONSTANT_
 #define _CONSTANT_
 #include <string>
+static std::string VCPKG_TRIPLET{"default"};
 
 #if defined(_WIN32)
 #include <windows.h>
 #define USERNAME "USERPROFILE" // Windows environment variable
-static std::string_view VCPKG_TRIPLET{"windows-static-build"};
 #elif defined(__linux__)
 #include <unistd.h>
 #define USERNAME "USER" // Linux environment variable
-static std::string_view VCPKG_TRIPLET{"linux-static-build"};
 #elif defined(__APPLE__)
 #include <unistd.h> // For macOS
-#include "aura.hpp"
-static std::string_view VCPKG_TRIPLET{"osx-static-build"};
 #define USERNAME "USER" // macOS environment variable
 #endif
 
@@ -116,7 +113,7 @@ log.txt
 
 constexpr std::string_view CMAKE_CODE[]{
     R"(
-#Auto Genrated CMake file by aura CLI
+#Auto Generated Root CMake file by aura CLI
 #@COPYRIGHT
 cmake_minimum_required(VERSION 3.6...3.31)
 project(@name VERSION 1.0.0 LANGUAGES CXX)
@@ -126,12 +123,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(STATIC_LINK "Enable static linking" ON)
-option(ENABLE_TESTS "Enable tests" OFF)
+option(ALL OFF)
 
-# Apply static linking if enabled
 if(STATIC_LINK)
   message(STATUS "Static linking enabled")
-  # Ensure static runtime linking on Windows
   if (WIN32)
       set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
   else()
@@ -143,19 +138,13 @@ set(COMPANY "@DeveloperName")
 string(TIMESTAMP CURRENT_YEAR "%Y")
 set(COPYRIGHT "Copyright(c) ${CURRENT_YEAR} ${COMPANY}.")
 
-include_directories(src ${CMAKE_BINARY_DIR})
+#@find DO NOT REMOVE THIS LINE
+include_directories(${CMAKE_BINARY_DIR})
 configure_file(@config_in @config_h)
-
-#@find Warning: Do not remove this line
-
-if(NOT ENABLE_TESTS)
-    message(STATUS "Tests are disabled")
-file(GLOB SOURCES "src/*.cc" "src/*/*.cc")
-add_executable(${PROJECT_NAME} ${SOURCES})
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     message(STATUS "Enabling secure coding features for Clang")
-    target_compile_options(${PROJECT_NAME} PRIVATE
+    add_compile_options(
         -Wall -Wextra -Wpedantic        # General warnings
         -Wshadow -Wold-style-cast       # Detect potential issues
         -Wcast-align -Wnull-dereference # Runtime safety
@@ -167,35 +156,23 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     )
 endif()
 
-install(TARGETS ${PROJECT_NAME} DESTINATION bin)
-#@link Warning: Do not remove this line
-
-else()
-    message(STATUS "Tests are enabled")
-    find_package(GTest)
-    enable_testing()
-    file(GLOB TEST_SOURCES "tests/*.cc")
-    add_executable(tests ${TEST_SOURCES})
-    target_link_libraries(tests GTest::GTest GTest::Main)
-endif()
+#@AuraAddSubProject@ WARNING : DO NOT REMOVE THIS LINE
 )",
     R"(
-#Auto Genrated CMake file by aura CLI
+#Auto Generated Root CMake file by aura CLI
 #@COPYRIGHT
 cmake_minimum_required(VERSION 3.6...3.31)
 project(@name VERSION 1.0.0 LANGUAGES C)
 
-set(CMAKE_C_STANDARD 23)
+set(CMAKE_C_STANDARD 20)
 set(CMAKE_C_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(STATIC_LINK "Enable static linking" ON)
-option(ENABLE_TESTS "Enable tests" OFF)
+option(ALL OFF)
 
-# Apply static linking if enabled
 if(STATIC_LINK)
   message(STATUS "Static linking enabled")
-  # Ensure static runtime linking on Windows
   if (WIN32)
       set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
   else()
@@ -207,21 +184,14 @@ set(COMPANY "@DeveloperName")
 string(TIMESTAMP CURRENT_YEAR "%Y")
 set(COPYRIGHT "Copyright(c) ${CURRENT_YEAR} ${COMPANY}.")
 
-include_directories(src ${CMAKE_BINARY_DIR})
+include_directories(${CMAKE_BINARY_DIR})
 configure_file(@config_in @config_h)
 
-#@find Warning: Do not remove this line
+#@find DO NOT REMOVE THIS LINE
 
-if(NOT ENABLE_TESTS)
-    message(STATUS "Tests are disabled")
-
-file(GLOB SOURCES "src/*.c" "src/*/*.c")
-
-add_executable(${PROJECT_NAME} ${SOURCES})
-
-if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+if (CMAKE_C_COMPILER_ID MATCHES "Clang")
     message(STATUS "Enabling secure coding features for Clang")
-    target_compile_options(${PROJECT_NAME} PRIVATE
+    add_compile_options(
         -Wall -Wextra -Wpedantic        # General warnings
         -Wshadow -Wold-style-cast       # Detect potential issues
         -Wcast-align -Wnull-dereference # Runtime safety
@@ -233,15 +203,7 @@ if(CMAKE_C_COMPILER_ID MATCHES "Clang")
     )
 endif()
 
-install(TARGETS ${PROJECT_NAME} DESTINATION bin)
-#@link Warning: Do not remove this line
-else()
-    message(STATUS "Tests are enabled")
-    find_package(cmocka REQUIRED)
-    file(GLOB TEST_SOURCES "tests/*.c")
-    add_executable(tests ${TEST_SOURCES})
-    target_link_libraries(tests cmocka::cmocka)
-endif()
+#@AuraAddSubProject@ WARNING : DO NOT REMOVE THIS LINE
 )"};
 
 static std::string MAIN_CODE[]{R"(//Auto Genrated C++ file by aura CLI
@@ -259,7 +221,7 @@ int main(int argc,char*argv[])
     return 0;
 }
 )",
-                               R"(//Auto Genrated C file by aura CLI
+ R"(//Auto Genrated C file by aura CLI
 //@COPYRIGHT
 #include<stdio.h>
 _HEADER_

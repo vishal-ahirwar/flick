@@ -38,6 +38,7 @@ private:
     void addToPathWin();
     friend void test();
     bool executeCMake(const std::vector<std::string> &additionalCMakeArg);
+    const std::string getStandaloneTriplet();
 public:
     Aura(const std::vector<std::string>&args={});
     ~Aura();

@@ -22,6 +22,7 @@
 #include <regex>
 #include <reproc++/reproc.hpp>
 #include <processmanager/processmanager.h>
+#include "aura.hpp"
 namespace fs = std::filesystem;
 Aura::Aura(const std::vector<std::string> &args)
 {
@@ -84,9 +85,20 @@ bool Aura::executeCMake(const std::vector<std::string> &additionalCMakeArg)
 	{
 		args.push_back(cmake);
 	};
-	return ProcessManager::startProcess(args, processLog, "Compile Process has been started") == 0;
+	return ProcessManager::startProcess(args, processLog, "Generating CMake Files") == 0;
 };
 
+const std::string Aura::getStandaloneTriplet()
+{
+// TODO: insert return statement here
+#if defined(_WIN32)
+	return std::string("windows-static-build");
+#elif defined(__linux__)
+	return std::string("linux-static-build");
+#elif defined(__APPLE__)
+	return std::string("osx-static-build");
+#endif
+}
 // TODO : add compile option
 bool Aura::compile()
 {
@@ -100,9 +112,9 @@ bool Aura::compile()
 	{
 		for (auto &arg : mArgs)
 		{
-			if (arg.find("--nostatic") != std::string::npos)
+			if (arg.find("--standalone") != std::string::npos)
 			{
-				VCPKG_TRIPLET = "default";
+				VCPKG_TRIPLET = getStandaloneTriplet();
 				break;
 			}
 		};
@@ -120,7 +132,7 @@ bool Aura::compile()
 		args.push_back("--build");
 		args.push_back("build/debug");
 		args.push_back("-j" + cpuThreads);
-		if (ProcessManager::startProcess(args, pLog, "Compiling") == 0) // if there is any kind of error then don't clear the terminal
+		if (ProcessManager::startProcess(args, pLog, "Compiling this may take minutes") == 0) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL");
 			return true;
@@ -140,7 +152,7 @@ bool Aura::compile()
 		args.push_back("build/debug");
 		args.push_back("-j" + cpuThreads);
 		// run ninja
-		if (ProcessManager::startProcess(args, pLog, "Compiling") == 0) // if there is any kind of error then don't clear the terminal
+		if (ProcessManager::startProcess(args, pLog, "Compiling this may take minutes") == 0) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL");
 
@@ -173,7 +185,7 @@ void Aura::run()
 			isArg = true;
 			continue;
 		}
-		else if (arg.find("--nostatic") != std::string::npos)
+		else if (arg.find("--standalone") != std::string::npos)
 		{
 			isArg = false;
 			continue;
@@ -506,9 +518,9 @@ void Aura::createInstaller()
 {
 	for (auto &arg : mArgs)
 	{
-		if (arg.find("--nostatic") != std::string::npos)
+		if (arg.find("--standalone") != std::string::npos)
 		{
-			VCPKG_TRIPLET = "default";
+			VCPKG_TRIPLET = getStandaloneTriplet();
 			break;
 		}
 	};
@@ -787,9 +799,9 @@ bool Aura::release()
 	Log::log(formatedString, Type::E_DISPLAY);
 	for (auto &arg : mArgs)
 	{
-		if (arg.find("--nostatic") != std::string::npos)
+		if (arg.find("--standalone") != std::string::npos)
 		{
-			VCPKG_TRIPLET = "default";
+			VCPKG_TRIPLET = getStandaloneTriplet();
 			break;
 		}
 	};
@@ -808,7 +820,7 @@ bool Aura::release()
 		args.push_back("--build");
 		args.push_back("build/release");
 		args.push_back("-j" + cpuThreads);
-		if (ProcessManager::startProcess(args, pLog, "Compiling") == 0) // if there is any kind of error then don't clear the terminal
+		if (ProcessManager::startProcess(args, pLog, "Compiling this may take minutes") == 0) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL");
 			return true;
@@ -828,7 +840,7 @@ bool Aura::release()
 		args.push_back("build/release");
 		args.push_back("-j" + cpuThreads);
 		// run ninja
-		if (ProcessManager::startProcess(args, pLog, "Compiling") == 0) // if there is any kind of error then don't clear the terminal
+		if (ProcessManager::startProcess(args, pLog, "Compiling this may take minutes") == 0) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL");
 
@@ -873,9 +885,9 @@ void Aura::reBuild()
 {
 	for (auto &arg : mArgs)
 	{
-		if (arg.find("--nostatic") != std::string::npos)
+		if (arg.find("--standalone") != std::string::npos)
 		{
-			VCPKG_TRIPLET = "default";
+			VCPKG_TRIPLET = getStandaloneTriplet();
 			break;
 		}
 	};
@@ -912,9 +924,9 @@ void Aura::addDeps()
 		std::string vcpkgLog{};
 		for (auto &arg : mArgs)
 		{
-			if (arg.find("--nostatic") != std::string::npos)
+			if (arg.find("--standalone") != std::string::npos)
 			{
-				VCPKG_TRIPLET = "default";
+				VCPKG_TRIPLET = getStandaloneTriplet();
 				break;
 			}
 		};
@@ -943,10 +955,16 @@ void Aura::genCMakePreset()
 void Aura::createSubProject()
 {
 	Log::log("SubProject Name [Press Enter To Cancel]> ", Type::E_DISPLAY, "");
-	std::string input{};
-	std::getline(std::cin, input);
+	std::string subProjectName{};
+	std::getline(std::cin, subProjectName);
 	Language lang{};
-	if (input.empty())
+	if (subProjectName.empty())
 		return;
-	Log::log("subproject name is " + input, Type::E_DISPLAY, "");
+	else if (subProjectName == "c")
+		lang = Language::C;
+	else if (subProjectName == "cc")
+		lang = Language::CXX;
+	ProjectGenerator projectGenerator{};
+	projectGenerator.setProjectSetting(mProjectSetting, lang);
+	projectGenerator.generateSubProject(subProjectName);
 }
