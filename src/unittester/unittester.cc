@@ -26,7 +26,7 @@ bool UnitTester::runUnitTesting(const std::vector<std::string> &args)
     {
         for (auto &arg : args)
         {
-            if (arg.find("--nostatic") != std::string::npos)
+            if (arg.find("--standalone") != std::string::npos)
             {
                 VCPKG_TRIPLET = "default";
                 break;

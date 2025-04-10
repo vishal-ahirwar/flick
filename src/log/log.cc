@@ -72,12 +72,12 @@ void Log::about()
     fmt::print(fmt::fg(fmt::color::yellow),
                "  compile        - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
-               "Compile the project. Usage: cd into project directory and run 'aura compile', use --nostatic flag to build project with dynamic linking\n\t\t\tExample : aura compile --nostatic\n");
+               "Compile the project. Usage: 'aura compile', use --standalone flag to build project with static linking\n");
 
     fmt::print(fmt::fg(fmt::color::yellow),
                "  run            - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
-               "Run the compiled binary. Ensure you compile the project before running this command and use --args to path args to executable\n\t\t\tExample:hello.exe --args 1 2 3 4.\n");
+               "Run the compiled binary.use --args to pass args to executable\n");
 
     fmt::print(fmt::fg(fmt::color::yellow),
                "  help           - ");
@@ -87,24 +87,20 @@ void Log::about()
     fmt::print(fmt::fg(fmt::color::yellow),
                "  build          - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
-               "Compile and run the project with a single command, use --nostatic flag to build project with dynamic linking\n\t\t\tExample : aura build --args 1 2 3 --nostatic\n");
+               "Compile and run the project with a single command, use --standalone flag to build project with static linking\n");
     fmt::print(fmt::fg(fmt::color::yellow),
-               "  builddeps      - ");
+               "  install        - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
-               "build all the external libraries present in external directory and install them.\n");
-    fmt::print(fmt::fg(fmt::color::yellow),
-               "  adddeps        - ");
-    fmt::print(fmt::fg(fmt::color::white_smoke),
-               "clone github repo in external directory and build it\n");
+               "install external lib from vcpkg to use in your project\n");
     fmt::print(fmt::fg(fmt::color::yellow),
                "  setup          - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
-               "Install a llvm-clang toolchain, ninja and CMake if not already installed.\n");
+               "Install a llvm-clang toolchain, ninja, vcpkg and CMake if not already installed.\n");
 
     fmt::print(fmt::fg(fmt::color::yellow),
-               "  utest          - ");
+               "  tests          - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
-               "Enable unit testing. Example: aura utest\n");
+               "Enable unit testing. Example: aura tests\n");
 
     fmt::print(fmt::fg(fmt::color::yellow),
                "  createinstaller- ");
@@ -119,16 +115,16 @@ void Log::about()
     fmt::print(fmt::fg(fmt::color::yellow),
                "  rebuild        - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
-               "Remove the build directory and recompile the project, use --nostatic flag to build project with dynamic linking\n\t\t\tExample : aura rebuild --nostatic\n");
+               "Remove the build directory and recompile the project, use --standalone flag to build project with static linking\n");
     fmt::print(fmt::fg(fmt::color::yellow),
                "  debug          - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
-               "Compile in Debug mode and Start the lldb debugger, use --nostatic flag to build project with dynamic linking\n\t\t\tExample : aura debug --nostatic\n");
+               "Compile in Debug mode and Start the lldb debugger, use --standalone flag to build project with static linking\n");
 
     fmt::print(fmt::fg(fmt::color::yellow),
                "  release        - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
-               "Compile in release mode, use --nostatic flag to build project with dynamic linking\n\t\t\tExample : aura release --nostatic\n");
+               "Compile in release mode, use --standalone flag to build project with dynamic linking\n");
 
     fmt::print(fmt::fg(fmt::color::yellow),
                "  vscode         - ");

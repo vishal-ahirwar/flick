@@ -2,18 +2,16 @@
 #define _CONSTANT_
 #include <string>
 
+static std::string VCPKG_TRIPLET{"default"};
 #if defined(_WIN32)
 #include <windows.h>
 #define USERNAME "USERPROFILE" // Windows environment variable
-static std::string_view VCPKG_TRIPLET{"windows-static-build"};
 #elif defined(__linux__)
 #include <unistd.h>
 #define USERNAME "USER" // Linux environment variable
-static std::string_view VCPKG_TRIPLET{"linux-static-build"};
 #elif defined(__APPLE__)
 #include <unistd.h> // For macOS
 #include "aura.hpp"
-static std::string_view VCPKG_TRIPLET{"osx-static-build"};
 #define USERNAME "USER" // macOS environment variable
 #endif
 
@@ -150,8 +148,8 @@ configure_file(@config_in @config_h)
 
 if(NOT ENABLE_TESTS)
     message(STATUS "Tests are disabled")
-file(GLOB SOURCES "src/*.cc" "src/*/*.cc")
-add_executable(${PROJECT_NAME} ${SOURCES})
+
+add_executable(${PROJECT_NAME} "src/main.cc")
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     message(STATUS "Enabling secure coding features for Clang")
@@ -215,9 +213,7 @@ configure_file(@config_in @config_h)
 if(NOT ENABLE_TESTS)
     message(STATUS "Tests are disabled")
 
-file(GLOB SOURCES "src/*.c" "src/*/*.c")
-
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${PROJECT_NAME} "src/main.c")
 
 if(CMAKE_C_COMPILER_ID MATCHES "Clang")
     message(STATUS "Enabling secure coding features for Clang")

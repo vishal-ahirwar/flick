@@ -49,7 +49,7 @@ namespace CLI
         {
             aura.createInstaller();
         }
-        else if (args.at(1) == ("utest"))
+        else if (args.at(1) == ("tests"))
         {
             aura.test();
         }
@@ -77,11 +77,7 @@ namespace CLI
         {
             aura.reBuild();
         }
-        else if (args.at(1) == "builddeps")
-        {
-            aura.buildDeps();
-        }
-        else if (args.at(1) == "adddeps")
+        else if (args.at(1) == "install")
         {
             aura.addDeps();
         }

@@ -163,7 +163,7 @@ bool Deps::installDeps(std::string &vcpkgLog, const std::string_view &TRIPLET)
     args.push_back("--preset");
     args.push_back(std::string(TRIPLET));
     args.push_back("-Bbuild/debug");
-    return ProcessManager::startProcess(args, vcpkgLog, "Installing Remaining packages") == 0;
+    return ProcessManager::startProcess(args, vcpkgLog, "Installing Remaining packages this may take a while") == 0;
 }
 [[deprecated("Will be removed in future")]]
 void Deps::findCMakeConfig(const std::string &root, std::vector<std::string> &configs)

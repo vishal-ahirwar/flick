@@ -22,6 +22,7 @@
 #include <regex>
 #include <reproc++/reproc.hpp>
 #include <processmanager/processmanager.h>
+#include "aura.hpp"
 namespace fs = std::filesystem;
 Aura::Aura(const std::vector<std::string> &args)
 {
@@ -84,9 +85,19 @@ bool Aura::executeCMake(const std::vector<std::string> &additionalCMakeArg)
 	{
 		args.push_back(cmake);
 	};
-	return ProcessManager::startProcess(args, processLog, "Compile Process has been started") == 0;
+	return ProcessManager::startProcess(args, processLog, "Generating CMake Files this may take a while") == 0;
 };
 
+const std::string Aura::getStandaloneTriplet()
+{
+#if defined(_WIN32)
+	return std::string{"windows-static-build"};
+#elif defined(__linux__)
+	return std::string{"linux-static-build"};
+#elif defined(__APPLE__)
+	return std::string{"osx-static-build"};
+#endif
+}
 // TODO : add compile option
 bool Aura::compile()
 {
@@ -100,9 +111,9 @@ bool Aura::compile()
 	{
 		for (auto &arg : mArgs)
 		{
-			if (arg.find("--nostatic") != std::string::npos)
+			if (arg.find("--standalone") != std::string::npos)
 			{
-				VCPKG_TRIPLET = "default";
+				VCPKG_TRIPLET = getStandaloneTriplet();
 				break;
 			}
 		};
@@ -173,7 +184,7 @@ void Aura::run()
 			isArg = true;
 			continue;
 		}
-		else if (arg.find("--nostatic") != std::string::npos)
+		else if (arg.find("--standalone") != std::string::npos)
 		{
 			isArg = false;
 			continue;
@@ -506,9 +517,9 @@ void Aura::createInstaller()
 {
 	for (auto &arg : mArgs)
 	{
-		if (arg.find("--nostatic") != std::string::npos)
+		if (arg.find("--standalone") != std::string::npos)
 		{
-			VCPKG_TRIPLET = "default";
+			VCPKG_TRIPLET = getStandaloneTriplet();
 			break;
 		}
 	};
@@ -787,9 +798,9 @@ bool Aura::release()
 	Log::log(formatedString, Type::E_DISPLAY);
 	for (auto &arg : mArgs)
 	{
-		if (arg.find("--nostatic") != std::string::npos)
+		if (arg.find("--standalone") != std::string::npos)
 		{
-			VCPKG_TRIPLET = "default";
+			VCPKG_TRIPLET = getStandaloneTriplet();
 			break;
 		}
 	};
@@ -873,9 +884,9 @@ void Aura::reBuild()
 {
 	for (auto &arg : mArgs)
 	{
-		if (arg.find("--nostatic") != std::string::npos)
+		if (arg.find("--standalone") != std::string::npos)
 		{
-			VCPKG_TRIPLET = "default";
+			VCPKG_TRIPLET = getStandaloneTriplet();
 			break;
 		}
 	};
@@ -912,9 +923,9 @@ void Aura::addDeps()
 		std::string vcpkgLog{};
 		for (auto &arg : mArgs)
 		{
-			if (arg.find("--nostatic") != std::string::npos)
+			if (arg.find("--standalone") != std::string::npos)
 			{
-				VCPKG_TRIPLET = "default";
+				VCPKG_TRIPLET = getStandaloneTriplet();
 				break;
 			}
 		};

@@ -14,9 +14,9 @@ int Extractor::extract(const std::string &vcpkgLog)
     std::istringstream logFile(vcpkgLog);
     while (std::getline(logFile, line, '\n'))
     {
-        if (line.find("find_package") != std::string::npos || line.find("target_link_libraries") != std::string::npos)
+        if (line.find("find_package") != std::string::npos || line.find("target_link_libraries") != std::string::npos||line.find("find_path")!=std::string::npos||line.find("target_include_directories")!=std::string::npos)
         {
-            if (line.find("target_link_libraries") != std::string::npos)
+            if (line.find("target_link_libraries") != std::string::npos||line.find("target_include_directories")!=std::string::npos)
             {
                 if (mPackages.contains(lastkey))
                 {
