@@ -85,17 +85,31 @@ bool Aura::executeCMake(const std::vector<std::string> &additionalCMakeArg)
 	{
 		args.push_back(cmake);
 	};
+<<<<<<< HEAD
 	return ProcessManager::startProcess(args, processLog, "Generating CMake Files this may take a while") == 0;
+=======
+	return ProcessManager::startProcess(args, processLog, "Generating CMake Files") == 0;
+>>>>>>> 744baa22e22d6cee4b5b0978f91f328b8c01c1a9
 };
 
 const std::string Aura::getStandaloneTriplet()
 {
+<<<<<<< HEAD
 #if defined(_WIN32)
 	return std::string{"windows-static-build"};
 #elif defined(__linux__)
 	return std::string{"linux-static-build"};
 #elif defined(__APPLE__)
 	return std::string{"osx-static-build"};
+=======
+// TODO: insert return statement here
+#if defined(_WIN32)
+	return std::string("windows-static-build");
+#elif defined(__linux__)
+	return std::string("linux-static-build");
+#elif defined(__APPLE__)
+	return std::string("osx-static-build");
+>>>>>>> 744baa22e22d6cee4b5b0978f91f328b8c01c1a9
 #endif
 }
 // TODO : add compile option
@@ -131,7 +145,7 @@ bool Aura::compile()
 		args.push_back("--build");
 		args.push_back("build/debug");
 		args.push_back("-j" + cpuThreads);
-		if (ProcessManager::startProcess(args, pLog, "Compiling") == 0) // if there is any kind of error then don't clear the terminal
+		if (ProcessManager::startProcess(args, pLog, "Compiling this may take minutes") == 0) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL");
 			return true;
@@ -151,7 +165,7 @@ bool Aura::compile()
 		args.push_back("build/debug");
 		args.push_back("-j" + cpuThreads);
 		// run ninja
-		if (ProcessManager::startProcess(args, pLog, "Compiling") == 0) // if there is any kind of error then don't clear the terminal
+		if (ProcessManager::startProcess(args, pLog, "Compiling this may take minutes") == 0) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL");
 
@@ -174,7 +188,7 @@ void Aura::run()
 	run += ".exe";
 #else
 	run += "./build/debug/";
-	run += _project_setting.getProjectName();
+	run += mProjectSetting.getProjectName();
 #endif // _WIN32
 	bool isArg{false};
 	for (auto &arg : mArgs)
@@ -784,7 +798,7 @@ void Aura::debug()
 #ifdef _WIN32
 	system(("lldb ./build/debug/" + mProjectSetting.getProjectName() + ".exe").c_str());
 #else
-	system(("lldb ./build/debug/" + _project_setting.getProjectName()).c_str());
+	system(("lldb ./build/debug/" + mProjectSetting.getProjectName()).c_str());
 #endif
 };
 // TODO
@@ -819,7 +833,7 @@ bool Aura::release()
 		args.push_back("--build");
 		args.push_back("build/release");
 		args.push_back("-j" + cpuThreads);
-		if (ProcessManager::startProcess(args, pLog, "Compiling") == 0) // if there is any kind of error then don't clear the terminal
+		if (ProcessManager::startProcess(args, pLog, "Compiling this may take minutes") == 0) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL");
 			return true;
@@ -839,7 +853,7 @@ bool Aura::release()
 		args.push_back("build/release");
 		args.push_back("-j" + cpuThreads);
 		// run ninja
-		if (ProcessManager::startProcess(args, pLog, "Compiling") == 0) // if there is any kind of error then don't clear the terminal
+		if (ProcessManager::startProcess(args, pLog, "Compiling this may take minutes") == 0) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL");
 
@@ -954,10 +968,16 @@ void Aura::genCMakePreset()
 void Aura::createSubProject()
 {
 	Log::log("SubProject Name [Press Enter To Cancel]> ", Type::E_DISPLAY, "");
-	std::string input{};
-	std::getline(std::cin, input);
+	std::string subProjectName{};
+	std::getline(std::cin, subProjectName);
 	Language lang{};
-	if (input.empty())
+	if (subProjectName.empty())
 		return;
-	Log::log("subproject name is " + input, Type::E_DISPLAY, "");
+	else if (subProjectName == "c")
+		lang = Language::C;
+	else if (subProjectName == "cc")
+		lang = Language::CXX;
+	ProjectGenerator projectGenerator{};
+	projectGenerator.setProjectSetting(mProjectSetting, lang);
+	projectGenerator.generateSubProject(subProjectName);
 }

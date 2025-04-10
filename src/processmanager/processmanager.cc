@@ -63,11 +63,14 @@ int ProcessManager::startProcess(const std::vector<std::string> &args, std::stri
                 {
                     Log::log(line, Type::E_ERROR);
                 }
+                else
+                {
+                    if (b_log)
+                    {
+                        Log::log(chunk, Type::E_DISPLAY);
+                    }
+                }
             }
-        }
-        if (b_log)
-        {
-            Log::log(chunk, Type::E_DISPLAY);
         }
     }
 
@@ -78,9 +81,9 @@ int ProcessManager::startProcess(const std::vector<std::string> &args, std::stri
     logFile << processLog << "\n";
     if (logFile.is_open())
         logFile.close();
-    if(status!=0)
+    if (status != 0)
     {
-        Log::log("For More info "+std::filesystem::path(std::filesystem::current_path().string()+"/build/build.log").generic_string(),Type::E_DISPLAY);
+        Log::log("For More info " + std::filesystem::path(std::filesystem::current_path().string() + "/build/build.log").generic_string(), Type::E_DISPLAY);
     }
     puts("");
     return status;

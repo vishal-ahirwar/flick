@@ -6,7 +6,8 @@
 #include <chrono>
 #include <format>
 #include <iostream>
-#include<utils/utils.h>
+#include <utils/utils.h>
+#include "projectgenerator.h"
 
 /*
  *root cmake [project-name]
@@ -24,9 +25,8 @@
  *----src
  *----cmakelist.txt
  */
-namespace fs=std::filesystem;
-ProjectGenerator::ProjectGenerator()
-{
+namespace fs = std::filesystem;
+ProjectGenerator::ProjectGenerator() {
 	// if(Utils::getAuraPath().empty())return;
 	// if (!fs::exists(Utils::getAuraPath()))
 	// {
@@ -46,17 +46,17 @@ ProjectGenerator::ProjectGenerator()
 	// ifs>>mConfig;
 	// ifs.close();
 };
-bool ProjectGenerator::getFromConfig(const std::string& key, std::string& result)
+bool ProjectGenerator::getFromConfig(const std::string &key, std::string &result)
 {
-	std::vector<std::string>tokens{};
+	std::vector<std::string> tokens{};
 	std::istringstream ss(key);
 	std::string token;
-	while (std::getline(ss,token,'/'))
+	while (std::getline(ss, token, '/'))
 	{
 		tokens.push_back(token);
 	};
 	nlohmann::json json;
-	for (const auto&token:tokens)
+	for (const auto &token : tokens)
 	{
 		if (json.is_null())
 		{
@@ -64,22 +64,24 @@ bool ProjectGenerator::getFromConfig(const std::string& key, std::string& result
 			{
 				return false;
 			}
-			json=mConfig[token];
-		}else
+			json = mConfig[token];
+		}
+		else
 		{
 			if (!json.contains(token))
 			{
 				return false;
 			}
-			json=json[token];
+			json = json[token];
 		}
 	};
 	if (json.is_string())
 	{
 		result = json.get<std::string>();
-	}else
+	}
+	else
 	{
-		Log::log(token+" is not a string",Type::E_ERROR);
+		Log::log(token + " is not a string", Type::E_ERROR);
 		return false;
 	}
 	return true;
@@ -111,10 +113,10 @@ void ProjectGenerator::generateProject()
 
 		Log::log("Generating Starter Project C++ language", Type::E_DISPLAY);
 	}
-	generateCppTemplateFile();
 	generateCmakeFile();
 	generateGitIgnoreFile();
 	generateVcpkgFiles();
+	generateSubProject(mProjectSetting.getProjectName(), true);
 	writeProjectSettings(&mProjectSetting);
 	Log::log("happy Coding :)", Type::E_DISPLAY);
 }
@@ -131,6 +133,40 @@ void ProjectGenerator::generateVcpkgFiles()
 	out.close();
 };
 
+void ProjectGenerator::generateSubProject(const std::string &subProjectName, bool bIsRoot)
+{
+	if (!bIsRoot)
+		fs::create_directories(subProjectName + "/src");
+	std::fstream out{};
+	if (bIsRoot)
+		out.open(mProjectSetting.getProjectName() + "/" + subProjectName + "/CMakelists.txt", std::ios::out);
+	else
+		out.open(subProjectName + "/CMakelists.txt", std::ios::out);
+	if (!out.is_open())
+		return;
+	std::string option{"", subProjectName.length()};
+	std::transform(subProjectName.begin(), subProjectName.end(), option.begin(), ::toupper);
+	out << "option(" << option << " OFF)\n";
+	out << "if(" << option << " OR ALL)\n";
+	out << "\tproject(" << subProjectName << ")\n";
+	out << "\tmessage(STATUS \"Building ${PROJECT_NAME}\")\n";
+	out << "\tadd_executable(${PROJECT_NAME} src/main.cpp)\n";
+	out << "endif()\n";
+	out.close();
+	generateCppTemplateFile(bIsRoot,subProjectName);
+	std::fstream cmake{};
+	if (!bIsRoot)
+		cmake.open("CMakeLists.txt", std::ios::app);
+	else
+		cmake.open(mProjectSetting.getProjectName() + "/CMakeLists.txt", std::ios::app);
+	if (!cmake.is_open())
+	{
+		Log::log("can't open cmake file", Type::E_ERROR);
+		return;
+	}
+	cmake << "add_subdirectory(" << subProjectName << ")\n";
+	cmake.close();
+}
 void ProjectGenerator::readProjectSettings(ProjectSetting *setting)
 {
 	if (!setting)
@@ -151,7 +187,7 @@ void ProjectGenerator::writeProjectSettings(ProjectSetting *setting)
 	deps.getSetting().write(setting->getProjectName());
 };
 
-void ProjectGenerator::generateCMakePreset(const Language&lang)
+void ProjectGenerator::generateCMakePreset(const Language &lang)
 {
 	std::ofstream out("CMakePresets.json");
 
@@ -167,37 +203,27 @@ void ProjectGenerator::generateCMakePreset(const Language&lang)
 void ProjectGenerator::createDir()
 {
 	namespace fs = std::filesystem;
-	std::string cmdString{};
-	cmdString += mProjectSetting.getProjectName();
-	if (fs::create_directory(cmdString.c_str()))
-	{
-		cmdString += "/src";
-		fs::create_directory(cmdString.c_str());
-		auto pos = cmdString.find("/");
-		cmdString.replace(pos + 1, cmdString.length() - pos, "res");
-		fs::create_directory(cmdString.c_str());
-		pos = cmdString.find("/");
-		cmdString.replace(pos + 1, cmdString.length() - pos, "external");
-		fs::create_directory(cmdString.c_str());
-	}
-	else
-	{
-		Log::log("failed to create dir error!", Type::E_ERROR);
-		exit(0);
-	}
+	fs::create_directories(mProjectSetting.getProjectName() + "/" + mProjectSetting.getProjectName() + "/src");
+	fs::create_directories(mProjectSetting.getProjectName() + "/res");
+	fs::create_directories(mProjectSetting.getProjectName() + "/external");
 };
 //
-void ProjectGenerator::generateCppTemplateFile()
+void ProjectGenerator::generateCppTemplateFile(bool bIsRoot,const std::string&subProject)
 {
 	std::ofstream file;
 	if (_lang == Language::CXX)
 	{
-
-		file.open("./" + mProjectSetting.getProjectName() + "/src/main.cc", std::ios::out);
+		if (bIsRoot)
+			file.open("./" + mProjectSetting.getProjectName() + "/" + mProjectSetting.getProjectName() + "/src/main.cpp", std::ios::out);
+		else
+			file.open("./" + subProject + "/src/main.cpp", std::ios::out);
 	}
 	else if (_lang == Language::C)
 	{
-		file.open("./" + mProjectSetting.getProjectName() + "/src/main.c", std::ios::out);
+		if (bIsRoot)
+			file.open("./" + mProjectSetting.getProjectName() + "/" + mProjectSetting.getProjectName() + "/src/main.c", std::ios::out);
+		else
+			file.open("./" + mProjectSetting.getProjectName() + "/src/main.c", std::ios::out);
 	}
 	if (file.is_open())
 	{

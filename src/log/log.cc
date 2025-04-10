@@ -72,7 +72,11 @@ void Log::about()
     fmt::print(fmt::fg(fmt::color::yellow),
                "  compile        - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
+<<<<<<< HEAD
                "Compile the project. Usage: 'aura compile', use --standalone flag to build project with static linking\n");
+=======
+               "Compile the project. Usage: cd into project directory and run 'aura compile', use --standalone flag to build project with dynamic linking\n\t\t\tExample : aura compile --standalone\n");
+>>>>>>> 744baa22e22d6cee4b5b0978f91f328b8c01c1a9
 
     fmt::print(fmt::fg(fmt::color::yellow),
                "  run            - ");
@@ -87,7 +91,11 @@ void Log::about()
     fmt::print(fmt::fg(fmt::color::yellow),
                "  build          - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
+<<<<<<< HEAD
                "Compile and run the project with a single command, use --standalone flag to build project with static linking\n");
+=======
+               "Compile and run the project with a single command, use --standalone flag to build project with dynamic linking\n\t\t\tExample : aura build --args 1 2 3 --standalone\n");
+>>>>>>> 744baa22e22d6cee4b5b0978f91f328b8c01c1a9
     fmt::print(fmt::fg(fmt::color::yellow),
                "  install        - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
@@ -115,16 +123,28 @@ void Log::about()
     fmt::print(fmt::fg(fmt::color::yellow),
                "  rebuild        - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
+<<<<<<< HEAD
                "Remove the build directory and recompile the project, use --standalone flag to build project with static linking\n");
     fmt::print(fmt::fg(fmt::color::yellow),
                "  debug          - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
                "Compile in Debug mode and Start the lldb debugger, use --standalone flag to build project with static linking\n");
+=======
+               "Remove the build directory and recompile the project, use --standalone flag to build project with dynamic linking\n\t\t\tExample : aura rebuild --standalone\n");
+    fmt::print(fmt::fg(fmt::color::yellow),
+               "  debug          - ");
+    fmt::print(fmt::fg(fmt::color::white_smoke),
+               "Compile in Debug mode and Start the lldb debugger, use --standalone flag to build project with dynamic linking\n\t\t\tExample : aura debug --standalone\n");
+>>>>>>> 744baa22e22d6cee4b5b0978f91f328b8c01c1a9
 
     fmt::print(fmt::fg(fmt::color::yellow),
                "  release        - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
+<<<<<<< HEAD
                "Compile in release mode, use --standalone flag to build project with dynamic linking\n");
+=======
+               "Compile in release mode, use --standalone flag to build project with dynamic linking\n\t\t\tExample : aura release --standalone\n");
+>>>>>>> 744baa22e22d6cee4b5b0978f91f328b8c01c1a9
 
     fmt::print(fmt::fg(fmt::color::yellow),
                "  vscode         - ");

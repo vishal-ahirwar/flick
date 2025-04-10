@@ -1,6 +1,7 @@
 #include "extractor.h"
 #include <sstream>
 #include <log/log.h>
+#include<string.h>
 const Packages &Extractor::getPackages() const
 {
     return mPackages;
