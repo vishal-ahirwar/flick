@@ -3,7 +3,6 @@
 #include <string>
 static std::string VCPKG_TRIPLET{"default"};
 
-static std::string VCPKG_TRIPLET{"default"};
 #if defined(_WIN32)
 #include <windows.h>
 #define USERNAME "USERPROFILE" // Windows environment variable
@@ -12,10 +11,7 @@ static std::string VCPKG_TRIPLET{"default"};
 #define USERNAME "USER" // Linux environment variable
 #elif defined(__APPLE__)
 #include <unistd.h> // For macOS
-<<<<<<< HEAD
 #include "aura.hpp"
-=======
->>>>>>> 744baa22e22d6cee4b5b0978f91f328b8c01c1a9
 #define USERNAME "USER" // macOS environment variable
 #endif
 
@@ -120,6 +116,9 @@ constexpr std::string_view CMAKE_CODE[]{
     R"(
 #Auto Generated Root CMake file by aura CLI
 #@COPYRIGHT
+
+#====================Basic Configuration===================
+
 cmake_minimum_required(VERSION 3.6...3.31)
 project(@name VERSION 1.0.0 LANGUAGES CXX)
 
@@ -128,10 +127,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(STATIC_LINK "Enable static linking" ON)
-option(ALL OFF)
-
+option(ENABLE_TESTS "GTests" OFF)
 if(STATIC_LINK)
-  message(STATUS "Static linking enabled")
   if (WIN32)
       set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
   else()
@@ -143,20 +140,11 @@ set(COMPANY "@DeveloperName")
 string(TIMESTAMP CURRENT_YEAR "%Y")
 set(COPYRIGHT "Copyright(c) ${CURRENT_YEAR} ${COMPANY}.")
 
-#@find DO NOT REMOVE THIS LINE
 include_directories(${CMAKE_BINARY_DIR})
 configure_file(@config_in @config_h)
 
-<<<<<<< HEAD
 #@find Warning: Do not remove this line
 
-if(NOT ENABLE_TESTS)
-    message(STATUS "Tests are disabled")
-
-add_executable(${PROJECT_NAME} "src/main.cc")
-
-=======
->>>>>>> 744baa22e22d6cee4b5b0978f91f328b8c01c1a9
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     message(STATUS "Enabling secure coding features for Clang")
     add_compile_options(
@@ -171,11 +159,26 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     )
 endif()
 
-#@AuraAddSubProject@ WARNING : DO NOT REMOVE THIS LINE
+
+#====================Configuration===================
+
+if(NOT ENABLE_TESTS)
+    add_executable(${PROJECT_NAME} "src/main.cpp")# Add your Source Files here
+    #@link Warning: Do not remove this line
+else()
+    message(STATUS "Tests are enabled")
+    find_package(GTest)
+    enable_testing()
+    add_executable(tests "tests/main.cpp")
+    target_link_libraries(tests GTest::GTest GTest::Main)
+endif()
 )",
     R"(
 #Auto Generated Root CMake file by aura CLI
 #@COPYRIGHT
+
+#====================Basic Configuration===================
+
 cmake_minimum_required(VERSION 3.6...3.31)
 project(@name VERSION 1.0.0 LANGUAGES C)
 
@@ -184,7 +187,7 @@ set(CMAKE_C_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(STATIC_LINK "Enable static linking" ON)
-option(ALL OFF)
+option(ENABLE_TESTS "CMOCKA Test" OFF)
 
 if(STATIC_LINK)
   message(STATUS "Static linking enabled")
@@ -202,32 +205,34 @@ set(COPYRIGHT "Copyright(c) ${CURRENT_YEAR} ${COMPANY}.")
 include_directories(${CMAKE_BINARY_DIR})
 configure_file(@config_in @config_h)
 
-#@find DO NOT REMOVE THIS LINE
+#@find WARNING : DO NOT REMOVE THIS LINE
 
-<<<<<<< HEAD
-if(NOT ENABLE_TESTS)
-    message(STATUS "Tests are disabled")
-
-add_executable(${PROJECT_NAME} "src/main.c")
 
 if(CMAKE_C_COMPILER_ID MATCHES "Clang")
-=======
-if (CMAKE_C_COMPILER_ID MATCHES "Clang")
->>>>>>> 744baa22e22d6cee4b5b0978f91f328b8c01c1a9
-    message(STATUS "Enabling secure coding features for Clang")
-    add_compile_options(
-        -Wall -Wextra -Wpedantic        # General warnings
-        -Wshadow -Wold-style-cast       # Detect potential issues
-        -Wcast-align -Wnull-dereference # Runtime safety
-        -Wformat=2 -Wformat-security    # Secure formatting
-        -fstack-protector-strong        # Stack protection
-        -D_FORTIFY_SOURCE=2             # Buffer security
-        -fno-common                     # Avoid common symbol issues
-        #-Werror                         # Treat warnings as errors
+  message(STATUS "Enabling secure coding features for Clang")
+  add_compile_options(
+    -Wall -Wextra -Wpedantic        # General warnings
+    -Wshadow -Wold-style-cast       # Detect potential issues
+    -Wcast-align -Wnull-dereference # Runtime safety
+    -Wformat=2 -Wformat-security    # Secure formatting
+    -fstack-protector-strong        # Stack protection
+    -D_FORTIFY_SOURCE=2             # Buffer security
+    -fno-common                     # Avoid common symbol issues
+    #-Werror                         # Treat warnings as errors
     )
 endif()
 
-#@AuraAddSubProject@ WARNING : DO NOT REMOVE THIS LINE
+#====================Configuration===================
+
+if(NOT ENABLE_TESTS)
+    add_executable(${PROJECT_NAME} "src/main.c")# Add Your Source Files here
+    #@link WARNING : DO NOT REMOVE THIS LINE
+else()
+    message(STATUS "Tests are enabled")
+    find_package(cmocka REQUIRED)
+    add_executable(tests "tests/main.c")
+    target_link_libraries(tests cmocka::cmocka)
+endif()
 )"};
 
 static std::string MAIN_CODE[]{R"(//Auto Genrated C++ file by aura CLI

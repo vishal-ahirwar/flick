@@ -75,7 +75,7 @@ bool Deps::addDeps(const std::string &url)
 {
     std::string processLog{};
     std::vector<std::string> args{"vcpkg", "add", "port", url};
-    return ProcessManager::startProcess(args, processLog,"") == 0;
+    return ProcessManager::startProcess(args, processLog,"Adding "+url+" to vcpkg.json") == 0;
 };
 
 bool Deps::updateCMakeFile(const std::string &vcpkgLog)
@@ -163,11 +163,7 @@ bool Deps::installDeps(std::string &vcpkgLog, const std::string_view &TRIPLET)
     args.push_back("--preset");
     args.push_back(std::string(TRIPLET));
     args.push_back("-Bbuild/debug");
-<<<<<<< HEAD
     return ProcessManager::startProcess(args, vcpkgLog, "Installing Remaining packages this may take a while") == 0;
-=======
-    return ProcessManager::startProcess(args, vcpkgLog, "Installing Remaining packages this may take minutes or even an hour") == 0;
->>>>>>> 744baa22e22d6cee4b5b0978f91f328b8c01c1a9
 }
 [[deprecated("Will be removed in future")]]
 void Deps::findCMakeConfig(const std::string &root, std::vector<std::string> &configs)

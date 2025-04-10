@@ -63,13 +63,6 @@ int ProcessManager::startProcess(const std::vector<std::string> &args, std::stri
                 {
                     Log::log(line, Type::E_ERROR);
                 }
-                else
-                {
-                    if (b_log)
-                    {
-                        Log::log(chunk, Type::E_DISPLAY);
-                    }
-                }
             }
         }
     }

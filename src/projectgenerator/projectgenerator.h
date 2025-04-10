@@ -17,7 +17,6 @@ public:
     static void readProjectSettings(ProjectSetting *setting);
     static void writeProjectSettings(ProjectSetting *setting);
     static void generateCMakePreset(const Language&);
-    void generateSubProject(const std::string&subProjectName,bool bIsRoot=false);
     bool getFromConfig(const std::string&key,std::string&result);
 private:
 Language _lang{Language::CXX};
@@ -25,7 +24,7 @@ Language _lang{Language::CXX};
 private:
     void generateProject();
     void createDir();
-    void generateCppTemplateFile(bool bIsRoot,const std::string&subProject);
+    void generateCppTemplateFile();
     void generateCmakeFile();
     void generateGitIgnoreFile();
     void generateVcpkgFiles();

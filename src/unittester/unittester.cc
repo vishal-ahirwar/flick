@@ -24,18 +24,10 @@ bool UnitTester::runUnitTesting(const std::vector<std::string> &args)
     Log::log(formatedString, Type::E_DISPLAY);
     if (!fs::exists(fs::current_path().string() + "/build/tests"))
     {
-        for (auto &arg : args)
-        {
-            if (arg.find("--standalone") != std::string::npos)
-            {
-                VCPKG_TRIPLET = "default";
-                break;
-            }
-        };
         // run cmake
         std::string processLog{};
         std::vector<std::string> args{"cmake", ".", "-Bbuild/tests", "-DENABLE_TESTS=ON", "--preset=" + std::string(VCPKG_TRIPLET)};
-        if (ProcessManager::startProcess(args, processLog, "Compile Process has been started") != 0)
+        if (ProcessManager::startProcess(args, processLog, "Generating Tests CMake Files") != 0)
             return false;
         // run ninja
         args.clear();
@@ -43,7 +35,7 @@ bool UnitTester::runUnitTesting(const std::vector<std::string> &args)
         args.push_back("--build");
         args.push_back("build/tests");
         args.push_back("-j" + cpuThreads);
-        return ProcessManager::startProcess(args, processLog, "")==0; // if there is any kind of error then don't clear the terminal
+        return ProcessManager::startProcess(args, processLog, "Compiling Tests")==0; // if there is any kind of error then don't clear the terminal
     }
     else
     {
@@ -53,7 +45,7 @@ bool UnitTester::runUnitTesting(const std::vector<std::string> &args)
         args.push_back("--build");
         args.push_back("build/tests");
         args.push_back("-j" + cpuThreads);
-        return ProcessManager::startProcess(args, processLog, "")==0; // if there is any kind of error then don't clear the terminal
+        return ProcessManager::startProcess(args, processLog, "Compiling Tests")==0; // if there is any kind of error then don't clear the terminal
     }
 };
 //
@@ -101,7 +93,7 @@ void UnitTester::setupUnitTestingFramework()
         break;
     case Language::CXX:
         [&]() -> void
-        {std::fstream testFile(path + "main.cc", std::ios::out);
+        {std::fstream testFile(path + "main.cpp", std::ios::out);
     if (testFile.is_open())
     {
         testFile << UNIT_TEST_CODE[static_cast<int>(lang)];

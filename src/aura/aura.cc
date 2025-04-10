@@ -80,36 +80,22 @@ void Aura::createNewProject()
 bool Aura::executeCMake(const std::vector<std::string> &additionalCMakeArg)
 {
 	std::string processLog{};
-	std::vector<std::string> args{"cmake", "-S", ".", "-G", "Ninja"};
+	std::vector<std::string> args{"cmake", "-S", ".","-DENABLE_TESTS=OFF", "-G", "Ninja"};
 	for (const auto &cmake : additionalCMakeArg)
 	{
 		args.push_back(cmake);
 	};
-<<<<<<< HEAD
 	return ProcessManager::startProcess(args, processLog, "Generating CMake Files this may take a while") == 0;
-=======
-	return ProcessManager::startProcess(args, processLog, "Generating CMake Files") == 0;
->>>>>>> 744baa22e22d6cee4b5b0978f91f328b8c01c1a9
 };
 
 const std::string Aura::getStandaloneTriplet()
 {
-<<<<<<< HEAD
 #if defined(_WIN32)
 	return std::string{"windows-static-build"};
 #elif defined(__linux__)
 	return std::string{"linux-static-build"};
 #elif defined(__APPLE__)
 	return std::string{"osx-static-build"};
-=======
-// TODO: insert return statement here
-#if defined(_WIN32)
-	return std::string("windows-static-build");
-#elif defined(__linux__)
-	return std::string("linux-static-build");
-#elif defined(__APPLE__)
-	return std::string("osx-static-build");
->>>>>>> 744baa22e22d6cee4b5b0978f91f328b8c01c1a9
 #endif
 }
 // TODO : add compile option
@@ -977,7 +963,4 @@ void Aura::createSubProject()
 		lang = Language::C;
 	else if (subProjectName == "cc")
 		lang = Language::CXX;
-	ProjectGenerator projectGenerator{};
-	projectGenerator.setProjectSetting(mProjectSetting, lang);
-	projectGenerator.generateSubProject(subProjectName);
 }
