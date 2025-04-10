@@ -4,22 +4,7 @@
 **Aura** is a powerful tool for C/C++ learners, designed to streamline the process of setting up and managing projects. With Aura, you can focus on learning and coding instead of dealing with repetitive tasks like creating folders, writing CMake files, or compiling manually.
 
 ---
-```
-📦 project-name
- ├── 📂 res
- ├── 📄 vcpkg.json
- ├── 📄 CMakeLists.txt
- ├── 📂 external
- ├── 📂 [project-name]
- │   ├── 📂 src
- │   ├── 📄 CMakeLists.txt
- ├── 📂 sub-project-1
- │   ├── 📂 src
- │   ├── 📄 CMakeLists.txt
- ├── 📂 sub-project-2
-     ├── 📂 src
-     ├── 📄 CMakeLists.txt
-```
+
 ## About
 
 Learning C/C++ and tired of manually managing files, folders, and compilation? Aura automates these tasks by:
