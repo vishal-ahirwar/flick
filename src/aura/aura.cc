@@ -80,7 +80,7 @@ void Aura::createNewProject()
 bool Aura::executeCMake(const std::vector<std::string> &additionalCMakeArg)
 {
 	std::string processLog{};
-	std::vector<std::string> args{"cmake", "-S", ".","-DENABLE_TESTS=OFF", "-G", "Ninja"};
+	std::vector<std::string> args{"cmake", "-S", ".", "-DENABLE_TESTS=OFF", "-G", "Ninja"};
 	for (const auto &cmake : additionalCMakeArg)
 	{
 		args.push_back(cmake);
@@ -400,9 +400,12 @@ void Aura::addToPathUnix()
 
 void Aura::setupVcpkg(const std::string &home, bool &is_install)
 {
+	std::string processLog{};
 	try
 	{
-		system((std::string("git clone https://github.com/microsoft/vcpkg.git ") + std::string(home) + "/vcpkg").c_str());
+		std::vector<std::string> args{"git", "clone", "https://github.com/microsoft/vcpkg.git", std::string(home) + "/vcpkg"};
+		if (!ProcessManager::startProcess(args, processLog, "Installing VCPKG From Github"))
+			return;
 	}
 	catch (std::exception &e)
 	{
@@ -412,9 +415,13 @@ void Aura::setupVcpkg(const std::string &home, bool &is_install)
 #ifdef _WIN32
 	std::string cmd{"setx VCPKG_ROOT " + home + "\\vcpkg"};
 	system(cmd.c_str());
-	system(("cd " + home + "\\vcpkg &&" + " .\\bootstrap-vcpkg.bat").c_str());
+	std::vector<std::string> args{home + "\\vcpkg\\bootstrap-vcpkg.bat"};
+	if (!ProcessManager::startProcess(args, processLog, "Installing VCPKG From Github"))
+		return;
 #else
-	system(("cd " + home + "\\vcpkg &&" + " ./bootstrap-vcpkg.sh").c_str());
+	std::vector<std::string> args{home + "/vcpkg/bootstrap-vcpkg.sh"};
+	if (!ProcessManager::startProcess(args, processLog, "Installing VCPKG From Github"))
+		return;
 	std::string bashrc = std::string("/home/") + getenv(USERNAME) + "/.bashrc";
 	std::fstream file(bashrc.c_str(), std::ios::app);
 	if (file.is_open())
@@ -482,15 +489,17 @@ void Aura::installTools(bool &isInstallationComplete)
 		fs::remove((home + "\\vs.exe"));
 	};
 	isInstallationComplete = true;
-	setupVcpkg(home, isInstallationComplete);
 	addToPathWin();
+	home = getenv(USERNAME);
+	setupVcpkg(home, isInstallationComplete);
 #else
 #define DISTRO_INFO "/etc/os-release"
 
 	Log::log("Install C++ clang Compiler and build tools using ex.[ubuntu]sudo apt install git ninja-build cmake clang clang-tools", Type::E_WARNING);
 	addToPathUnix();
-	isInstallationComplete = true;
-
+	std::string home="/home/";
+	home+=getenv(USERNAME);
+	setupVcpkg(home, isInstallationComplete);
 #endif
 };
 
