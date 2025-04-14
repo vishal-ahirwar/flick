@@ -71,3 +71,5 @@ file(GLOB SOURCES "src/*.cc" "src/*/*.cc")
     target_link_libraries(tests GTest::GTest GTest::Main cpr::cpr fmt::fmt nlohmann_json::nlohmann_json Boost::process)
     add_test(NAME MyUnitTests COMMAND tests)
 
+
+    

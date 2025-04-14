@@ -112,20 +112,13 @@ __pycache__
 log.txt
 )"};
 
-constexpr std::string_view CMAKE_CODE[]{
+constexpr std::string_view CONFIG_CMAKE[]{
     R"(
 #Auto Generated Root CMake file by aura CLI
 #@COPYRIGHT
-
-#====================Basic Configuration===================
-
-cmake_minimum_required(VERSION 3.6...3.31)
-project(@name VERSION 1.0.0 LANGUAGES CXX)
-
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 option(STATIC_LINK "Enable static linking" ON)
 option(ENABLE_TESTS "GTests" OFF)
 if(STATIC_LINK)
@@ -135,16 +128,11 @@ if(STATIC_LINK)
       set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
   endif()
 endif()
-
 set(COMPANY "@DeveloperName")
 string(TIMESTAMP CURRENT_YEAR "%Y")
 set(COPYRIGHT "Copyright(c) ${CURRENT_YEAR} ${COMPANY}.")
-
 include_directories(${CMAKE_BINARY_DIR})
 configure_file(@config_in @config_h)
-
-#@find Warning: Do not remove this line
-
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     message(STATUS "Enabling secure coding features for Clang")
     add_compile_options(
@@ -158,37 +146,15 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         #-Werror                         # Treat warnings as errors
     )
 endif()
-
-
-#====================Configuration===================
-
-if(NOT ENABLE_TESTS)
-    add_executable(${PROJECT_NAME} "src/main.cpp")# Add your Source Files here
-    #@link Warning: Do not remove this line
-else()
-    message(STATUS "Tests are enabled")
-    find_package(GTest)
-    enable_testing()
-    add_executable(tests "tests/main.cpp")
-    target_link_libraries(tests GTest::GTest GTest::Main)
-endif()
 )",
     R"(
 #Auto Generated Root CMake file by aura CLI
 #@COPYRIGHT
-
-#====================Basic Configuration===================
-
-cmake_minimum_required(VERSION 3.6...3.31)
-project(@name VERSION 1.0.0 LANGUAGES C)
-
 set(CMAKE_C_STANDARD 20)
 set(CMAKE_C_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 option(STATIC_LINK "Enable static linking" ON)
 option(ENABLE_TESTS "CMOCKA Test" OFF)
-
 if(STATIC_LINK)
   message(STATUS "Static linking enabled")
   if (WIN32)
@@ -197,17 +163,11 @@ if(STATIC_LINK)
       set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
   endif()
 endif()
-
 set(COMPANY "@DeveloperName")
 string(TIMESTAMP CURRENT_YEAR "%Y")
 set(COPYRIGHT "Copyright(c) ${CURRENT_YEAR} ${COMPANY}.")
-
 include_directories(${CMAKE_BINARY_DIR})
 configure_file(@config_in @config_h)
-
-#@find WARNING : DO NOT REMOVE THIS LINE
-
-
 if(CMAKE_C_COMPILER_ID MATCHES "Clang")
   message(STATUS "Enabling secure coding features for Clang")
   add_compile_options(
@@ -220,18 +180,6 @@ if(CMAKE_C_COMPILER_ID MATCHES "Clang")
     -fno-common                     # Avoid common symbol issues
     #-Werror                         # Treat warnings as errors
     )
-endif()
-
-#====================Configuration===================
-
-if(NOT ENABLE_TESTS)
-    add_executable(${PROJECT_NAME} "src/main.c")# Add Your Source Files here
-    #@link WARNING : DO NOT REMOVE THIS LINE
-else()
-    message(STATUS "Tests are enabled")
-    find_package(cmocka REQUIRED)
-    add_executable(tests "tests/main.c")
-    target_link_libraries(tests cmocka::cmocka)
 endif()
 )"};
 

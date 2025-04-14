@@ -496,8 +496,8 @@ void Aura::installTools(bool &isInstallationComplete)
 
 	Log::log("Install C++ clang Compiler and build tools using ex.[ubuntu]sudo apt install git ninja-build cmake clang clang-tools", Type::E_WARNING);
 	addToPathUnix();
-	std::string home="/home/";
-	home+=getenv(USERNAME);
+	std::string home = "/home/";
+	home += getenv(USERNAME);
 	setupVcpkg(home, isInstallationComplete);
 #endif
 };
@@ -971,4 +971,7 @@ void Aura::createSubProject()
 		lang = Language::C;
 	else if (subProjectName == "cc")
 		lang = Language::CXX;
+	ProjectGenerator generator{};
+	generator.setProjectSetting(mProjectSetting, lang);
+	generator.generateSubProject(subProjectName, lang);
 }

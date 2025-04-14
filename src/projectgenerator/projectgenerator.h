@@ -18,16 +18,19 @@ public:
     static void writeProjectSettings(ProjectSetting *setting);
     static void generateCMakePreset(const Language&);
     bool getFromConfig(const std::string&key,std::string&result);
+    bool generateSubProject(const std::string&projectName,Language,bool isRoot=false);
 private:
 Language _lang{Language::CXX};
 
 private:
     void generateProject();
     void createDir();
-    void generateCppTemplateFile();
-    void generateCmakeFile();
+    void generateCppTemplateFile(const std::string&projectName,bool isRoot);
     void generateGitIgnoreFile();
     void generateVcpkgFiles();
+    void generateRootCMake();
+    void generateSubProjectCMake(const std::string&projectName);
+    void configCMake();
 public:
     static void generateLicenceFile(const UserInfo&userInfo);
 };

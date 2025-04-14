@@ -65,11 +65,6 @@ bool Deps::buildDeps()
     return true;
 }
 
-DepsSetting &Deps::getSetting()
-{
-    // TODO: insert return statement here
-    return mDepsSetting;
-};
 
 bool Deps::addDeps(const std::string &packageName)
 {
