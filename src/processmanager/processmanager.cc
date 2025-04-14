@@ -7,78 +7,46 @@
 #include <array>
 #include "log/log.h"
 #include "processmanager.h"
+const char SHAPES[]{'/', '+', '-', '\\'};
+const int size{sizeof(SHAPES)};
+namespace fs = std::filesystem;
 int ProcessManager::startProcess(const std::vector<std::string> &args, std::string &processLog, const std::string &msg, bool b_log)
 {
-    static const char SHAPES[]{'/', '+', '-', '\\'};
-    static const int SIZE{sizeof(SHAPES)};
-
-    namespace bp = boost::process;
-    namespace fs = std::filesystem;
-    namespace ba = boost::algorithm;
+    Log::log(msg + ".." + SHAPES[rand() % size], Type::E_DISPLAY, "\r");
 
     if (!fs::exists("build"))
         fs::create_directories("build");
 
     std::ofstream logFile("build/build.log", std::ios::out);
-
-    std::string exe = args[0];
-    std::vector<std::string> cmdArgs(args.begin() + 1, args.end());
-
-    bp::ipstream outStream;
-    bp::ipstream errStream;
-
-    bp::child process(
-        bp::search_path(exe),
-        bp::args = cmdArgs,
-        bp::std_out > outStream,
-        bp::std_err > errStream);
-
-    std::string line;
-    while (process.running())
+    boost::process::ipstream outStream;
+    boost::process::ipstream errStream;
+    boost::process::child process(boost::process::search_path(args[0]), boost::process::args(std::vector<std::string>(args.begin()+1,args.end())), boost::process::std_out > outStream, boost::process::std_err > errStream);
+    std::string lineOut, lineErr;
+    while (process.running() && (std::getline(outStream, lineOut) || std::getline(errStream, lineErr)))
     {
-        bool hasOutput = false;
-
-        if (std::getline(outStream, line))
+        Log::log(msg + ".." + SHAPES[rand() % size], Type::E_DISPLAY, "\r");
+        if (!lineErr.empty())
         {
-            hasOutput = true;
-            processLog += line + "\n";
-            logFile << line << '\n';
-
-            if (ba::icontains(line, "warning"))
-            {
-                Log::log(line, Type::E_WARNING);
-            }
-            else if (ba::icontains(line, "error"))
-            {
-                Log::log(line, Type::E_ERROR);
-            }
+            if (lineErr.find("warning") != std::string::npos)
+                Log::log(lineErr, Type::E_WARNING);
+            if (lineErr.find("error") != std::string::npos)
+                Log::log(lineErr, Type::E_ERROR);
+            logFile<<lineErr<<"\n";
+            processLog.append(lineErr+"\n");
         }
-
-        if (std::getline(errStream, line))
+        if (!lineOut.empty())
         {
-            hasOutput = true;
-            processLog += line + "\n";
-            logFile << line << '\n';
-
-            if (ba::icontains(line, "warning"))
-            {
-                Log::log(line, Type::E_WARNING);
-            }
-            else if (ba::icontains(line, "error"))
-            {
-                Log::log(line, Type::E_ERROR);
-            }
-        }
-
-        if (hasOutput)
-        {
-            Log::log(msg + ".." + SHAPES[rand() % SIZE], Type::E_DISPLAY, "\r");
+            if (lineOut.find("warning") != std::string::npos)
+                Log::log(lineOut, Type::E_WARNING);
+            if (lineOut.find("error") != std::string::npos)
+                Log::log(lineOut, Type::E_ERROR);
+            logFile<<lineOut<<"\n";
+            processLog.append(lineOut+"\n");
         }
     }
-
     process.wait();
     int exitCode = process.exit_code();
-
+    logFile.close();
     if (exitCode != 0)
     {
         Log::log("For more info: " + (fs::current_path() / "build/build.log").generic_string(), Type::E_DISPLAY);

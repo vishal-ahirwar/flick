@@ -219,10 +219,11 @@ bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName)
     std::vector<std::string> args{"vcpkg", "search", packageName};
     std::string processLog{};
     ProcessManager::startProcess(args, processLog, "Searching Package info");
+
     std::string line{};
     std::vector<std::string> lines{};
     std::stringstream ss{processLog};
-    while (std::getline(ss, line))
+    while (std::getline(ss, line, '\n'))
     {
         if (line.find(packageName) != std::string::npos)
             lines.push_back(line);
@@ -248,11 +249,13 @@ bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName)
             if (matches[1].str() == packageName)
             {
                 Log::log("Selected package info", Type::E_DISPLAY);
-                for (size_t i = 1; i < matches.size(); ++i)
-                {
-                    Log::log(matches[i].str(), Type::E_NONE);
-                }
+                Log::log("\t" + package, Type::E_NONE);
                 return true;
+            }
+            else
+            {
+                if (lines.size() <= 2)
+                    Log::log("You might be looking for : " + package);
             }
         }
     };
