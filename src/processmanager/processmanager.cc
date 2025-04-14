@@ -1,83 +1,89 @@
-#include <reproc++/reproc.hpp>
-#include <processmanager/processmanager.h>
+#include <boost/process.hpp>
+#include <boost/asio.hpp>
+#include <boost/algorithm/string.hpp>
 #include <filesystem>
 #include <fstream>
 #include <sstream>
 #include <array>
 #include "log/log.h"
-
-const char SHAPES[]{'/', '+', '-', '\\'};
-const int SIZE{sizeof(SHAPES)};
-// b_log -- should log the msg to the file to print on the termnial ;)
-
+#include "processmanager.h"
 int ProcessManager::startProcess(const std::vector<std::string> &args, std::string &processLog, const std::string &msg, bool b_log)
 {
-    reproc::process process;
-    reproc::options options;
+    static const char SHAPES[]{'/', '+', '-', '\\'};
+    static const int SIZE{sizeof(SHAPES)};
 
-    options.redirect.out.type = reproc::redirect::pipe;
-    options.redirect.err.type = reproc::redirect::pipe;
+    namespace bp = boost::process;
+    namespace fs = std::filesystem;
+    namespace ba = boost::algorithm;
 
-    std::error_code ec = process.start(args, options);
-    if (ec)
+    if (!fs::exists("build"))
+        fs::create_directories("build");
+
+    std::ofstream logFile("build/build.log", std::ios::out);
+
+    std::string exe = args[0];
+    std::vector<std::string> cmdArgs(args.begin() + 1, args.end());
+
+    bp::ipstream outStream;
+    bp::ipstream errStream;
+
+    bp::child process(
+        bp::search_path(exe),
+        bp::args = cmdArgs,
+        bp::std_out > outStream,
+        bp::std_err > errStream);
+
+    std::string line;
+    while (process.running())
     {
-        processLog = "Failed to start process: " + ec.message();
-        return 1;
-    }
+        bool hasOutput = false;
 
-    std::ofstream logFile;
-    if (!std::filesystem::exists("build"))
-        std::filesystem::create_directories("build");
-    logFile.open("build/build.log", std::ios::out);
-
-    std::array<uint8_t, 4096> buffer;
-
-    while (true)
-    {
-        auto [bytesRead, read_ec] = process.read(reproc::stream::out, buffer.data(), buffer.size());
-        if (read_ec || bytesRead == 0)
-            break;
-
-        std::string chunk(reinterpret_cast<char *>(buffer.data()), bytesRead);
-        processLog.append(chunk);
-        Log::log(msg + ".." + SHAPES[rand() % SIZE], Type::E_DISPLAY, "\r");
-        if (chunk.find("warning") != std::string::npos)
+        if (std::getline(outStream, line))
         {
-            std::istringstream ss(chunk);
-            std::string line{};
-            while (std::getline(ss, line, '\n'))
+            hasOutput = true;
+            processLog += line + "\n";
+            logFile << line << '\n';
+
+            if (ba::icontains(line, "warning"))
             {
-                if (line.find("warning") != std::string::npos)
-                {
-                    Log::log(line, Type::E_WARNING);
-                }
+                Log::log(line, Type::E_WARNING);
+            }
+            else if (ba::icontains(line, "error"))
+            {
+                Log::log(line, Type::E_ERROR);
             }
         }
-        else if (chunk.find("error") != std::string::npos)
+
+        if (std::getline(errStream, line))
         {
-            std::istringstream ss(chunk);
-            std::string line{};
-            while (std::getline(ss, line, '\n'))
+            hasOutput = true;
+            processLog += line + "\n";
+            logFile << line << '\n';
+
+            if (ba::icontains(line, "warning"))
             {
-                if (line.find("error") != std::string::npos)
-                {
-                    Log::log(line, Type::E_ERROR);
-                }
+                Log::log(line, Type::E_WARNING);
             }
+            else if (ba::icontains(line, "error"))
+            {
+                Log::log(line, Type::E_ERROR);
+            }
+        }
+
+        if (hasOutput)
+        {
+            Log::log(msg + ".." + SHAPES[rand() % SIZE], Type::E_DISPLAY, "\r");
         }
     }
 
-    auto [status, exitCode] = process.wait(reproc::infinite);
-    process.close(reproc::stream::in);
-    process.close(reproc::stream::out);
-    process.close(reproc::stream::err);
-    logFile << processLog << "\n";
-    if (logFile.is_open())
-        logFile.close();
-    if (status != 0)
+    process.wait();
+    int exitCode = process.exit_code();
+
+    if (exitCode != 0)
     {
-        Log::log("For More info " + std::filesystem::path(std::filesystem::current_path().string() + "/build/build.log").generic_string(), Type::E_DISPLAY);
+        Log::log("For more info: " + (fs::current_path() / "build/build.log").generic_string(), Type::E_DISPLAY);
     }
+
     puts("");
-    return status;
+    return exitCode;
 }

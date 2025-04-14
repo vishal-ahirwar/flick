@@ -2,10 +2,10 @@
   "name": "aura",
   "version": "3.0.0",
   "dependencies": [
+    "boost-process",
     "cpr",
     "fmt",
-    "nlohmann-json",
-    "reproc",
-    "gtest"
+    "gtest",
+    "nlohmann-json"
   ]
 }
