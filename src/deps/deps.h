@@ -29,4 +29,5 @@ private:
     bool installGlobally(const std::string &url);
     bool addToConfig(const std::string &path);
     bool rebuildDeps(const std::string &url);
+    bool isPackageAvailableOnVCPKG(const std::string&packageName);
 };

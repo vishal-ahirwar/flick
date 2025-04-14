@@ -8,7 +8,7 @@
 #include "extractor.h"
 #include "deps.h"
 #include "processmanager/processmanager.h"
-
+#include <regex>
 namespace fs = std::filesystem;
 bool Deps::buildDeps()
 {
@@ -71,11 +71,13 @@ DepsSetting &Deps::getSetting()
     return mDepsSetting;
 };
 
-bool Deps::addDeps(const std::string &url)
+bool Deps::addDeps(const std::string &packageName)
 {
+    if (!isPackageAvailableOnVCPKG(packageName))
+        return false;
     std::string processLog{};
-    std::vector<std::string> args{"vcpkg", "add", "port", url};
-    return ProcessManager::startProcess(args, processLog,"Adding "+url+" to vcpkg.json") == 0;
+    std::vector<std::string> args{"vcpkg", "add", "port", packageName};
+    return ProcessManager::startProcess(args, processLog, "Adding " + packageName + " to vcpkg.json") == 0;
 };
 
 bool Deps::updateCMakeFile(const std::string &vcpkgLog)
@@ -105,7 +107,7 @@ bool Deps::updateCMakeFile(const std::string &vcpkgLog)
     {
         if (packageName.empty())
             continue;
-        Log::log("\t+" + packageName, Type::E_DISPLAY);
+        Log::log("\t+" + packageName, Type::E_NONE);
 
         for (const auto &package : values)
         {
@@ -209,5 +211,50 @@ bool Deps::addToConfig(const std::string &path)
 [[deprecated("Will be removed in future")]]
 bool Deps::rebuildDeps(const std::string &url)
 {
+    return false;
+}
+
+bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName)
+{
+    std::vector<std::string> args{"vcpkg", "search", packageName};
+    std::string processLog{};
+    ProcessManager::startProcess(args, processLog, "Searching Package info");
+    std::string line{};
+    std::vector<std::string> lines{};
+    std::stringstream ss{processLog};
+    while (std::getline(ss, line))
+    {
+        if (line.find(packageName) != std::string::npos)
+            lines.push_back(line);
+    };
+    if (lines.size() > 1)
+    {
+        Log::log("Found more than 1 packages with similiar name " + packageName, Type::E_WARNING);
+        for (const auto &package : lines)
+            Log::log(package, Type::E_DISPLAY);
+    }
+
+    if (lines.size() == 0)
+    {
+        Log::log("No package found with name " + packageName, Type::E_ERROR);
+        return 0;
+    }
+    std::regex pattern(R"(^(\S+)\s+([^\s]+)\s+(.*)$)");
+    for (const auto &package : lines)
+    {
+        std::smatch matches{};
+        if (std::regex_match(package, matches, pattern))
+        {
+            if (matches[1].str() == packageName)
+            {
+                Log::log("Selected package info", Type::E_DISPLAY);
+                for (size_t i = 1; i < matches.size(); ++i)
+                {
+                    Log::log(matches[i].str(), Type::E_NONE);
+                }
+                return true;
+            }
+        }
+    };
     return false;
 }
