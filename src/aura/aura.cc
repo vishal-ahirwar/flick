@@ -972,17 +972,22 @@ void Aura::genCMakePreset()
 
 void Aura::createSubProject()
 {
-	Log::log("SubProject Name [Press Enter To Cancel]> ", Type::E_DISPLAY, "");
-	std::string subProjectName{};
-	std::getline(std::cin, subProjectName);
-	Language lang{};
-	if (subProjectName.empty())
+	if (mArgs.size() < 3)
+	{
+		Log::log("Your must provide subproject name!", Type::E_ERROR);
 		return;
-	else if (subProjectName == "c")
+	}
+	Log::log("Please Choose your Programming language c/cc [Press Enter To Cancel]> ", Type::E_DISPLAY, "");
+	std::string input{};
+	std::getline(std::cin, input);
+	Language lang{};
+	if (input.empty())
+		return;
+	else if (input == "c")
 		lang = Language::C;
-	else if (subProjectName == "cc")
+	else if (input == "cc")
 		lang = Language::CXX;
 	ProjectGenerator generator{};
 	generator.setProjectSetting(mProjectSetting, lang);
-	generator.generateSubProject(subProjectName, lang);
+	generator.generateSubProject(mArgs.at(2), lang);
 }

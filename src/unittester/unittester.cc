@@ -35,7 +35,7 @@ bool UnitTester::runUnitTesting(const std::vector<std::string> &args)
         args.push_back("--build");
         args.push_back("build/debug");
         args.push_back("-j" + cpuThreads);
-        return ProcessManager::startProcess(args, processLog, "Compiling Tests")==0; // if there is any kind of error then don't clear the terminal
+        return ProcessManager::startProcess(args, processLog, "Compiling Tests") == 0; // if there is any kind of error then don't clear the terminal
     }
     else
     {
@@ -45,7 +45,7 @@ bool UnitTester::runUnitTesting(const std::vector<std::string> &args)
         args.push_back("--build");
         args.push_back("build/debug");
         args.push_back("-j" + cpuThreads);
-        return ProcessManager::startProcess(args, processLog, "Compiling Tests")==0; // if there is any kind of error then don't clear the terminal
+        return ProcessManager::startProcess(args, processLog, "Compiling Tests") == 0; // if there is any kind of error then don't clear the terminal
     }
 };
 //
@@ -76,30 +76,41 @@ void UnitTester::setupUnitTestingFramework()
     {
         std::exit(0);
     }
-    fs::create_directory(path);
+    fs::create_directories(path + "src");
     Deps deps;
+    std::ofstream cmake{"./tests/CMakeLists.txt"};
     switch (lang)
     {
     case Language::C:
 
         [&]() -> void
-        {std::fstream testFile(path + "main.c", std::ios::out);
-        if (testFile.is_open())
-        {
-            testFile << UNIT_TEST_CODE[static_cast<int>(lang)];
-            testFile.close();
-            deps.addDeps("cmocka");
-        }; }();
+        {std::fstream testFile(path + "src/main.c", std::ios::out);
+            cmake<<"find_package(cmocka CONFIG REQUIRED)\n";
+            cmake << "add_executable(tests src/main.c)# Add your Source Files here\n";
+            cmake<<"target_link_libraries(tests PRIVATE cmocka::cmocka)\n";
+            if (testFile.is_open())
+            {
+                testFile << UNIT_TEST_CODE[static_cast<int>(lang)];
+                testFile.close();
+                deps.addDeps("cmocka");
+            }; }();
         break;
     case Language::CXX:
         [&]() -> void
-        {std::fstream testFile(path + "main.cpp", std::ios::out);
-    if (testFile.is_open())
-    {
-        testFile << UNIT_TEST_CODE[static_cast<int>(lang)];
-        testFile.close();
-        deps.addDeps("gtest");
-    }; }();
+        {std::fstream testFile(path + "src/main.cpp", std::ios::out);
+            cmake << "find_package(GTest CONFIG REQUIRED)\n";
+            cmake << "add_executable(tests src/main.cpp)# Add your Source Files here\n";
+            cmake<<"target_link_libraries(tests GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main)\n";
+                if (testFile.is_open())
+                {
+                    testFile << UNIT_TEST_CODE[static_cast<int>(lang)];
+                    testFile.close();
+                    deps.addDeps("gtest");
+                }; }();
         break;
     }
+    cmake.close();
+    cmake.open("CMakeLists.txt", std::ios::app);
+    cmake << "add_subdirectory(tests)\n";
+    cmake.close();
 };

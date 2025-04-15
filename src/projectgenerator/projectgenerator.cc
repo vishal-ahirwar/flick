@@ -64,7 +64,16 @@ bool ProjectGenerator::generateSubProject(const std::string &projectName, Langua
 		generateVcpkgFiles();
 		generateGitIgnoreFile();
 		std::ofstream file{mProjectSetting.getProjectName() + "/" + mProjectSetting.getProjectName() + "/CMakeLists.txt"};
-		file << std::format("add_executable({} src/main.cpp)# Add your Source Files here\n", projectName);
+		switch (lang)
+		{
+		case Language::CXX:
+			file << std::format("add_executable({} src/main.cpp)# Add your Source Files here\n", projectName);
+			break;
+		case Language::C:
+			file << std::format("add_executable({} src/main.c)# Add your Source Files here\n", projectName);
+			break;
+		};
+
 		file.close();
 	}
 	else
@@ -76,22 +85,24 @@ bool ProjectGenerator::generateSubProject(const std::string &projectName, Langua
 
 	generateCppTemplateFile(projectName, isRoot);
 
-	std::vector<std::string>lines{};
+	std::vector<std::string> lines{};
 	std::string line{};
 	std::ifstream in{};
-	isRoot?in.open(mProjectSetting.getProjectName()+"/CMakeLists.txt"):in.open("CMakelists.txt");
-	size_t index=0,appnedIndex=0;
-	while(std::getline(in,line))
+	isRoot ? in.open(mProjectSetting.getProjectName() + "/CMakeLists.txt") : in.open("CMakelists.txt");
+	size_t index = 0, appnedIndex = 0;
+	while (std::getline(in, line))
 	{
 		++index;
 		lines.push_back(line);
-		if(line.find("@add_subproject")!=std::string::npos)appnedIndex=index;
+		if (line.find("@add_subproject") != std::string::npos)
+			appnedIndex = index;
 	};
 	in.close();
-	lines.insert(lines.begin()+appnedIndex,std::format("add_subdirectory({})",projectName));
+	lines.insert(lines.begin() + appnedIndex, std::format("add_subdirectory({})", projectName));
 	std::ofstream out;
-	isRoot?out.open(mProjectSetting.getProjectName()+"/CMakeLists.txt"):out.open("CMakelists.txt");
-	for(const auto&line:lines)out<<line<<"\n";
+	isRoot ? out.open(mProjectSetting.getProjectName() + "/CMakeLists.txt") : out.open("CMakelists.txt");
+	for (const auto &line : lines)
+		out << line << "\n";
 	out.close();
 	return true;
 }
@@ -190,7 +201,16 @@ void ProjectGenerator::generateSubProjectCMake(const std::string &projectName)
 	if (fs::exists(projectName + "/CMakeLists.txt"))
 		return;
 	std::ofstream file{projectName + "/CMakeLists.txt"};
-	file << std::format("add_executable({} src/main.cpp)# Add your Source Files here\n", projectName);
+	switch (_lang)
+	{
+	case Language::CXX:
+		file << std::format("add_executable({} src/main.cpp)# Add your Source Files here\n", projectName);
+		break;
+	case Language::C:
+		file << std::format("add_executable({} src/main.c)# Add your Source Files here\n", projectName);
+		break;
+	};
+
 	file.close();
 }
 void ProjectGenerator::configCMake()
@@ -305,7 +325,6 @@ void ProjectGenerator::generateCppTemplateFile(const std::string &projectName, b
 		file << MAIN_CODE[static_cast<int>(_lang)];
 		file.close();
 	}
-	Log::log("done Cpp Tep part", Type::E_WARNING);
 }
 
 //

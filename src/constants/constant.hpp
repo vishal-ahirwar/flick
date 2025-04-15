@@ -150,7 +150,7 @@ endif()
     R"(
 #Auto Generated Root CMake file by aura CLI
 #@COPYRIGHT
-set(CMAKE_C_STANDARD 20)
+set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 option(STATIC_LINK "Enable static linking" ON)
