@@ -60,7 +60,14 @@ bool ProjectGenerator::generateSubProject(const std::string &projectName, Langua
 	{
 		configCMake();
 		generateRootCMake();
-		generateCMakePreset(lang);
+		std::ofstream out(mProjectSetting.getProjectName()+"/CMakePresets.json");
+		if (!out.is_open())
+		{
+			Log::log("failed to generate CMakePresets.json", Type::E_ERROR);
+			return false;
+		};
+		out << CMAKE_PRESETS[static_cast<int>(lang)];
+		out.close();
 		generateVcpkgFiles();
 		generateGitIgnoreFile();
 		std::ofstream file{mProjectSetting.getProjectName() + "/" + mProjectSetting.getProjectName() + "/CMakeLists.txt"};
@@ -88,7 +95,7 @@ bool ProjectGenerator::generateSubProject(const std::string &projectName, Langua
 	std::vector<std::string> lines{};
 	std::string line{};
 	std::ifstream in{};
-	isRoot ? in.open(mProjectSetting.getProjectName() + "/CMakeLists.txt") : in.open("CMakelists.txt");
+	isRoot ? in.open(mProjectSetting.getProjectName() + "/CMakeLists.txt") : in.open("CMakeLists.txt");
 	size_t index = 0, appnedIndex = 0;
 	while (std::getline(in, line))
 	{
@@ -100,7 +107,7 @@ bool ProjectGenerator::generateSubProject(const std::string &projectName, Langua
 	in.close();
 	lines.insert(lines.begin() + appnedIndex, std::format("add_subdirectory({})", projectName));
 	std::ofstream out;
-	isRoot ? out.open(mProjectSetting.getProjectName() + "/CMakeLists.txt") : out.open("CMakelists.txt");
+	isRoot ? out.open(mProjectSetting.getProjectName() + "/CMakeLists.txt") : out.open("CMakeLists.txt");
 	for (const auto &line : lines)
 		out << line << "\n";
 	out.close();

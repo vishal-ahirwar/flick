@@ -185,6 +185,18 @@ void Aura::run()
 	run += app;
 	run += "/" + app;
 #endif // _WIN32
+	if (!fs::exists(run))
+	{
+		run.clear();
+#ifdef _WIN32
+		run += ".\\build\\debug\\";
+		run += "\\" + app;
+		run += ".exe";
+#else
+		run += "./build/debug/";
+		run += "/" + app;
+#endif // _WIN32
+	}
 	bool isArg{false};
 	for (auto &arg : mArgs)
 	{
