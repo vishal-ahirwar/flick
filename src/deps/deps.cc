@@ -65,7 +65,6 @@ bool Deps::buildDeps()
     return true;
 }
 
-
 bool Deps::addDeps(const std::string &packageName)
 {
     if (!isPackageAvailableOnVCPKG(packageName))
@@ -75,21 +74,33 @@ bool Deps::addDeps(const std::string &packageName)
     return ProcessManager::startProcess(args, processLog, "Adding " + packageName + " to vcpkg.json") == 0;
 };
 
-bool Deps::updateCMakeFile(const std::string &vcpkgLog)
+bool Deps::updateCMakeFile(const std::string &vcpkgLog, const std::string &projectName, const std::string &packageName)
 {
-    std::ifstream in("CMakeLists.txt");
-    if (!in.is_open())
+    std::fstream subProjectCMake(projectName + "/CMakeLists.txt", std::ios::in);
+    std::fstream rootCMake("CMakeLists.txt", std::ios::in);
+    if (!rootCMake.is_open())
     {
-        Log::log("Failed to open CMakeLists.txt", Type::E_ERROR);
+        Log::log("Failed to open CMakeLists.txt for Reading", Type::E_ERROR);
         return false;
     };
-    std::vector<std::string> lines{};
-    std::string line{};
-    while (std::getline(in, line)) // reading whole file in vector to easily update the file
+    if (!subProjectCMake.is_open())
     {
-        lines.push_back(line);
+        Log::log(std::format("Failed to open {}/CMakeLists.txt for Reading", projectName), Type::E_ERROR);
+        return false;
+    }
+    std::vector<std::string> rootCMakeLines{}, subProjectLines;
+    std::string line{};
+    while (std::getline(rootCMake, line)) // reading whole file in vector to easily update the file
+    {
+        rootCMakeLines.push_back(line);
     };
-    in.close();
+    while (std::getline(subProjectCMake, line))
+    {
+        subProjectLines.push_back(line);
+    };
+
+    rootCMake.close();
+    subProjectCMake.close();
     Extractor extractor;
     if (extractor.extract(vcpkgLog))
     {
@@ -98,16 +109,16 @@ bool Deps::updateCMakeFile(const std::string &vcpkgLog)
     };
     auto packages{extractor.getPackages()};
     Log::log("Packages :", Type::E_DISPLAY);
-    for (const auto &[packageName, values] : packages)
+    for (auto &[name, values] : packages)
     {
-        if (packageName.empty())
+        if (name.empty())
             continue;
-        Log::log("\t+" + packageName, Type::E_NONE);
+        Log::log("\t+" + name, Type::E_NONE);
 
-        for (const auto &package : values)
+        for (auto &package : values)
         {
             bool shouldAdd{true};
-            for (const auto &line : lines)
+            for (const auto &line : rootCMakeLines)
             {
                 if (line.find(package) != std::string::npos)
                 {
@@ -118,38 +129,46 @@ bool Deps::updateCMakeFile(const std::string &vcpkgLog)
             {
                 if (package.find("find") != std::string::npos)
                 {
-                    for (int i = 0; i < lines.size(); ++i)
+                    for (int i = 0; i < rootCMakeLines.size(); ++i)
                     {
-                        if (lines.at(i).find("@find") != std::string::npos)
+                        if (rootCMakeLines.at(i).find("@add_find_package") != std::string::npos)
                         {
-                            lines.insert(lines.begin() + i + 1, package);
+                            rootCMakeLines.insert(rootCMakeLines.begin() + i + 1, package);
                             break;
                         }
                     }
                 }
                 else
                 {
-                    for (int i = 0; i < lines.size(); ++i)
-                    {
-                        if (lines.at(i).find("@link") != std::string::npos)
-                        {
-                            lines.insert(lines.begin() + i + 1, package);
-                            break;
-                        }
-                    }
+                    auto index = package.find("main");
+                    if (index == std::string::npos)
+                        continue;
+                    package.replace(index, strlen("main"), projectName);
+                    if (std::find(subProjectLines.begin(), subProjectLines.end(), package) != subProjectLines.end())
+                        continue;
+                    subProjectLines.push_back(package);
                 }
             }
         }
-    };
-    std::fstream out{"CMakeLists.txt", std::ios::out};
-    if (out.is_open())
-    {
-        for (const auto &line : lines)
-        {
-            out << line << "\n";
-        };
-        out.close();
     }
+    rootCMake.open("CMakeLists.txt", std::ios::out);
+    subProjectCMake.open(projectName + "/CMakeLists.txt", std::ios::out);
+    if (!rootCMake.is_open())
+    {
+        Log::log("Failed to open CMakeLists.txt for Writing", Type::E_ERROR);
+        return false;
+    };
+    if (!subProjectCMake.is_open())
+    {
+        Log::log(std::format("Failed to open {}/CMakeLists.txt for Writing", projectName), Type::E_ERROR);
+        return false;
+    }
+    for (const auto &line : rootCMakeLines)
+        rootCMake << line << "\n";
+    for (const auto &line : subProjectLines)
+        subProjectCMake << line << "\n";
+    rootCMake.close();
+    subProjectCMake.close();
     return true;
 }
 

@@ -12,7 +12,7 @@ class Deps
 public:
     bool buildDeps();
     bool addDeps(const std::string &url);
-    bool updateCMakeFile(const std::string &vcpkgLog);
+    bool updateCMakeFile(const std::string &vcpkgLog, const std::string &projectName,const std::string&packageName);
     bool installDeps(std::string&vcpkgLog,const std::string_view&TRIPLET);
 private:
     bool updateConfig(const std::string &libName, const std::string &libPath);

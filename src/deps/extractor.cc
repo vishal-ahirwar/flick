@@ -4,81 +4,73 @@
 #include <string.h>
 #include <regex>
 #include <list>
-#include <set>
+#include <unordered_set>
 std::vector<std::pair<std::string, std::regex>> patterns = {
-    {"find_package", std::regex(R"(find_package\([^\)]+\))")},
-    {"target_link_libraries", std::regex(R"(target_link_libraries\([^)]*\))")},
-    {"find_path", std::regex(R"(find_path\([^\)]+\))")},
-    {"target_include_directories", std::regex(R"(target_include_directories\([^)]*\))")}};
+    {"find_package", std::regex(R"(find_package\([^\)]+\))", std::regex_constants::icase)},
+    {"target_link_libraries", std::regex(R"(target_link_libraries\([^)]*\))", std::regex_constants::icase)},
+    {"find_path", std::regex(R"(find_path\([^\)]+\))", std::regex_constants::icase)},
+    {"target_include_directories", std::regex(R"(target_include_directories\([^)]*\))", std::regex_constants::icase)}};
 
 const Packages &Extractor::getPackages() const
 {
     return mPackages;
 };
+int compareWeight(const std::string &a, const std::string &b)
+{
+    std::string s1 = a;
+    std::string s2 = b;
+
+    // Convert both to lowercase
+    std::transform(s1.begin(), s1.end(), s1.begin(), ::tolower);
+    std::transform(s2.begin(), s2.end(), s2.begin(), ::tolower);
+
+    int weight = 0;
+    size_t minLen = std::min(s1.length(), s2.length());
+
+    for (size_t i = 0; i < minLen; ++i)
+    {
+        if (s1[i] == s2[i])
+            ++weight;
+        else
+            --weight;
+    }
+
+    return ((a.length() + b.length())) / weight;
+}
+std::string getName(const std::string &findPackgeString)
+{
+    auto start = findPackgeString.find("(");
+    auto end = findPackgeString.find(" ");
+    if (start == std::string::npos || end == std::string::npos)
+        return "";
+    return findPackgeString.substr(start + 1, end - start);
+}
 
 int Extractor::extract(const std::string &vcpkgLog)
 {
-    std::set<std::string> findPackage{};
-    std::vector<std::string> targetLink{};
-
-    for (const auto &[name, pattern] : patterns)
+    size_t index{0};
+    while (true)
     {
-        auto start = vcpkgLog.cbegin();
-        std::smatch match;
-        while (std::regex_search(start, vcpkgLog.cend(), match, pattern))
-        {
-            if (name.find("find") != std::string::npos)
-            {
-                findPackage.emplace(match[0]);
-            }
-            else
-            {
-                targetLink.push_back(match[0]);
-            };
-            start = match.suffix().first;
-        }
-    };
-    std::set<std::string> usedTargets;
-    for (const auto &package : findPackage)
-    {
-        std::smatch nameMatch;
-        std::string name;
-        if (std::regex_search(package, nameMatch, std::regex(R"(find_package\(\s*([^\s\)]+))")))
-        {
-            name = nameMatch[1];
-        }
-        else
+        index = vcpkgLog.find("find", index);
+        if (index == std::string::npos)
+            break;
+        auto end = vcpkgLog.find(")", index);
+        if (index == std::string::npos)
+            break;
+        std::string findPackage = vcpkgLog.substr(index, end - index + 1);
+        index = end;
+        auto name = getName(findPackage);
+        index = vcpkgLog.find("target", index);
+        if (index == std::string::npos)
+            break;
+        end = vcpkgLog.find(")", index);
+        if (index == std::string::npos)
+            break;
+        std::string linkTarget = vcpkgLog.substr(index, end - index + 1);
+        index = end;
+        if (mPackages.contains(name))
             continue;
-
-        // Log::log("Found package: " + name);
-
-        std::vector<std::string> values;
-        values.push_back(package);
-
-        for (auto &link : targetLink)
-        {
-            std::smatch targetMatch;
-            std::regex targetRegex(name + R"((::[\w\-]+)?)");
-            if (std::regex_search(link, targetMatch, targetRegex))
-            {
-                // Only add the first matching link block
-                if (!usedTargets.contains(name))
-                {
-                    auto index = link.find("main");
-                    if (index == std::string::npos)
-                    {
-                        Log::log("Unkown Pattern!", Type::E_WARNING);
-                        continue;
-                    }
-                    link.replace(index, strlen("main"), "${PROJECT_NAME}");
-                    std::string flatLink = std::regex_replace(link, std::regex(R"(\s*\n\s*)"), " ");
-                    values.push_back(flatLink);
-                    mPackages[name] = values;
-                    usedTargets.insert(name);
-                }
-                break;
-            }
-        }
+        mPackages[name] = std::vector{findPackage, linkTarget};
     }
     return 0;
 };

@@ -167,13 +167,23 @@ bool Aura::compile()
 void Aura::run()
 {
 	std::string run{};
+	std::string app{mProjectSetting.getProjectName()};
+	if (mArgs.size() >= 3)
+	{
+		if (mArgs[2].find("--") == std::string::npos)
+		{
+			app = mArgs[2];
+		};
+	}
 #ifdef _WIN32
 	run += ".\\build\\debug\\";
-	run += mProjectSetting.getProjectName();
+	run += app;
+	run += "\\" + app;
 	run += ".exe";
 #else
 	run += "./build/debug/";
-	run += mProjectSetting.getProjectName();
+	run += app;
+	run += "/" + app;
 #endif // _WIN32
 	bool isArg{false};
 	for (auto &arg : mArgs)
@@ -183,17 +193,13 @@ void Aura::run()
 			isArg = true;
 			continue;
 		}
-		else if (arg.find("--standalone") != std::string::npos)
-		{
-			isArg = false;
-			continue;
-		};
 		if (isArg)
 		{
 			run += " ";
 			run += arg;
 		};
 	}
+
 	if (system(run.c_str()))
 	{
 		Log::log("Maybe You should Compile First Before run or You have Permission to "
@@ -572,9 +578,9 @@ void Aura::test()
 	if (!tester.runUnitTesting(mArgs))
 		return;
 #ifdef _WIN32
-	system(".\\build\\tests\\tests.exe");
+	system(".\\build\\debug\\tests\\tests.exe");
 #else
-	system("./build/tests/tests");
+	system("./build/debug/tests/tests");
 #endif
 };
 
@@ -922,9 +928,14 @@ void Aura::addDeps()
 {
 	if (mArgs.size() < 3)
 	{
-		Log::log("You have to provide github url! make sure it has CMakeList.txt", Type::E_ERROR);
+		Log::log("No Package name given", Type::E_ERROR);
 		return;
 	};
+	std::string app{mProjectSetting.getProjectName()};
+	if (mArgs.size() >= 4)
+	{
+		app = mArgs[3].find("--") == std::string::npos ? mArgs[3] : app;
+	}
 	Deps deps;
 	if (deps.addDeps(mArgs.at(2)))
 	{
@@ -941,7 +952,7 @@ void Aura::addDeps()
 		{
 			return;
 		};
-		deps.updateCMakeFile(vcpkgLog);
+		deps.updateCMakeFile(vcpkgLog, app, mArgs.at(2));
 	}
 }
 void Aura::genCMakePreset()

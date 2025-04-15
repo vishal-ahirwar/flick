@@ -22,18 +22,18 @@ bool UnitTester::runUnitTesting(const std::vector<std::string> &args)
     std::string cpuThreads{std::to_string(std::thread::hardware_concurrency() - 1)};
     // auto formatedString = std::format("Threads in use : {}", cpuThreads.c_str());
     // Log::log(formatedString, Type::E_DISPLAY);
-    if (!fs::exists(fs::current_path().string() + "/build/tests"))
+    if (!fs::exists(fs::current_path().string() + "/build/debug"))
     {
         // run cmake
         std::string processLog{};
-        std::vector<std::string> args{"cmake", ".", "-Bbuild/tests", "-DENABLE_TESTS=ON", "--preset=" + std::string(VCPKG_TRIPLET)};
+        std::vector<std::string> args{"cmake", ".", "-Bbuild/debug", "-DENABLE_TESTS=ON", "--preset=" + std::string(VCPKG_TRIPLET)};
         if (ProcessManager::startProcess(args, processLog, "Generating Tests CMake Files") != 0)
             return false;
         // run ninja
         args.clear();
         args.push_back("cmake");
         args.push_back("--build");
-        args.push_back("build/tests");
+        args.push_back("build/debug");
         args.push_back("-j" + cpuThreads);
         return ProcessManager::startProcess(args, processLog, "Compiling Tests")==0; // if there is any kind of error then don't clear the terminal
     }
@@ -43,7 +43,7 @@ bool UnitTester::runUnitTesting(const std::vector<std::string> &args)
         std::vector<std::string> args{};
         args.push_back("cmake");
         args.push_back("--build");
-        args.push_back("build/tests");
+        args.push_back("build/debug");
         args.push_back("-j" + cpuThreads);
         return ProcessManager::startProcess(args, processLog, "Compiling Tests")==0; // if there is any kind of error then don't clear the terminal
     }

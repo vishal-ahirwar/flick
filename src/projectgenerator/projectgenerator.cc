@@ -9,42 +9,9 @@
 #include <utils/utils.h>
 #include "projectgenerator.h"
 
-/*
- *root cmake [project-name]
- *--res
- *--vcpkg.json
- *--cmakelist.txt
- *--external
- *--project-name
- *----src
- *----cmakelist.txt
- *--sub-project-1
- *----src
- *----cmakelist.txt
- *--sub-project-2
- *----src
- *----cmakelist.txt
- */
 namespace fs = std::filesystem;
 ProjectGenerator::ProjectGenerator() {
-	// if(Utils::getAuraPath().empty())return;
-	// if (!fs::exists(Utils::getAuraPath()))
-	// {
-	// 	Log::log("aura is not initialized yet run 'aura init'",Type::E_ERROR);
-	// 	std::exit(EXIT_FAILURE);
-	// }else if (!fs::exists(Utils::getAuraPath()+"/config.json"))
-	// {
-	// 	Log::log("config.json not found run 'aura doctor' to fix this",Type::E_ERROR);
-	// 	std::exit(EXIT_FAILURE);
-	// };
-	// std::ifstream ifs(Utils::getAuraPath()+"/config.json");
-	// if (!ifs.is_open())
-	// {
-	// 	Log::log("failed to open config file",Type::E_ERROR);
-	// 	std::exit(EXIT_FAILURE);
-	// };
-	// ifs>>mConfig;
-	// ifs.close();
+
 };
 bool ProjectGenerator::getFromConfig(const std::string &key, std::string &result)
 {
@@ -103,9 +70,30 @@ bool ProjectGenerator::generateSubProject(const std::string &projectName, Langua
 	else
 	{
 		fs::create_directories(projectName + "/src");
+		fs::create_directories(projectName + "/include");
 		generateSubProjectCMake(projectName);
 	};
+
 	generateCppTemplateFile(projectName, isRoot);
+
+	std::vector<std::string>lines{};
+	std::string line{};
+	std::ifstream in{};
+	isRoot?in.open(mProjectSetting.getProjectName()+"/CMakeLists.txt"):in.open("CMakelists.txt");
+	size_t index=0,appnedIndex=0;
+	while(std::getline(in,line))
+	{
+		++index;
+		lines.push_back(line);
+		if(line.find("@add_subproject")!=std::string::npos)appnedIndex=index;
+	};
+	in.close();
+	lines.insert(lines.begin()+appnedIndex,std::format("add_subdirectory({})",projectName));
+	std::ofstream out;
+	isRoot?out.open(mProjectSetting.getProjectName()+"/CMakeLists.txt"):out.open("CMakelists.txt");
+	for(const auto&line:lines)out<<line<<"\n";
+	out.close();
+	return true;
 }
 
 void ProjectGenerator::generate()
@@ -134,9 +122,9 @@ void ProjectGenerator::generateProject()
 
 		Log::log("Generating Starter Project C++ language", Type::E_DISPLAY);
 	}
-	writeProjectSettings(&mProjectSetting);
 	generateSubProject(mProjectSetting.getProjectName(), _lang, true);
 	Log::log("happy Coding :)", Type::E_DISPLAY);
+	writeProjectSettings(&mProjectSetting);
 }
 
 void ProjectGenerator::generateVcpkgFiles()
@@ -207,7 +195,7 @@ void ProjectGenerator::generateSubProjectCMake(const std::string &projectName)
 }
 void ProjectGenerator::configCMake()
 {
-	std::ofstream file{mProjectSetting.getProjectName()+"/res/config.cmake"};
+	std::ofstream file{mProjectSetting.getProjectName() + "/res/config.cmake"};
 	constexpr std::string_view config_in{"@config_in"};
 	constexpr std::string_view config_h{"@config_h"};
 	constexpr std::string_view comment{"@COPYRIGHT"};
@@ -271,6 +259,8 @@ void ProjectGenerator::generateCMakePreset(const Language &lang)
 void ProjectGenerator::createDir()
 {
 	namespace fs = std::filesystem;
+	fs::create_directories(mProjectSetting.getProjectName() + "/" + mProjectSetting.getProjectName() + "/src");
+	fs::create_directories(mProjectSetting.getProjectName() + "/" + mProjectSetting.getProjectName() + "/include");
 	fs::create_directories(mProjectSetting.getProjectName() + "/res");
 };
 //
@@ -315,6 +305,7 @@ void ProjectGenerator::generateCppTemplateFile(const std::string &projectName, b
 		file << MAIN_CODE[static_cast<int>(_lang)];
 		file.close();
 	}
+	Log::log("done Cpp Tep part", Type::E_WARNING);
 }
 
 //
