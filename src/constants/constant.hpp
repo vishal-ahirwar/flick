@@ -204,7 +204,7 @@ int main(int argc,char*argv[])
 _HEADER_
 int main(int argc,char*argv[])
 {
-    fprintf_s(stdout,"%s v%s %s\n",PROJECT_NAME,VERSION_STRING,COMPANY_NAME);
+    printf("%s v%s %s\n",PROJECT_NAME,VERSION_STRING,COMPANY_NAME);
     for(int i=0;i<argc;++i){
       puts(argv[i]);
     }
