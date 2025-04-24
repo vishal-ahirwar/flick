@@ -18,7 +18,14 @@ static std::string VCPKG_TRIPLET{"default"};
 enum class Language
 {
   CXX,
-  C
+  C,
+  NONE
+};
+enum class ProjectType
+{
+  NONE,
+  EXECUTABLE,
+  LIBRARY
 };
 
 constexpr std::string_view LICENSE_TEXT{R"(
@@ -128,6 +135,8 @@ if(STATIC_LINK)
   else()
       set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
   endif()
+else()
+  set(BUILD_SHARED_LIBS ON)
 endif()
 set(COMPANY "@DeveloperName")
 string(TIMESTAMP CURRENT_YEAR "%Y")
@@ -223,7 +232,7 @@ constexpr std::string_view CMAKE_PRESETS[]{R"(
     {
       "name": "default",
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build",
+      "binaryDir": "${sourceDir}/build/${presetName}",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
         "CMAKE_CXX_COMPILER": "clang++",
@@ -263,7 +272,7 @@ constexpr std::string_view CMAKE_PRESETS[]{R"(
     {
       "name": "default",
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build",
+      "binaryDir": "${sourceDir}/build/${presetName}",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
         "CMAKE_C_COMPILER": "clang",
@@ -301,7 +310,7 @@ constexpr std::string_view VSCODE_CONFIG{R"(    {
        "configurations": [
            {
                "name": "Windows OS",
-               "compileCommands": "${workspaceFolder}/build/debug/compile_commands.json",
+               "compileCommands": "${workspaceFolder}/build/default/compile_commands.json",
                "includePath": [
                    "${workspaceFolder}/**"
                ],

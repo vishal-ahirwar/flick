@@ -5,6 +5,7 @@
 #include<userinfo/userinfo.h>
 #include<rt/rt.h>
 #include<vector>
+#include<constants/constant.hpp>
 class Aura
 {
 private:
@@ -39,6 +40,7 @@ private:
     friend void test();
     bool executeCMake(const std::vector<std::string> &additionalCMakeArg);
     const std::string getStandaloneTriplet();
+    std::pair<ProjectType, Language> Aura::readuserInput();
 public:
     Aura(const std::vector<std::string>&args={});
     ~Aura();

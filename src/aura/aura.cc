@@ -1,4 +1,6 @@
+#define NOMINMAX
 #include <thread>
+#include <limits>
 #include <ctime>
 #include <filesystem>
 #include <fstream>
@@ -23,6 +25,51 @@
 #include <processmanager/processmanager.h>
 #include "aura.hpp"
 namespace fs = std::filesystem;
+void clearInputBuffer()
+{
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	std::cin.clear();
+}
+
+std::pair<ProjectType, Language> Aura::readuserInput()
+{
+	Log::log("Choose language: c / cc (default = cc), q = quit > ", Type::E_DISPLAY, "");
+
+	std::string input{};
+	std::getline(std::cin, input);
+	Language lang{Language::NONE};
+	ProjectType projectType{ProjectType::NONE};
+	std::transform(input.begin(), input.end(), input.begin(), ::tolower);
+	if (input.empty())
+		lang = Language::CXX;
+	else if (input == "c")
+		lang = Language::C;
+	else if (input == "cc")
+		lang = Language::CXX;
+	else if (input == "q")
+	{
+		mRt.~RT();
+		std::exit(0);
+	}
+	Log::log("Choose project type: x = executable, l = library (Enter to cancel) > ", Type::E_DISPLAY, "");
+
+	// clearInputBuffer();
+	std::getline(std::cin, input,'\n');
+	std::transform(input.begin(), input.end(), input.begin(), ::tolower);
+	if (input.empty())
+		return std::pair<ProjectType, Language>{};
+	else if (input == "x")
+		projectType = ProjectType::EXECUTABLE;
+	else if (input == "l")
+		projectType = ProjectType::LIBRARY;
+	if (projectType == ProjectType::NONE)
+	{
+		Log::log("Unkown Project Type", Type::E_ERROR);
+		mRt.~RT();
+		std::exit(0);
+	}
+	return std::pair<ProjectType, Language>{projectType, lang};
+};
 Aura::Aura(const std::vector<std::string> &args)
 {
 	mArgs = args;
@@ -57,22 +104,8 @@ Aura::~Aura() {
 void Aura::createNewProject()
 {
 	ProjectGenerator generator{};
-	Log::log("Please Choose your Programming language c/cc default=cc,q=quit > ", Type::E_DISPLAY, "");
-	std::string input{};
-	std::getline(std::cin, input);
-	Language lang{};
-	if (input.empty())
-		lang = Language::CXX;
-	else if (input == "c")
-		lang = Language::C;
-	else if (input == "cc")
-		lang = Language::CXX;
-	else if (input == "q")
-	{
-		mRt.~RT();
-		std::exit(0);
-	}
-	generator.setProjectSetting(mProjectSetting, lang);
+	auto info = readuserInput();
+	generator.setProjectSetting(mProjectSetting, info.second, info.first);
 	generator.generate();
 };
 
@@ -106,18 +139,18 @@ bool Aura::compile()
 	std::string cpuThreads{std::to_string(std::thread::hardware_concurrency() - 1)};
 	// auto formatedString = std::format("Threads in use : {}", cpuThreads.c_str());
 	// Log::log(formatedString, Type::E_DISPLAY);
-	if (!fs::exists(fs::current_path().string() + "/build/debug"))
+	for (auto &arg : mArgs)
 	{
-		for (auto &arg : mArgs)
+		if (arg.find("--standalone") != std::string::npos)
 		{
-			if (arg.find("--standalone") != std::string::npos)
-			{
-				VCPKG_TRIPLET = getStandaloneTriplet();
-				break;
-			}
-		};
+			VCPKG_TRIPLET = getStandaloneTriplet();
+			break;
+		}
+	};
+	if (!fs::exists(fs::current_path().string() + "/build/" + VCPKG_TRIPLET))
+	{
 		// run cmake
-		std::vector<std::string> args{"-Bbuild/debug", "-DCMAKE_BUILD_TYPE=Debug", "--preset=" + std::string(VCPKG_TRIPLET)};
+		std::vector<std::string> args{"-DCMAKE_BUILD_TYPE=Debug", "--preset=" + std::string(VCPKG_TRIPLET)};
 		if (!executeCMake(args))
 		{
 			Log::log("There are some errors in your CMakeLists.txt read build/build.log for more info", Type::E_ERROR);
@@ -128,7 +161,7 @@ bool Aura::compile()
 		args.clear();
 		args.push_back("cmake");
 		args.push_back("--build");
-		args.push_back("build/debug");
+		args.push_back("build/" + VCPKG_TRIPLET);
 		args.push_back("-j" + cpuThreads);
 		if (ProcessManager::startProcess(args, pLog, "Compiling this may take minutes") == 0) // if there is any kind of error then don't clear the terminal
 		{
@@ -147,7 +180,7 @@ bool Aura::compile()
 		std::vector<std::string> args{};
 		args.push_back("cmake");
 		args.push_back("--build");
-		args.push_back("build/debug");
+		args.push_back("build/" + VCPKG_TRIPLET);
 		args.push_back("-j" + cpuThreads);
 		// run ninja
 		if (ProcessManager::startProcess(args, pLog, "Compiling this may take minutes") == 0) // if there is any kind of error then don't clear the terminal
@@ -176,12 +209,12 @@ void Aura::run()
 		};
 	}
 #ifdef _WIN32
-	run += ".\\build\\debug\\";
+	run += ".\\build\\" + VCPKG_TRIPLET + "\\";
 	run += app;
 	run += "\\" + app;
 	run += ".exe";
 #else
-	run += "./build/debug/";
+	run += "./build/" + VCPKG_TRIPLET + "/";
 	run += app;
 	run += "/" + app;
 #endif // _WIN32
@@ -189,11 +222,11 @@ void Aura::run()
 	{
 		run.clear();
 #ifdef _WIN32
-		run += ".\\build\\debug\\";
+		run += ".\\build\\" + VCPKG_TRIPLET + "\\";
 		run += "\\" + app;
 		run += ".exe";
 #else
-		run += "./build/debug/";
+		run += "./build/" + VCPKG_TRIPLET + "/";
 		run += "/" + app;
 #endif // _WIN32
 	}
@@ -549,7 +582,7 @@ void Aura::createInstaller()
 			break;
 		}
 	};
-	std::vector<std::string> args{"-Bbuild/release", "-DCMAKE_BUILD_TYPE=Release", "--preset=" + std::string(VCPKG_TRIPLET)};
+	std::vector<std::string> args{"-Bbuild/Release", "-DCMAKE_BUILD_TYPE=Release", "--preset=" + std::string(VCPKG_TRIPLET)};
 	if (executeCMake(args))
 	{
 		Log::log("Please First fix all the errors", Type::E_ERROR);
@@ -830,9 +863,9 @@ bool Aura::release()
 			break;
 		}
 	};
-	if (!fs::exists(fs::current_path().string() + "/build/release"))
+	if (!fs::exists(fs::current_path().string() + "/build/Release"))
 	{
-		std::vector<std::string> args{"-Bbuild/release", "-DCMAKE_BUILD_TYPE=Release", "--preset=" + std::string(VCPKG_TRIPLET)};
+		std::vector<std::string> args{"-Bbuild/Release", "-DCMAKE_BUILD_TYPE=Release", "--preset=" + std::string(VCPKG_TRIPLET)};
 		if (!executeCMake(args))
 		{
 			Log::log("There are some errors in your CMakeLists.txt read build/build.log for more info", Type::E_ERROR);
@@ -843,7 +876,7 @@ bool Aura::release()
 		args.clear();
 		args.push_back("cmake");
 		args.push_back("--build");
-		args.push_back("build/release");
+		args.push_back("build/Release");
 		args.push_back("-j" + cpuThreads);
 		if (ProcessManager::startProcess(args, pLog, "Compiling this may take minutes") == 0) // if there is any kind of error then don't clear the terminal
 		{
@@ -862,7 +895,7 @@ bool Aura::release()
 		std::vector<std::string> args{};
 		args.push_back("cmake");
 		args.push_back("--build");
-		args.push_back("build/release");
+		args.push_back("build/Release");
 		args.push_back("-j" + cpuThreads);
 		// run ninja
 		if (ProcessManager::startProcess(args, pLog, "Compiling this may take minutes") == 0) // if there is any kind of error then don't clear the terminal
@@ -920,7 +953,7 @@ void Aura::reBuild()
 	try
 	{
 		fs::remove_all("build");
-		std::vector<std::string> args{"-Bbuild/debug", "-DCMAKE_BUILD_TYPE=Debug", "--preset=" + std::string(VCPKG_TRIPLET)};
+		std::vector<std::string> args{"-DCMAKE_BUILD_TYPE=Debug", "--preset=" + std::string(VCPKG_TRIPLET)};
 		executeCMake(args);
 		compile();
 	}
@@ -989,17 +1022,8 @@ void Aura::createSubProject()
 		Log::log("Your must provide subproject name!", Type::E_ERROR);
 		return;
 	}
-	Log::log("Please Choose your Programming language c/cc [Press Enter To Cancel]> ", Type::E_DISPLAY, "");
-	std::string input{};
-	std::getline(std::cin, input);
-	Language lang{};
-	if (input.empty())
-		return;
-	else if (input == "c")
-		lang = Language::C;
-	else if (input == "cc")
-		lang = Language::CXX;
+	auto info = readuserInput();
 	ProjectGenerator generator{};
-	generator.setProjectSetting(mProjectSetting, lang);
-	generator.generateSubProject(mArgs.at(2), lang);
+	generator.setProjectSetting(mProjectSetting, info.second, info.first);
+	generator.generateSubProject(mArgs.at(2));
 }

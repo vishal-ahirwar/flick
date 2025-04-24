@@ -54,30 +54,46 @@ bool ProjectGenerator::getFromConfig(const std::string &key, std::string &result
 	return true;
 }
 
-bool ProjectGenerator::generateSubProject(const std::string &projectName, Language lang, bool isRoot)
+bool ProjectGenerator::generateSubProject(const std::string &projectName, bool isRoot)
 {
 	if (isRoot)
 	{
 		configCMake();
 		generateRootCMake();
-		std::ofstream out(mProjectSetting.getProjectName()+"/CMakePresets.json");
+		std::ofstream out(mProjectSetting.getProjectName() + "/CMakePresets.json");
 		if (!out.is_open())
 		{
 			Log::log("failed to generate CMakePresets.json", Type::E_ERROR);
 			return false;
 		};
-		out << CMAKE_PRESETS[static_cast<int>(lang)];
+		out << CMAKE_PRESETS[static_cast<int>(_lang)];
 		out.close();
 		generateVcpkgFiles();
 		generateGitIgnoreFile();
 		std::ofstream file{mProjectSetting.getProjectName() + "/" + mProjectSetting.getProjectName() + "/CMakeLists.txt"};
-		switch (lang)
+		switch (_lang)
 		{
 		case Language::CXX:
-			file << std::format("add_executable({} src/main.cpp)# Add your Source Files here\n", projectName);
+			switch (_type)
+			{
+			case ProjectType::EXECUTABLE:
+				file << std::format("add_executable({} src/main.cpp)# Add your Source Files here\n", projectName);
+				break;
+			case ProjectType::LIBRARY:
+				file << std::format("add_library({} src/{}.cpp)# Add your Source Files here\n", projectName, projectName);
+				break;
+			}
 			break;
 		case Language::C:
-			file << std::format("add_executable({} src/main.c)# Add your Source Files here\n", projectName);
+			switch (_type)
+			{
+			case ProjectType::EXECUTABLE:
+				file << std::format("add_executable({}  src/main.c)# Add your Source Files here\n", projectName);
+				break;
+			case ProjectType::LIBRARY:
+				file << std::format("add_library({}  src/{}.c)# Add your Source Files here\n", projectName, projectName);
+				break;
+			}
 			break;
 		};
 
@@ -119,9 +135,10 @@ void ProjectGenerator::generate()
 	generateProject();
 }
 
-void ProjectGenerator::setProjectSetting(const ProjectSetting &projectSetting, const Language &lang)
+void ProjectGenerator::setProjectSetting(const ProjectSetting &projectSetting, const Language &lang, const ProjectType &type)
 {
 	_lang = lang;
+	_type = type;
 	mProjectSetting = projectSetting;
 }
 
@@ -140,8 +157,18 @@ void ProjectGenerator::generateProject()
 
 		Log::log("Generating Starter Project C++ language", Type::E_DISPLAY);
 	}
-	generateSubProject(mProjectSetting.getProjectName(), _lang, true);
-	Log::log("happy Coding :)", Type::E_DISPLAY);
+	if (_type == ProjectType::EXECUTABLE)
+	{
+
+		Log::log("Project Type is Executable", Type::E_DISPLAY);
+	}
+	if (_type == ProjectType::LIBRARY)
+	{
+
+		Log::log("Project Type is Library", Type::E_DISPLAY);
+	}
+	generateSubProject(mProjectSetting.getProjectName(), true);
+	Log::log("with great power comes great responsibility", Type::E_WARNING);
 	writeProjectSettings(&mProjectSetting);
 }
 
@@ -211,10 +238,26 @@ void ProjectGenerator::generateSubProjectCMake(const std::string &projectName)
 	switch (_lang)
 	{
 	case Language::CXX:
-		file << std::format("add_executable({} src/main.cpp)# Add your Source Files here\n", projectName);
+		switch (_type)
+		{
+		case ProjectType::EXECUTABLE:
+			file << std::format("add_executable({} src/main.cpp)# Add your Source Files here\n", projectName);
+			break;
+		case ProjectType::LIBRARY:
+			file << std::format("add_library({} src/{}.cpp)# Add your Source Files here\n", projectName, projectName);
+			break;
+		}
 		break;
 	case Language::C:
-		file << std::format("add_executable({} src/main.c)# Add your Source Files here\n", projectName);
+		switch (_type)
+		{
+		case ProjectType::EXECUTABLE:
+			file << std::format("add_executable({}  src/main.c)# Add your Source Files here\n", projectName);
+			break;
+		case ProjectType::LIBRARY:
+			file << std::format("add_library({}  src/{}.c)# Add your Source Files here\n", projectName, projectName);
+			break;
+		}
 		break;
 	};
 
@@ -293,44 +336,85 @@ void ProjectGenerator::createDir()
 //
 void ProjectGenerator::generateCppTemplateFile(const std::string &projectName, bool isRoot)
 {
-	std::ofstream file;
+	std::ofstream sourceFile, headerFile;
 	if (_lang == Language::CXX)
 	{
-
-		isRoot ? file.open("./" + mProjectSetting.getProjectName() + "/" + mProjectSetting.getProjectName() + "/src/main.cpp", std::ios::out) : file.open("./" + projectName + "/src/main.cpp", std::ios::out);
+		switch (_type)
+		{
+		case ProjectType::EXECUTABLE:
+			isRoot ? sourceFile.open("./" + mProjectSetting.getProjectName() + "/" + mProjectSetting.getProjectName() + "/src/main.cpp", std::ios::out) : sourceFile.open("./" + projectName + "/src/main.cpp", std::ios::out);
+			break;
+		case ProjectType::LIBRARY:
+			isRoot ? sourceFile.open("./" + mProjectSetting.getProjectName() + "/" + mProjectSetting.getProjectName() + "/src/" + mProjectSetting.getProjectName() + ".cpp", std::ios::out) : sourceFile.open("./" + projectName + "/src/" + projectName + ".cpp", std::ios::out);
+			isRoot ? headerFile.open("./" + mProjectSetting.getProjectName() + "/" + mProjectSetting.getProjectName() + "/include/" + mProjectSetting.getProjectName() + ".hpp", std::ios::out) : headerFile.open("./" + projectName + "/include/" + projectName + ".hpp", std::ios::out);
+			break;
+		}
 	}
 	else if (_lang == Language::C)
 	{
-		isRoot ? file.open("./" + mProjectSetting.getProjectName() + "/" + mProjectSetting.getProjectName() + "/src/main.c", std::ios::out) : file.open("./" + projectName + "/src/main.c", std::ios::out);
+		switch (_type)
+		{
+		case ProjectType::EXECUTABLE:
+			isRoot ? sourceFile.open("./" + mProjectSetting.getProjectName() + "/" + mProjectSetting.getProjectName() + "/src/main.c", std::ios::out) : sourceFile.open("./" + projectName + "/src/main.c", std::ios::out);
+			break;
+		case ProjectType::LIBRARY:
+			isRoot ? sourceFile.open("./" + mProjectSetting.getProjectName() + "/" + mProjectSetting.getProjectName() + "/src/" + mProjectSetting.getProjectName() + ".c", std::ios::out) : sourceFile.open("./" + projectName + "/src/" + projectName + ".c", std::ios::out);
+			isRoot ? headerFile.open("./" + mProjectSetting.getProjectName() + "/" + mProjectSetting.getProjectName() + "/include/" + mProjectSetting.getProjectName() + ".h", std::ios::out) : headerFile.open("./" + projectName + "/include/" + projectName + ".h", std::ios::out);
+			break;
+		}
 	}
-	if (file.is_open())
+	if (sourceFile.is_open())
 	{
-		std::string_view header{"_HEADER_"};
-		std::string_view copyright{"_COPYRIGHT_"};
-		std::string_view project{"_PROJECT_"};
-		std::string_view comment{"@COPYRIGHT"};
+		switch (_type)
+		{
+		case ProjectType::EXECUTABLE:
+			[&]()
+			{
+				std::string_view header{"_HEADER_"};
+				std::string_view copyright{"_COPYRIGHT_"};
+				std::string_view project{"_PROJECT_"};
+				std::string_view comment{"@COPYRIGHT"};
 
-		std::string cap("", mProjectSetting.getProjectName().length());
-		std::transform(mProjectSetting.getProjectName().begin(), mProjectSetting.getProjectName().end(), cap.begin(), ::toupper);
+				std::string cap("", mProjectSetting.getProjectName().length());
+				std::transform(mProjectSetting.getProjectName().begin(), mProjectSetting.getProjectName().end(), cap.begin(), ::toupper);
 
-		auto index = MAIN_CODE[static_cast<int>(_lang)].find(header);
-		if (index != std::string::npos)
-			MAIN_CODE[static_cast<int>(_lang)].replace(index, header.length(), ("#include<" + mProjectSetting.getProjectName() + "config.h>"));
+				auto index = MAIN_CODE[static_cast<int>(_lang)].find(header);
+				if (index != std::string::npos)
+					MAIN_CODE[static_cast<int>(_lang)].replace(index, header.length(), ("#include<" + mProjectSetting.getProjectName() + "config.h>"));
 
-		index = MAIN_CODE[static_cast<int>(_lang)].find(copyright);
-		if (index != std::string::npos)
-			MAIN_CODE[static_cast<int>(_lang)].replace(index, copyright.length(), (cap + "_COPYRIGHT"));
+				index = MAIN_CODE[static_cast<int>(_lang)].find(copyright);
+				if (index != std::string::npos)
+					MAIN_CODE[static_cast<int>(_lang)].replace(index, copyright.length(), (cap + "_COPYRIGHT"));
 
-		index = MAIN_CODE[static_cast<int>(_lang)].find(project);
-		if (index != std::string::npos)
-			MAIN_CODE[static_cast<int>(_lang)].replace(index, project.length(), "\"" + mProjectSetting.getProjectName() + "\"");
+				index = MAIN_CODE[static_cast<int>(_lang)].find(project);
+				if (index != std::string::npos)
+					MAIN_CODE[static_cast<int>(_lang)].replace(index, project.length(), "\"" + mProjectSetting.getProjectName() + "\"");
 
-		index = MAIN_CODE[static_cast<int>(_lang)].find(comment);
-		if (index != std::string::npos)
-			MAIN_CODE[static_cast<int>(_lang)].replace(index, comment.length(), mUserInfo.getUserName());
+				index = MAIN_CODE[static_cast<int>(_lang)].find(comment);
+				if (index != std::string::npos)
+					MAIN_CODE[static_cast<int>(_lang)].replace(index, comment.length(), mUserInfo.getUserName());
 
-		file << MAIN_CODE[static_cast<int>(_lang)];
-		file.close();
+				sourceFile << MAIN_CODE[static_cast<int>(_lang)];
+			}();
+			break;
+		case ProjectType::LIBRARY:
+			[&]()
+			{
+				sourceFile << "#include<" << projectName << "/include/" << projectName << (_lang == Language::C ? ".h" : ".hpp") << ">\n";
+				sourceFile << "int callMe(int x){return x*x;}\n";
+				std::string headerGuardText{};
+				std::transform(projectName.begin(), projectName.end(), std::back_inserter(headerGuardText), ::toupper);
+				headerFile << "#ifndef __" << headerGuardText << "__\n";
+				headerFile << "#define __" << headerGuardText << "__\n";
+				headerFile << "int callMe(int x);\n";
+				headerFile << "#endif //" << "__" << headerGuardText << "__\n";
+			}();
+			break;
+		}
+
+		sourceFile.close();
+		if (headerFile.is_open())
+			headerFile.close();
 	}
 }
 

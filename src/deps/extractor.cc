@@ -15,6 +15,13 @@ const Packages &Extractor::getPackages() const
 {
     return mPackages;
 };
+#include <regex>
+
+std::string formatToOneLine(const std::string &multiline)
+{
+    std::regex newlineAndIndentRegex(R"(\s*\n\s*)"); // Matches newlines and surrounding spaces
+    return std::regex_replace(multiline, newlineAndIndentRegex, " ");
+}
 int compareWeight(const std::string &a, const std::string &b)
 {
     std::string s1 = a;
@@ -70,7 +77,7 @@ int Extractor::extract(const std::string &vcpkgLog)
         index = end;
         if (mPackages.contains(name))
             continue;
-        mPackages[name] = std::vector{findPackage, linkTarget};
+        mPackages[name] = std::vector{findPackage, formatToOneLine(linkTarget)};
     }
     return 0;
 };
