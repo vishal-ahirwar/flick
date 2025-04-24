@@ -12,7 +12,7 @@ Learning C/C++ and tired of manually managing files, folders, and compilation? A
 - **Automated Project Initialization**: Generate a professional-grade project structure complete with a `CMakeLists.txt` file.  
 - **Organized Folder Setup**: Start every project with a clean, intuitive folder hierarchy.  
 - **Default `.gitignore` Integration**: Avoid unnecessary clutter by including a pre-configured `.gitignore` file.  
-- **Seamless Library Management**: Leverage built-in Conan support to easily integrate external libraries into your project.  
+- **Seamless Library Management**: Leverage built-in VCPKG support to easily integrate external libraries into your project.  
 - **Quick Environment Setup**: Configure your entire C++ learning environment effortlessly with a single command.  
 - **Efficiency-Driven Commands**: Simplify repetitive tasks to focus more on learning and building your C++ skills.  
 
@@ -25,7 +25,7 @@ No more starting from scratch every time you want to learn a new concept in C/C+
 - **Automated Project Setup**: Quickly generate a new C/C++ project structure.
 - **Compilation Commands**: Simplified commands for compiling and running code.
 - **Integrated Unit Testing**: Easily set up and run unit tests.
-- **External Library Support**: Add libraries using Conan package manager.
+- **External Library Support**: Add libraries using VCPKG package manager.
 - **Build Automation**: A single command to compile and run your project.
 - **Cross-Platform Support**: Works on Windows and Linux.
 - **Package Management**: Manage dependencies with ease.
@@ -81,16 +81,17 @@ aura [command] projectname
 | Command         | Description                                                                                         |
 |------------------|-----------------------------------------------------------------------------------------------------|
 | **create**       | Create a new C/C++ project. Example: `aura create myProject`                                       |
+| **subproject**   | Create Subproject<Executable/Library> C/C++ project. Example: `aura subproject network`                                       |
 | **compile**      | Compile the project. Example: `cd myProject && aura compile -DCMAKE_BUILD_TYPE=Debug`              |
 | **run**          | Run the compiled binary. Ensure the project is compiled first.                                    |
 | **build**        | Compile and run the project in a single step.                                                     |
-| **setup**        | Install `g++` and `cmake` on your system (if not already installed).                              |
-| **utest**        | Enable unit testing. Example: `aura create test --test`                                           |
+| **setup**        | Install `clang`, `vcpkg`, `Ninja` and `cmake` on your system (if not already installed).                              |
+| **tests**        | Enable unit testing. Example: `aura  tests `                                           |
 | **createinstaller** | Create a packaged build of your application.                                                   |
 | **update**       | Update Aura to the latest version.                                                                |
-| **add**          | Add an external library using Conan. Example: `aura add fmt/11.0.2`                               |
+| **add**          | Add an external library using VCPKG. Example: `aura add fmt/11.0.2`                               |
 | **reload**       | Reload the package list. Example: `aura reload`.                                                 |
-| **initconan**    | Add a Conan configuration file to the project.                                                   |
+| **initVCPKG**    | Add a VCPKG configuration file to the project.                                                   |
 | **debug**        | Start the GDB debugger for your project.                                                          |
 | **release**      | Compile the application in release mode. Example: `aura compile -DCMAKE_BUILD_TYPE=Release`.      |
 | **fix**          | Fix Aura installation issues.                                                                     |
