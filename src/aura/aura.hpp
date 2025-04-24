@@ -40,7 +40,7 @@ private:
     friend void test();
     bool executeCMake(const std::vector<std::string> &additionalCMakeArg);
     const std::string getStandaloneTriplet();
-    std::pair<ProjectType, Language> Aura::readuserInput();
+    std::pair<ProjectType, Language> readuserInput();
 public:
     Aura(const std::vector<std::string>&args={});
     ~Aura();
