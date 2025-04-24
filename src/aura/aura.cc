@@ -623,9 +623,9 @@ void Aura::test()
 	if (!tester.runUnitTesting(mArgs))
 		return;
 #ifdef _WIN32
-	system(".\\build\\debug\\tests\\tests.exe");
+	system(std::format(".\\build\\{}\\tests\\tests.exe",VCPKG_TRIPLET).c_str());
 #else
-	system("./build/debug/tests/tests");
+	system(std::format("./build/{}/tests/tests",VCPKG_TRIPLET).c_str());
 #endif
 };
 
