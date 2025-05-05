@@ -7,5 +7,12 @@
     "fmt",
     "gtest",
     "nlohmann-json"
-  ]
+  ],
+  "overrides": [
+    {
+      "name": "boost-process",
+      "version": "1.87.0"
+    }
+  ],
+  "builtin-baseline": "566f9496b7e00ee0cc00aca0ab90493d122d148a"
 }
