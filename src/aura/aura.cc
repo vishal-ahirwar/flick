@@ -23,7 +23,6 @@
 #include <unittester/unittester.h>
 #include <regex>
 #include <processmanager/processmanager.h>
-#include "aura.hpp"
 namespace fs = std::filesystem;
 void clearInputBuffer()
 {
