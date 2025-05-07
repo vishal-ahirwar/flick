@@ -53,7 +53,7 @@ std::pair<ProjectType, Language> Aura::readuserInput()
 	Log::log("Choose project type: x = executable, l = library (Enter to cancel) > ", Type::E_DISPLAY, "");
 
 	// clearInputBuffer();
-	std::getline(std::cin, input,'\n');
+	std::getline(std::cin, input, '\n');
 	std::transform(input.begin(), input.end(), input.begin(), ::tolower);
 	if (input.empty())
 		return std::pair<ProjectType, Language>{};
@@ -162,6 +162,16 @@ bool Aura::compile()
 		args.push_back("--build");
 		args.push_back("build/" + VCPKG_TRIPLET);
 		args.push_back("-j" + cpuThreads);
+		if (std::find(mArgs.begin(), mArgs.end(), std::string("-a")) != mArgs.end())
+		{
+			args.push_back("--target");
+			if(std::find(mArgs.begin(), mArgs.end(), std::string("-t")) != mArgs.end())
+			{
+				args.push_back();
+			}
+		}
+
+
 		if (ProcessManager::startProcess(args, pLog, "Compiling this may take minutes") == 0) // if there is any kind of error then don't clear the terminal
 		{
 			Log::log("BUILD SUCCESSFULL");
@@ -207,6 +217,14 @@ void Aura::run()
 			app = mArgs[2];
 		};
 	}
+	for (auto &arg : mArgs)
+	{
+		if (arg.find("--standalone") != std::string::npos)
+		{
+			VCPKG_TRIPLET = getStandaloneTriplet();
+			break;
+		}
+	};
 #ifdef _WIN32
 	run += ".\\build\\" + VCPKG_TRIPLET + "\\";
 	run += app;
@@ -622,9 +640,9 @@ void Aura::test()
 	if (!tester.runUnitTesting(mArgs))
 		return;
 #ifdef _WIN32
-	system(std::format(".\\build\\{}\\tests\\tests.exe",VCPKG_TRIPLET).c_str());
+	system(std::format(".\\build\\{}\\tests\\tests.exe", VCPKG_TRIPLET).c_str());
 #else
-	system(std::format("./build/{}/tests/tests",VCPKG_TRIPLET).c_str());
+	system(std::format("./build/{}/tests/tests", VCPKG_TRIPLET).c_str());
 #endif
 };
 
