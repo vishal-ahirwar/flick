@@ -23,5 +23,9 @@ private:
     bool installGlobally(const std::string &url);
     bool addToConfig(const std::string &path);
     bool rebuildDeps(const std::string &url);
-    bool isPackageAvailableOnVCPKG(const std::string&packageName);
+    bool isPackageAvailableOnVCPKG(const std::string&packageName,std::string&,std::string&);
+    bool findBuildinBaseline(const std::string&name,const std::string&version,std::string&outBaseLine);
+    bool isBaseLineAlreadyInJson();
+    bool addToJson(const std::string&name,const std::string&version);
+    void updateBaseLine(const std::string&baseLine);
 };

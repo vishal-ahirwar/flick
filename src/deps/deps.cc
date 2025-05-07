@@ -67,7 +67,9 @@ bool Deps::buildDeps()
 
 bool Deps::addDeps(const std::string &packageName)
 {
-    if (!isPackageAvailableOnVCPKG(packageName))
+    std::string version{};
+    std::string name{};
+    if (!isPackageAvailableOnVCPKG(packageName,name,version))
         return false;
     std::string processLog{};
     std::vector<std::string> args{"vcpkg", "add", "port", packageName};
@@ -227,7 +229,7 @@ bool Deps::rebuildDeps(const std::string &url)
     return false;
 }
 
-bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName)
+bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName,std::string&outName,std::string&outVersion)
 {
     std::vector<std::string> args{"vcpkg", "search", packageName};
     std::string processLog{};
@@ -273,4 +275,23 @@ bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName)
         }
     };
     return false;
+}
+
+bool Deps::findBuildinBaseline(const std::string &name, const std::string &version, std::string &outBaseLine)
+{
+    return false;
+}
+
+bool Deps::isBaseLineAlreadyInJson()
+{
+    return false;
+}
+
+bool Deps::addToJson(const std::string &name, const std::string &version)
+{
+    return false;
+}
+
+void Deps::updateBaseLine(const std::string &baseLine)
+{
 }
