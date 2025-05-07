@@ -9,13 +9,13 @@
 #endif
 #include <filesystem>
 namespace fs = std::filesystem;
-std::string Utils::getAuraPath()
+std::string Utils::getSolixPath()
 {
     std::string path{std::getenv(USERNAME)};
 #ifdef _WIN32
-    path += "\\aura";
+    path += "\\Solix";
 #else
-    path += "/aura";
+    path += "/Solix";
 #endif
     if (!fs::exists(path))
         return "";

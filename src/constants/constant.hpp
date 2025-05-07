@@ -11,7 +11,7 @@ static std::string VCPKG_TRIPLET{"default"};
 #define USERNAME "USER" // Linux environment variable
 #elif defined(__APPLE__)
 #include <unistd.h> // For macOS
-#include "aura.hpp"
+#include "Solix.hpp"
 #define USERNAME "USER" // macOS environment variable
 #endif
 
@@ -121,7 +121,7 @@ log.txt
 
 constexpr std::string_view CONFIG_CMAKE[]{
     R"(
-#Auto Generated Root CMake file by aura CLI
+#Auto Generated Root CMake file by Solix CLI
 #@COPYRIGHT
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -158,7 +158,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 )",
     R"(
-#Auto Generated Root CMake file by aura CLI
+#Auto Generated Root CMake file by Solix CLI
 #@COPYRIGHT
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED True)
@@ -194,7 +194,7 @@ if(CMAKE_C_COMPILER_ID MATCHES "Clang")
 endif()
 )"};
 
-static std::string MAIN_CODE[]{R"(//Auto Genrated C++ file by aura CLI
+static std::string MAIN_CODE[]{R"(//Auto Genrated C++ file by Solix CLI
 //@COPYRIGHT
 #include<iostream>
 _HEADER_
@@ -209,7 +209,7 @@ int main(int argc,char*argv[])
     return 0;
 }
 )",
- R"(//Auto Genrated C file by aura CLI
+ R"(//Auto Genrated C file by Solix CLI
 //@COPYRIGHT
 #include<stdio.h>
 _HEADER_
@@ -328,7 +328,7 @@ constexpr std::string_view VSCODE_CONFIG{R"(    {
        "version": 4
    })"};
 
-constexpr std::string_view UPDATER_URL{"https://github.com/vishal-ahirwar/aura/releases/latest/download/utool.exe"};
+constexpr std::string_view UPDATER_URL{"https://github.com/vishal-ahirwar/Solix/releases/latest/download/utool.exe"};
 constexpr std::string_view COMPILER_URL{"https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/clang+llvm-19.1.7-x86_64-pc-windows-msvc.tar.xz"};
 constexpr std::string_view CMAKE_URL{"https://github.com/Kitware/CMake/releases/download/v3.31.5/cmake-3.31.5-windows-x86_64.zip"};
 constexpr std::string_view NINJA_URL{"https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-win.zip"};
@@ -355,6 +355,6 @@ constexpr std::string_view VSCODE_CONFIG{R"(     {
        ],
        "version": 4
    })"};
-constexpr std::string_view UPDATER_URL{"https://github.com/vishal-ahirwar/aura/releases/latest/download/utool"};
+constexpr std::string_view UPDATER_URL{"https://github.com/vishal-ahirwar/Solix/releases/latest/download/utool"};
 #endif
 #endif

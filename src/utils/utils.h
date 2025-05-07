@@ -4,7 +4,7 @@
 
 namespace Utils
 {
-    std::string getAuraPath();
+    std::string getSolixPath();
     int startApp(const std::string&path); 
 };
 #endif

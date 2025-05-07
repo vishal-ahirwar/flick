@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.6...3.31)
-project(aura VERSION 4.0.0)
+project(Solix VERSION 4.0.0)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -27,7 +27,7 @@ find_package(fmt CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
 include_directories(src ${CMAKE_BINARY_DIR})
-configure_file(res/auraConfig.h.in auraConfig.h)
+configure_file(res/solixconfig.h.in solixconfig.h)
 file(GLOB SOURCES "src/*.cc" "src/*/*.cc")
 
     add_executable(${PROJECT_NAME} ${SOURCES} ${CMAKE_SOURCE_DIR}/src/main/main.cpp)

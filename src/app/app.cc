@@ -1,7 +1,7 @@
 #include <app/app.h>
 #include <constants/colors.hpp>
-#include <aura/aura.hpp>
-#include <auraConfig.h>
+#include <Solix/Solix.hpp>
+#include <SolixConfig.h>
 #include <string>
 #include <log/log.h>
 namespace CLI
@@ -13,10 +13,10 @@ namespace CLI
     }
     int createApp(const std::vector<std::string> &args)
     {
-        Aura aura{args};
+        Solix Solix{args};
         if (args.at(1) == "create")
         {
-            aura.createNewProject();
+            Solix.createNewProject();
         }
         else if (args.at(1) == ("help"))
         {
@@ -24,21 +24,21 @@ namespace CLI
         }
         else if (args.at(1) == ("compile"))
         {
-            aura.compile();
+            Solix.compile();
         }
         else if (args.at(1) == ("run"))
         {
-            aura.run();
+            Solix.run();
         }
         else if (args.at(1) == ("build"))
         {
-            aura.build();
+            Solix.build();
         }
         else if (args.at(1) == ("setup"))
         {
             try
             {
-                aura.setup();
+                Solix.setup();
             }
             catch (const std::exception &e)
             {
@@ -47,51 +47,51 @@ namespace CLI
         }
         else if (args.at(1) == ("createinstaller"))
         {
-            aura.createInstaller();
+            Solix.createInstaller();
         }
         else if (args.at(1) == ("tests"))
         {
-            aura.test();
+            Solix.test();
         }
         else if (args.at(1) == ("doctor"))
         {
-            aura.fixInstallation();
+            Solix.fixInstallation();
         }
         else if (args.at(1) == ("update"))
         {
-            aura.update();
+            Solix.update();
         }
         else if (args.at(1) == ("debug"))
         {
-            aura.debug();
+            Solix.debug();
         }
         else if (args.at(1) == ("release"))
         {
-            aura.release();
+            Solix.release();
         }
         else if (args.at(1) == ("vscode"))
         {
-            aura.vsCode();
+            Solix.vsCode();
         }
         else if (args.at(1) == ("rebuild"))
         {
-            aura.reBuild();
+            Solix.reBuild();
         }
         else if (args.at(1) == "install")
         {
-            aura.addDeps();
+            Solix.addDeps();
         }
         else if (args.at(1) == "cmake-preset")
         {
-            aura.genCMakePreset();
+            Solix.genCMakePreset();
         }else if (args.at(1)=="subproject")
         {
-            aura.createSubProject();
+            Solix.createSubProject();
         }
         else
         {
             printf("%s[Error] Invalid Command !%s\n", RED, WHITE);
-            printf("Try again with 'aura help' :(\n");
+            printf("Try again with 'Solix help' :(\n");
             return 0;
         };
         return 0;

@@ -1,13 +1,13 @@
 ---
-# Aura
+# Solix
 [![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
-**Aura** is a powerful tool for C/C++ learners, designed to streamline the process of setting up and managing projects. With Aura, you can focus on learning and coding instead of dealing with repetitive tasks like creating folders, writing CMake files, or compiling manually.
+**Solix** is a powerful tool for C/C++ learners, designed to streamline the process of setting up and managing projects. With Solix, you can focus on learning and coding instead of dealing with repetitive tasks like creating folders, writing CMake files, or compiling manually.
 
 ---
 
 ## About
 
-Learning C/C++ and tired of manually managing files, folders, and compilation? Aura automates these tasks by:
+Learning C/C++ and tired of manually managing files, folders, and compilation? Solix automates these tasks by:
 
 - **Automated Project Initialization**: Generate a professional-grade project structure complete with a `CMakeLists.txt` file.  
 - **Organized Folder Setup**: Start every project with a clean, intuitive folder hierarchy.  
@@ -31,7 +31,7 @@ No more starting from scratch every time you want to learn a new concept in C/C+
 - **Package Management**: Manage dependencies with ease.
 - **GDB Debugger Integration**: Debug your projects seamlessly.
 - **Installer Creation**: Generate packaged builds for distribution.
-- **Update & Fix Commands**: Keep Aura up-to-date and resolve installation issues.
+- **Update & Fix Commands**: Keep Solix up-to-date and resolve installation issues.
 
 ---
 
@@ -53,8 +53,8 @@ Ensure the following tools are installed on your system:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/vishal-ahirwar/aura.git
-   cd aura
+   git clone https://github.com/vishal-ahirwar/Solix.git
+   cd Solix
    ```
 
 2. Build and install:
@@ -71,30 +71,30 @@ Ensure the following tools are installed on your system:
 
 ## Usage
 
-Run Aura with the following syntax:
+Run Solix with the following syntax:
 ```bash
-aura [command] projectname
+Solix [command] projectname
 ```
 
 ### Available Commands
 
 | Command         | Description                                                                                         |
 |------------------|-----------------------------------------------------------------------------------------------------|
-| **create**       | Create a new C/C++ project. Example: `aura create myProject`                                       |
-| **subproject**   | Create Subproject<Executable/Library> C/C++ project. Example: `aura subproject network`                                       |
-| **compile**      | Compile the project. Example: `cd myProject && aura compile -DCMAKE_BUILD_TYPE=Debug`              |
+| **create**       | Create a new C/C++ project. Example: `Solix create myProject`                                       |
+| **subproject**   | Create Subproject<Executable/Library> C/C++ project. Example: `Solix subproject network`                                       |
+| **compile**      | Compile the project. Example: `cd myProject && Solix compile -DCMAKE_BUILD_TYPE=Debug`              |
 | **run**          | Run the compiled binary. Ensure the project is compiled first.                                    |
 | **build**        | Compile and run the project in a single step.                                                     |
 | **setup**        | Install `clang`, `vcpkg`, `Ninja` and `cmake` on your system (if not already installed).                              |
-| **tests**        | Enable unit testing. Example: `aura  tests `                                           |
+| **tests**        | Enable unit testing. Example: `Solix  tests `                                           |
 | **createinstaller** | Create a packaged build of your application.                                                   |
-| **update**       | Update Aura to the latest version.                                                                |
-| **add**          | Add an external library using VCPKG. Example: `aura add fmt/11.0.2`                               |
-| **reload**       | Reload the package list. Example: `aura reload`.                                                 |
+| **update**       | Update Solix to the latest version.                                                                |
+| **add**          | Add an external library using VCPKG. Example: `Solix add fmt/11.0.2`                               |
+| **reload**       | Reload the package list. Example: `Solix reload`.                                                 |
 | **initVCPKG**    | Add a VCPKG configuration file to the project.                                                   |
 | **debug**        | Start the GDB debugger for your project.                                                          |
-| **release**      | Compile the application in release mode. Example: `aura compile -DCMAKE_BUILD_TYPE=Release`.      |
-| **fix**          | Fix Aura installation issues.                                                                     |
+| **release**      | Compile the application in release mode. Example: `Solix compile -DCMAKE_BUILD_TYPE=Release`.      |
+| **fix**          | Fix Solix installation issues.                                                                     |
 
 ---
 

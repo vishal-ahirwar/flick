@@ -3,7 +3,7 @@
 #include <fmt/color.h>
 #include <thread>
 #include <chrono>
-#include <auraConfig.h>
+#include <SolixConfig.h>
 
 void Log::log(const std::string_view &formated_string, Type type, const std::string_view &end)
 {
@@ -47,15 +47,15 @@ void Log::about()
 
     // Version Info
     fmt::print(fmt::emphasis::bold | fmt::fg(fmt::color::green),
-               "Aura {}.{}.{}\n", AURA_VERSION_MAJOR, AURA_VERSION_MINOR, AURA_VERSION_PATCH);
+               "Solix {}.{}.{}\n", Solix_VERSION_MAJOR, Solix_VERSION_MINOR, Solix_VERSION_PATCH);
     fmt::print(fmt::fg(fmt::color::gray),
-               "{}\n\n", AURA_COPYRIGHT);
+               "{}\n\n", Solix_COPYRIGHT);
 
     // Usage Section
     fmt::print(fmt::emphasis::bold | fmt::fg(fmt::color::light_sky_blue),
                "Usage:\n");
     fmt::print(fmt::fg(fmt::color::white_smoke),
-               "aura <command> projectname\n\n");
+               "Solix <command> projectname\n\n");
 
     // Available Commands
     fmt::print(fmt::emphasis::bold | fmt::fg(fmt::color::light_sky_blue),
@@ -64,15 +64,15 @@ void Log::about()
     fmt::print(fmt::fg(fmt::color::yellow),
                "  create         - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
-               "Create a new C/C++ project. Example: aura create projectName\n");
+               "Create a new C/C++ project. Example: Solix create projectName\n");
     fmt::print(fmt::fg(fmt::color::yellow),
                "  subproject     - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
-               "Create a new C/C++ sub-project. Example: aura subproject name\n");
+               "Create a new C/C++ sub-project. Example: Solix subproject name\n");
     fmt::print(fmt::fg(fmt::color::yellow),
                "  compile        - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
-               "Compile the project. Usage: 'aura compile', use --standalone flag to build project with static linking\n");
+               "Compile the project. Usage: 'Solix compile', use --standalone flag to build project with static linking\n");
 
     fmt::print(fmt::fg(fmt::color::yellow),
                "  run            - ");
@@ -100,7 +100,7 @@ void Log::about()
     fmt::print(fmt::fg(fmt::color::yellow),
                "  tests          - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
-               "Enable unit testing. Example: aura tests\n");
+               "Enable unit testing. Example: Solix tests\n");
 
     fmt::print(fmt::fg(fmt::color::yellow),
                "  createinstaller- ");
@@ -110,7 +110,7 @@ void Log::about()
     fmt::print(fmt::fg(fmt::color::yellow),
                "  update         - ");
     fmt::print(fmt::fg(fmt::color::white_smoke),
-               "Update Aura to the latest version.\n");
+               "Update Solix to the latest version.\n");
 
     fmt::print(fmt::fg(fmt::color::yellow),
                "  rebuild        - ");

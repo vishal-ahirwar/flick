@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <format>
 #include <chrono>
-#include <aura/aura.hpp>
+#include <Solix/Solix.hpp>
 #include <projectgenerator/projectgenerator.h>
 #include <constants/colors.hpp>
 #include <constants/constant.hpp>
@@ -30,7 +30,7 @@ void clearInputBuffer()
 	std::cin.clear();
 }
 
-std::pair<ProjectType, Language> Aura::readuserInput()
+std::pair<ProjectType, Language> Solix::readuserInput()
 {
 	Log::log("Choose language: c / cc (default = cc), q = quit > ", Type::E_DISPLAY, "");
 
@@ -69,7 +69,7 @@ std::pair<ProjectType, Language> Aura::readuserInput()
 	}
 	return std::pair<ProjectType, Language>{projectType, lang};
 };
-Aura::Aura(const std::vector<std::string> &args)
+Solix::Solix(const std::vector<std::string> &args)
 {
 	mArgs = args;
 	std::string cmd{args.at(1)};
@@ -96,11 +96,11 @@ Aura::Aura(const std::vector<std::string> &args)
 	if (cmd != "setup" && cmd != "doctor" && cmd != "update" && cmd != "builddeps")
 		ProjectGenerator::readProjectSettings(&this->mProjectSetting);
 };
-Aura::~Aura() {
+Solix::~Solix() {
 
 };
 
-void Aura::createNewProject()
+void Solix::createNewProject()
 {
 	ProjectGenerator generator{};
 	auto info = readuserInput();
@@ -108,7 +108,7 @@ void Aura::createNewProject()
 	generator.generate();
 };
 
-bool Aura::executeCMake(const std::vector<std::string> &additionalCMakeArg)
+bool Solix::executeCMake(const std::vector<std::string> &additionalCMakeArg)
 {
 	std::string processLog{};
 	std::vector<std::string> args{"cmake", "-S", ".", "-DENABLE_TESTS=OFF", "-G", "Ninja"};
@@ -119,7 +119,7 @@ bool Aura::executeCMake(const std::vector<std::string> &additionalCMakeArg)
 	return ProcessManager::startProcess(args, processLog, "Generating CMake Files this may take a while") == 0;
 };
 
-const std::string Aura::getStandaloneTriplet()
+const std::string Solix::getStandaloneTriplet()
 {
 #if defined(_WIN32)
 	return std::string{"windows-static-build"};
@@ -130,7 +130,7 @@ const std::string Aura::getStandaloneTriplet()
 #endif
 }
 // TODO : add compile option
-bool Aura::compile()
+bool Solix::compile()
 {
 	// Temp Soln
 
@@ -197,7 +197,7 @@ bool Aura::compile()
 	}
 };
 //
-void Aura::run()
+void Solix::run()
 {
 	std::string run{};
 	std::string app{mProjectSetting.getProjectName()};
@@ -262,7 +262,7 @@ void Aura::run()
 }
 
 //
-void Aura::build()
+void Solix::build()
 {
 	if (!this->compile())
 		return;
@@ -270,14 +270,14 @@ void Aura::build()
 }
 
 //
-void Aura::addToPathWin()
+void Solix::addToPathWin()
 {
 #ifdef _WIN32
 	namespace fs = std::filesystem;
-	std::string aura{getenv(USERNAME)};
-	aura += "\\aura";
-	std::string source{fs::current_path().string() + "\\aura.exe"};
-	std::string destination{(aura + "\\aura.exe").c_str()};
+	std::string Solix{getenv(USERNAME)};
+	Solix += "\\Solix";
+	std::string source{fs::current_path().string() + "\\Solix.exe"};
+	std::string destination{(Solix + "\\Solix.exe").c_str()};
 	if (source.compare(destination) != 0)
 	{
 		for (auto &dll : fs::directory_iterator(fs::current_path()))
@@ -286,33 +286,33 @@ void Aura::addToPathWin()
 				continue;
 			if (dll.path().filename().string().find(".dll") != std::string::npos)
 			{
-				printf("%sCopying %s to %s%s\n", GREEN, dll.path().filename().string().c_str(), aura.c_str(), WHITE);
-				// if (fs::copy_file(dll.path(), aura, fs::copy_options::update_existing))
+				printf("%sCopying %s to %s%s\n", GREEN, dll.path().filename().string().c_str(), Solix.c_str(), WHITE);
+				// if (fs::copy_file(dll.path(), Solix, fs::copy_options::update_existing))
 				// {
-				// 	printf("%s copied to %s\n", dll.path().filename().string().c_str(), aura.c_str());
+				// 	printf("%s copied to %s\n", dll.path().filename().string().c_str(), Solix.c_str());
 				// }
 			}
 		}
 		if (!fs::exists(source))
 		{
-			Log::log("aura doesn't exist in current dir", Type::E_WARNING);
+			Log::log("Solix doesn't exist in current dir", Type::E_WARNING);
 		}
 		else
 		{
-			printf("%sCopying aura into %s%s\n", GREEN, aura.c_str(), WHITE);
+			printf("%sCopying Solix into %s%s\n", GREEN, Solix.c_str(), WHITE);
 			if (fs::copy_file(source, destination, fs::copy_options::update_existing))
 			{
 				printf("%s copied to %s\n", source.c_str(), destination.c_str());
 			}
 			else
 			{
-				Log::log("error while copying aura.exe into aura directory!", Type::E_ERROR);
+				Log::log("error while copying Solix.exe into Solix directory!", Type::E_ERROR);
 			};
 		}
 	}
-	std::string path{aura + ";"};
+	std::string path{Solix + ";"};
 
-	for (const auto &dir : fs::directory_iterator(aura))
+	for (const auto &dir : fs::directory_iterator(Solix))
 	{
 		if (dir.is_directory())
 		{
@@ -353,11 +353,11 @@ void Aura::addToPathWin()
 
 	if (found)
 	{
-		Log::log("All paths from aura are in PATH", Type::E_DISPLAY);
+		Log::log("All paths from Solix are in PATH", Type::E_DISPLAY);
 	}
 	else
 	{
-		Log::log("Some paths from aura are missing in PATH adding these entries into path make sure to restart your shell after that", Type::E_WARNING);
+		Log::log("Some paths from Solix are missing in PATH adding these entries into path make sure to restart your shell after that", Type::E_WARNING);
 		pathStream.clear();
 		pathStream.str(newPath);
 		std::string tempStr{};
@@ -370,24 +370,24 @@ void Aura::addToPathWin()
 #endif
 }
 //
-void Aura::addToPathUnix()
+void Solix::addToPathUnix()
 {
 
 	namespace fs = std::filesystem;
-	std::string aura{"/home/"};
-	aura += getenv(USERNAME);
-	aura += "/aura";
-	std::string source{fs::current_path().string() + "/aura"};
-	std::string destination{(aura + "/aura").c_str()};
+	std::string Solix{"/home/"};
+	Solix += getenv(USERNAME);
+	Solix += "/Solix";
+	std::string source{fs::current_path().string() + "/Solix"};
+	std::string destination{(Solix + "/Solix").c_str()};
 	if (source.compare(destination) != 0)
 	{
 		if (!fs::exists(source))
 		{
-			Log::log("aura doesn't exist in current dir", Type::E_ERROR);
+			Log::log("Solix doesn't exist in current dir", Type::E_ERROR);
 		}
 		else
 		{
-			printf("%sCopying aura into %s%s\n", GREEN, destination.c_str(), WHITE);
+			printf("%sCopying Solix into %s%s\n", GREEN, destination.c_str(), WHITE);
 			fs::remove(destination);
 			if (fs::copy_file(source, destination, fs::copy_options::overwrite_existing))
 			{
@@ -395,12 +395,12 @@ void Aura::addToPathUnix()
 			}
 			else
 			{
-				Log::log("error while copying aura.exe into aura directory!", Type::E_ERROR);
+				Log::log("error while copying Solix.exe into Solix directory!", Type::E_ERROR);
 			};
 		}
 	}
-	std::string path{aura + ";"};
-	for (const auto &dir : fs::directory_iterator(aura))
+	std::string path{Solix + ";"};
+	for (const auto &dir : fs::directory_iterator(Solix))
 	{
 		if (dir.is_directory())
 		{
@@ -433,11 +433,11 @@ void Aura::addToPathUnix()
 	}
 	if (found)
 	{
-		Log::log("All paths from aura are in PATH", Type::E_DISPLAY);
+		Log::log("All paths from Solix are in PATH", Type::E_DISPLAY);
 	}
 	else
 	{
-		Log::log("Some paths from aura are missing in PATH adding these entries into path make sure to restart your shell after that", Type::E_WARNING);
+		Log::log("Some paths from Solix are missing in PATH adding these entries into path make sure to restart your shell after that", Type::E_WARNING);
 		pathStream.clear();
 		pathStream.str(newPath);
 		std::string tempStr{};
@@ -456,7 +456,7 @@ void Aura::addToPathUnix()
 	};
 };
 
-void Aura::setupVcpkg(const std::string &home, bool &is_install)
+void Solix::setupVcpkg(const std::string &home, bool &is_install)
 {
 	std::string processLog{};
 	try
@@ -497,7 +497,7 @@ void Aura::setupVcpkg(const std::string &home, bool &is_install)
 	is_install = true;
 };
 // installing dev tools
-void Aura::installTools(bool &isInstallationComplete)
+void Solix::installTools(bool &isInstallationComplete)
 {
 #ifdef _WIN32
 	namespace fs = std::filesystem;
@@ -518,7 +518,7 @@ void Aura::installTools(bool &isInstallationComplete)
 	std::string home = getenv(USERNAME);
 	if (!home.c_str())
 		return;
-	home += "\\aura";
+	home += "\\Solix";
 	// system(("start " + std::string(VS_URL)).c_str());
 	// Log::log("Make sure you download Desktop Development in C++ from Visual Studio Installer", Type::E_WARNING);
 	Downloader::download(std::string(COMPILER_URL), home + "\\compiler.tar.xz");
@@ -536,8 +536,8 @@ void Aura::installTools(bool &isInstallationComplete)
 	fs::remove((home + "\\cmake.zip"));
 	fs::remove((home + "\\ninja.zip"));
 	Downloader::download(std::string(VS_BUILD_TOOLS_INSTALLER_URL), home + "\\vs.exe");
-	Downloader::download("https://github.com/vishal-ahirwar/aura/blob/master/res/aura.vsconfig", home + "\\aura.vsconfig");
-	if (system((home + "\\vs.exe --quiet --wait --config " + home + "\\aura.vsconfig").c_str()))
+	Downloader::download("https://github.com/vishal-ahirwar/Solix/blob/master/res/Solix.vsconfig", home + "\\Solix.vsconfig");
+	if (system((home + "\\vs.exe --quiet --wait --config " + home + "\\Solix.vsconfig").c_str()))
 	{
 		Log::log("installing Visual Studio C++ Build Tools failed!", Type::E_ERROR);
 	}
@@ -561,7 +561,7 @@ void Aura::installTools(bool &isInstallationComplete)
 #endif
 };
 
-void Aura::setup()
+void Solix::setup()
 {
 	if (system("git --version") == 0)
 	{
@@ -580,7 +580,7 @@ void Aura::setup()
 };
 
 // creating packaged build [with installer for windows] using cpack
-void Aura::createInstaller()
+void Solix::createInstaller()
 {
 	for (auto &arg : mArgs)
 	{
@@ -614,7 +614,7 @@ void Aura::createInstaller()
 			ProjectGenerator::generateLicenceFile(mUserInfo);
 		};
 		if (system("cd build/release && cpack"))
-			Log::log("CPack added to cmake run 'aura createinstaller' command again",
+			Log::log("CPack added to cmake run 'Solix createinstaller' command again",
 					 Type::E_DISPLAY);
 	}
 	else
@@ -624,7 +624,7 @@ void Aura::createInstaller()
 };
 
 // running utest
-void Aura::test()
+void Solix::test()
 {
 	UnitTester tester(mUserInfo);
 	tester.setupUnitTestingFramework();
@@ -639,7 +639,7 @@ void Aura::test()
 
 // TODO
 // implementation is buggy right now will fix later
-bool Aura::onSetup()
+bool Solix::onSetup()
 {
 	bool isInstallationComplete{false};
 	namespace fs = std::filesystem;
@@ -653,24 +653,24 @@ bool Aura::onSetup()
 		return false;
 	std::fstream file;
 #ifdef _WIN32
-	if (!fs::create_directory(home + "\\aura"))
+	if (!fs::create_directory(home + "\\Solix"))
 	{
-		Log::log("aura dir alread exist", Type::E_WARNING);
+		Log::log("Solix dir alread exist", Type::E_WARNING);
 	};
-	file.open((home + "\\aura\\.cconfig").c_str(), std::ios::in);
+	file.open((home + "\\Solix\\.cconfig").c_str(), std::ios::in);
 	if (file.is_open())
 	{
 		file >> isInstallationComplete;
 		file.close();
 		if (isInstallationComplete)
 		{
-			Log::log("Compiler is already installed if you think you messed up with aura installation please use this command aura fix", Type::E_WARNING);
+			Log::log("Compiler is already installed if you think you messed up with Solix installation please use this command Solix fix", Type::E_WARNING);
 			return true;
 		}
 	}
 	else
 	{
-		file.open((home + "\\aura\\.cconfig").c_str(), std::ios::out);
+		file.open((home + "\\Solix\\.cconfig").c_str(), std::ios::out);
 		if (file.is_open())
 		{
 			installTools(isInstallationComplete);
@@ -683,7 +683,7 @@ bool Aura::onSetup()
 	if (!isInstallationComplete)
 	{
 		installTools(isInstallationComplete);
-		file.open((home + "\\aura\\.cconfig").c_str(), std::ios::out);
+		file.open((home + "\\Solix\\.cconfig").c_str(), std::ios::out);
 		if (file.is_open())
 		{
 			file << isInstallationComplete;
@@ -695,23 +695,23 @@ bool Aura::onSetup()
 	};
 	return true;
 #else
-	if (!fs::create_directory(home + "/aura"))
+	if (!fs::create_directory(home + "/Solix"))
 	{
-		Log::log("aura dir alread exist", Type::E_WARNING);
+		Log::log("Solix dir alread exist", Type::E_WARNING);
 	}
 	else
 	{
-		printf("%sCreating aura dir at %s %s\n", BLUE, home.c_str(), WHITE);
+		printf("%sCreating Solix dir at %s %s\n", BLUE, home.c_str(), WHITE);
 	};
 
-	file.open((home + "/aura/.cconfig").c_str(), std::ios::in);
+	file.open((home + "/Solix/.cconfig").c_str(), std::ios::in);
 	if (file.is_open())
 	{
 		file >> isInstallationComplete;
 		file.close();
 		if (isInstallationComplete)
 		{
-			Log::log("Compiler is already installed if you think you messed up with aura installation please use this command aura fix", Type::E_WARNING);
+			Log::log("Compiler is already installed if you think you messed up with Solix installation please use this command Solix fix", Type::E_WARNING);
 			return true;
 		}
 	}
@@ -722,7 +722,7 @@ bool Aura::onSetup()
 
 	installTools(isInstallationComplete);
 
-	file.open((home + std::string("/aura/.cconfig")).c_str(), std::ios::out);
+	file.open((home + std::string("/Solix/.cconfig")).c_str(), std::ios::out);
 	if (file.is_open())
 	{
 		Log::log("writing to config file!", Type::E_DISPLAY);
@@ -741,8 +741,8 @@ bool Aura::onSetup()
 #endif
 }
 // TODO
-// remove the ~/aura and reinstall the aura again with all the tools like cmake,g++ compiler,ninja,nsis
-void Aura::fixInstallation() {
+// remove the ~/Solix and reinstall the Solix again with all the tools like cmake,g++ compiler,ninja,nsis
+void Solix::fixInstallation() {
 	// TODO
 };
 
@@ -812,27 +812,27 @@ void createProcess(const std::string &path)
 #endif
 }
 // download the utool from github if it's not already there then download the latest build from github
-void Aura::update()
+void Solix::update()
 {
 	namespace fs = std::filesystem;
 #ifdef _WIN32
-	std::string aura = getenv(USERNAME);
+	std::string Solix = getenv(USERNAME);
 #else
-	std::string aura{"/home/"};
-	aura += getenv(USERNAME);
+	std::string Solix{"/home/"};
+	Solix += getenv(USERNAME);
 #endif
 #ifdef _WIN32
-	aura += "\\aura";
-	std::string source{aura + "\\utool.exe"};
+	Solix += "\\Solix";
+	std::string source{Solix + "\\utool.exe"};
 #else
-	aura += "/aura";
-	std::string source{aura + "/utool"};
+	Solix += "/Solix";
+	std::string source{Solix + "/utool"};
 #endif
-	Log::log("updating aura...", Type::E_DISPLAY);
+	Log::log("updating Solix...", Type::E_DISPLAY);
 	std::cout << source << "\n";
-	if (fs::exists(source)) // if utool is present in ~/aura directory then start the utool if not download the utool first
+	if (fs::exists(source)) // if utool is present in ~/Solix directory then start the utool if not download the utool first
 	{
-		createProcess(source); // Windows//starting process parent-less which will start utool so aura will shutdown and then utool override the aura.exe
+		createProcess(source); // Windows//starting process parent-less which will start utool so Solix will shutdown and then utool override the Solix.exe
 	}
 	else
 	{
@@ -840,11 +840,11 @@ void Aura::update()
 #ifndef _WIN32 // for linux we have to set permission for the newly downloaded file
 		system(("chmod +x " + source).c_str());
 #endif
-		createProcess(source); // starting process parent-less which will start utool so aura will shutdown and then utool override the aura.exe
+		createProcess(source); // starting process parent-less which will start utool so Solix will shutdown and then utool override the Solix.exe
 	};
 };
 // TODO
-void Aura::debug()
+void Solix::debug()
 {
 	if (!compile())
 		return;
@@ -856,7 +856,7 @@ void Aura::debug()
 };
 // TODO
 // this is actually useless for now but will add usefull stuff to it in future
-bool Aura::release()
+bool Solix::release()
 {
 
 	namespace fs = std::filesystem;
@@ -922,7 +922,7 @@ bool Aura::release()
 };
 // for generating vscode intelligence
 // everytime user run this command it's will override everything in c_cpp_properties.json
-void Aura::vsCode()
+void Solix::vsCode()
 {
 	namespace fs = std::filesystem;
 	if (!fs::exists("vcpkg.json"))
@@ -947,7 +947,7 @@ void Aura::vsCode()
 }
 
 // it will simply delete the whole build folder and compile the project again
-void Aura::reBuild()
+void Solix::reBuild()
 {
 	for (auto &arg : mArgs)
 	{
@@ -971,13 +971,13 @@ void Aura::reBuild()
 	};
 };
 
-void Aura::buildDeps()
+void Solix::buildDeps()
 {
 	// building cmake external libraries
 	Deps deps;
 	deps.buildDeps();
 }
-void Aura::addDeps()
+void Solix::addDeps()
 {
 	if (mArgs.size() < 3)
 	{
@@ -1008,7 +1008,7 @@ void Aura::addDeps()
 		deps.updateCMakeFile(vcpkgLog, app, mArgs.at(2));
 	}
 }
-void Aura::genCMakePreset()
+void Solix::genCMakePreset()
 {
 	Log::log("Please Choose your Programming language c/cc default=cc,q=quit > ", Type::E_DISPLAY, "");
 	std::string input{};
@@ -1023,7 +1023,7 @@ void Aura::genCMakePreset()
 	ProjectGenerator::generateCMakePreset(lang);
 };
 
-void Aura::createSubProject()
+void Solix::createSubProject()
 {
 	if (mArgs.size() < 3)
 	{

@@ -6,12 +6,12 @@
 #include<rt/rt.h>
 #include<vector>
 #include<constants/constant.hpp>
-class Aura
+class Solix
 {
 private:
     ProjectSetting mProjectSetting{};
     UserInfo mUserInfo{};
-    RT mRt{"Aura"};
+    RT mRt{"Solix"};
     std::vector<std::string>mArgs{};
 public:
     void createNewProject();
@@ -42,6 +42,6 @@ private:
     const std::string getStandaloneTriplet();
     std::pair<ProjectType, Language> readuserInput();
 public:
-    Aura(const std::vector<std::string>&args={});
-    ~Aura();
+    Solix(const std::vector<std::string>&args={});
+    ~Solix();
 };

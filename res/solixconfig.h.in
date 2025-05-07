@@ -1,0 +1,5 @@
+#define Solix_VERSION_MAJOR @Solix_VERSION_MAJOR@
+#define Solix_VERSION_MINOR @Solix_VERSION_MINOR@
+#define Solix_VERSION_PATCH @Solix_VERSION_PATCH@
+#define Solix_COMPANY "@COMPANY@"
+#define Solix_COPYRIGHT "@COPYRIGHT@"
