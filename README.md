@@ -1,131 +1,128 @@
+# Solix
 
-# Solix - A Modern C++ Project Setup & Build System
+> **Use external libraries in Modern C++ as easily as in other modern languages.**
+> Solix brings the simplicity of dependency management from languages like Python, Rust, or JavaScript into C++—finally making C++ feel modern to work with.
 
-Solix is a fast, reliable, and cross-platform build system for C++ projects. It automates common tasks, like integrating external libraries, managing CMake configuration, and providing an efficient build system to save time for developers.
+---
 
-## 🚀 Why Use Solix?
+## ✨ Features
 
-- **Modern C++ Integration**: Easily use external libraries just like you would in other modern languages.
-- **Faster Builds**: Enjoy a smoother, more efficient build process with minimal overhead.
-- **Consistent Builds Across Platforms**: Whether you're on Windows, Linux, or macOS, Solix ensures consistent builds.
-- **Cross-Compiling**: Simplifies the setup for cross-compiling projects across different environments.
-- **Save Time on Configuration**: No need to manually write or configure your CMake files every time.
-- **No More Starting from Scratch**: Kickstart projects quickly with predefined structures and configurations.
+* 📦 **Modern C++ Package Management**
+  Easily add external libraries using `vcpkg`, without writing CMake by hand.
 
-## 🌟 Key Features
+* ⚡ **Faster Builds**
+  Optimized build presets with Clang and Ninja ensure rapid compilation.
 
-- **Automated Project Setup**: Solix sets up a professional-grade project structure, including necessary files like `CMakeLists.txt`, `README.md`, and `.gitignore`, automatically.
-- **Effortless External Library Integration**: Easily add external libraries to your project through `vcpkg` or other methods.
-- **Cross-Platform Support**: Works seamlessly across major platforms (Windows, Linux, macOS).
-- **Fast and Consistent Builds**: Build your projects faster and more reliably with Solix’s pre-configured build system.
-- **Cross-Compiling Made Simple**: Set up cross-compilation with ease to target multiple platforms.
-- **No More CMake Headaches**: Avoid repetitive CMake configurations by using the default `CMakePresets.json` and build commands.
-- **Simplified Compilation**: Solix provides an easy way to compile and run your project with minimal setup.
-- **Zero Python Dependency**: Forget about Python-based build systems; Solix is all C++ and CMake-based.
+* 🧱 **Cross-Platform & Cross-Compiling**
+  Build the same project seamlessly across Windows and Linux, and target other platforms too.
 
-## 🛠️ How to Build Solix from Source
+* 📁 **Professional Project Structure**
+  Automatically generates clean CMake-based layouts.
 
-The only way to build **Solix** from source is with CMake. Follow these simple steps:
+* 🔄 **Repeatable Builds**
+  Get consistent output across machines with unified presets.
 
-### 1. Clone the Repository
-```bash
-git clone https://github.com/vishal-ahirwar/solix.git
-cd solix
-```
+* 🎯 **Build From Scratch? Never Again**
+  Save hours by never manually writing CMake files again.
 
-### 2. Use the Predefined CMake Preset
+* 🧪 **Unit Testing Integration**
+  Enable and run tests with ease.
+
+* 🛠️ **Installer Generation**
+  Easily package your application for distribution.
+
+* 🧰 **Environment Setup**
+  Automatically installs and configures Clang, Ninja, and CMake.
+
+* 🧭 **LLDB Debugger Integration**
+  Start debugging sessions with one command.
+
+* 🧹 **.gitignore Generator**
+  Prevents unwanted clutter from entering version control.
+
+---
+
+## 🔧 Installation
+
+### Prerequisites
+
+* Git
+* CMake
+* Clang (on all platforms)
+* Ninja (Recommended)
+* vcpkg (Handled internally by Solix)
+
+### Building Solix
+
 ```bash
 cmake --preset=default
 cmake --build build/default
 ```
 
-### Or Use the Built-In Command to Build:
+> Or use Solix itself to bootstrap:
+
 ```bash
 aura build
 ```
 
-**Note:** You can also use the command-line options for building and compiling your project with `solix`.
+---
 
-## 📝 Example Usage
+## 🚀 Usage
 
-### Create a New C++ Project
 ```bash
-solix create myProject
+solix [command] [project-name]
 ```
 
-### Compile Your Project
-```bash
-cd myProject
-solix build
-```
+### Core Commands
 
-### Add External Library
-```bash
-solix add fmt/11.0.2
-```
-
-### Run the Project
-```bash
-solix run
-```
-
-### Set Up Unit Testing
-```bash
-solix tests
-```
-
-### Create a Packaged Build
-```bash
-solix createinstaller
-```
-
-## 📋 Commands Overview
-
-| Command          | Description                                               |
-|------------------|-----------------------------------------------------------|
-| `create`         | Create a new C++ project structure.                       |
-| `build`          | Compile and build the project.                            |
-| `run`            | Run the compiled project.                                 |
-| `add`            | Add an external library to the project.                   |
-| `tests`          | Enable unit testing for the project.                      |
-| `createinstaller`| Generate a packaged installer for the application.        |
-| `update`         | Update Solix to the latest version.                       |
-| `fix`            | Fix any installation issues.                             |
-
-## ⚙️ Prerequisites
-
-Before using **Solix**, make sure you have the following tools installed:
-
-- **CMake**: Make sure it's installed for building the project.
-- **Clang**: Solix uses Clang as the default compiler on all platforms.
-- **vcpkg**: For managing external libraries.
-
-## 🔧 Installation
-
-### Install Solix
-To install **Solix**, follow these steps:
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/vishal-ahirwar/solix.git
-   cd solix
-   ```
-
-2. Build and install:
-   ```bash
-   cmake --preset=default
-   cmake --build build/default
-   ```
-
-## 📜 License
-
-This project is licensed under the MIT License. See the [LICENSE](https://github.com/vishal-ahirwar/solix/blob/main/LICENSE) file for more details.
-
-## 👨‍💻 Author
-
-Developed by **Vishal Ahirwar**  
-[GitHub Profile](https://github.com/vishal-ahirwar)
+| Command           | Description                                                         |
+| ----------------- | ------------------------------------------------------------------- |
+| `create`          | Create a new C/C++ project with all defaults                        |
+| `subproject`      | Add a subproject (executable or library)                            |
+| `build`           | Configure and compile using Clang + Ninja                           |
+| `run`             | Run the compiled binary                                             |
+| `compile`         | Compile with custom flags (e.g. Debug or Release)                   |
+| `tests`           | Enable and manage unit tests                                        |
+| `debug`           | Launch LLDB for debugging                                           |
+| `release`         | Compile in release mode                                             |
+| `add`             | Add external library using `vcpkg`. Example: `solix add fmt/11.0.2` |
+| `initVCPKG`       | Create `vcpkg.json` config in project                               |
+| `reload`          | Reload the vcpkg dependency cache                                   |
+| `createinstaller` | Generate an installable package                                     |
+| `fix`             | Diagnose and fix Solix issues                                       |
+| `update`          | Update Solix to the latest version                                  |
+| `setup`           | Auto install Clang, Ninja, CMake, and vcpkg                         |
 
 ---
 
-Feel free to explore, contribute, and start building faster with **Solix**!
+## 📂 Example
+
+```bash
+solix create myApp
+cd myApp
+solix add fmt/11.0.2
+solix build
+solix run
+```
+
+---
+
+## 🧠 Why Use Solix?
+
+* Skip repetitive setup and config
+* Learn modern C++ without being blocked by tooling
+* Fast builds out of the box
+* Cross-platform by default
+* Just focus on building things
+
+---
+
+## 👨‍💻 Author
+
+Made with 💻 by [Vishal Ahirwar](https://github.com/vishal-ahirwar)
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License. See `LICENSE` for more info.
