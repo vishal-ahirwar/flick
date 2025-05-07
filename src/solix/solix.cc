@@ -590,7 +590,7 @@ void Solix::createInstaller()
 			break;
 		}
 	};
-	std::vector<std::string> args{"-Bbuild/Release", "-DCMAKE_BUILD_TYPE=Release", "--preset=" + std::string(VCPKG_TRIPLET)};
+	std::vector<std::string> args{"-Bbuild/release", "-DCMAKE_BUILD_TYPE=Release", "--preset=" + std::string(VCPKG_TRIPLET)};
 	if (executeCMake(args))
 	{
 		Log::log("Please First fix all the errors", Type::E_ERROR);
@@ -871,9 +871,9 @@ bool Solix::release()
 			break;
 		}
 	};
-	if (!fs::exists(fs::current_path().string() + "/build/Release"))
+	if (!fs::exists(fs::current_path().string() + "/build/release"))
 	{
-		std::vector<std::string> args{"-Bbuild/Release", "-DCMAKE_BUILD_TYPE=Release", "--preset=" + std::string(VCPKG_TRIPLET)};
+		std::vector<std::string> args{"-Bbuild/release", "-DCMAKE_BUILD_TYPE=Release", "--preset=" + std::string(VCPKG_TRIPLET)};
 		if (!executeCMake(args))
 		{
 			Log::log("There are some errors in your CMakeLists.txt read build/build.log for more info", Type::E_ERROR);
@@ -884,7 +884,7 @@ bool Solix::release()
 		args.clear();
 		args.push_back("cmake");
 		args.push_back("--build");
-		args.push_back("build/Release");
+		args.push_back("build/release");
 		args.push_back("-j" + cpuThreads);
 		if (ProcessManager::startProcess(args, pLog, "Compiling this may take minutes") == 0) // if there is any kind of error then don't clear the terminal
 		{
@@ -903,7 +903,7 @@ bool Solix::release()
 		std::vector<std::string> args{};
 		args.push_back("cmake");
 		args.push_back("--build");
-		args.push_back("build/Release");
+		args.push_back("build/release");
 		args.push_back("-j" + cpuThreads);
 		// run ninja
 		if (ProcessManager::startProcess(args, pLog, "Compiling this may take minutes") == 0) // if there is any kind of error then don't clear the terminal

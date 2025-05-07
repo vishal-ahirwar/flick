@@ -3,7 +3,7 @@
 #include <fmt/color.h>
 #include <thread>
 #include <chrono>
-#include <SolixConfig.h>
+#include <solixconfig.h>
 
 void Log::log(const std::string_view &formated_string, Type type, const std::string_view &end)
 {

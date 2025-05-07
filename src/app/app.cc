@@ -1,7 +1,7 @@
 #include <app/app.h>
 #include <constants/colors.hpp>
-#include <Solix/Solix.hpp>
-#include <SolixConfig.h>
+#include <solix/solix.hpp>
+#include <solixconfig.h>
 #include <string>
 #include <log/log.h>
 namespace CLI
