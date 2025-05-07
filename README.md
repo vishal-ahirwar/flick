@@ -125,4 +125,4 @@ Made with 💻 by [Vishal Ahirwar](https://github.com/vishal-ahirwar)
 
 ## 📄 License
 
-This project is licensed under the MIT License. See `LICENSE` for more info.
+This project is licensed under the BSD 3-Clause License. See `LICENSE` for more info.
