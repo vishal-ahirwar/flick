@@ -3,65 +3,16 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <thread>
-#include<format>
+#include <format>
 #include "log/log.h"
 #include "extractor.h"
 #include "deps.h"
 #include "processmanager/processmanager.h"
 #include <regex>
+#include <boost/process.hpp>
 namespace fs = std::filesystem;
 bool Deps::buildDeps()
 {
-    // _deps_setting.read();
-    // if (!fs::exists(external_dir))
-    // {
-    //     Log::log("External directory not found!", Type::E_ERROR);
-    //     return false;
-    // }
-
-    // for (const auto &entry : fs::directory_iterator(external_dir))
-    // {
-    //     if (entry.is_directory())
-    //     {
-    //         bool is_cmake_present{false};
-    //         for (const auto &cmake_file : fs::directory_iterator(entry.path()))
-    //             if (!cmake_file.is_directory() && cmake_file.path().filename().string() == "CMakeLists.txt")
-    //             {
-    //                 is_cmake_present = true;
-    //                 break;
-    //             };
-    //         if (!is_cmake_present)
-    //             continue;
-    //         std::string libPath = entry.path().string();
-    //         std::string buildDir = libPath + "/build";
-    //         std::string libName = entry.path().filename().string();
-    //         std::string installDir = libPath + "/install";
-    //         Log::log("Building: " + libName, Type::E_DISPLAY);
-
-    //         fs::create_directory(buildDir);
-    //         std::string cmakeCmd = "cmake -S " + libPath + " -B " + buildDir + " -G \"Ninja\" " + _deps_setting.getCMakeArgs();
-    //         std::string buildCmd = "ninja -C " + buildDir + " -j" + std::to_string(std::thread::hardware_concurrency() - 1);
-    //         std::string installCmd = "cmake --install " + buildDir + " --prefix=" + installDir;
-    //         if (std::system(cmakeCmd.c_str()) != 0 || std::system(buildCmd.c_str()) != 0 || std::system(installCmd.c_str()) != 0)
-    //         {
-    //             Log::log("Failed to build " + libName, Type::E_ERROR);
-    //             continue;
-    //         }
-    //         else
-    //         {
-    //             std::vector<std::string> configs{};
-    //             findCMakeConfig(libName, configs);
-    //             for (const std::string &config : configs)
-    //             {
-
-    //                 if (updateConfig(config, installDir))
-    //                     Log::log("adding " + config + " to config.json", Type::E_DISPLAY);
-    //                 if (updateCMakeFile(config))
-    //                     Log::log("adding " + config + " to CMakeLists.txt", Type::E_DISPLAY);
-    //             }
-    //         }
-    //     }
-    // }
     return true;
 }
 
@@ -69,7 +20,7 @@ bool Deps::addDeps(const std::string &packageName)
 {
     std::string version{};
     std::string name{};
-    if (!isPackageAvailableOnVCPKG(packageName,name,version))
+    if (!isPackageAvailableOnVCPKG(packageName, name, version))
         return false;
     std::string processLog{};
     std::vector<std::string> args{"vcpkg", "add", "port", packageName};
@@ -229,7 +180,7 @@ bool Deps::rebuildDeps(const std::string &url)
     return false;
 }
 
-bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName,std::string&outName,std::string&outVersion)
+bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName, std::string &outName, std::string &outVersion)
 {
     std::vector<std::string> args{"vcpkg", "search", packageName};
     std::string processLog{};
@@ -265,6 +216,8 @@ bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName,std::string&
             {
                 Log::log("Selected package info", Type::E_DISPLAY);
                 Log::log("\t" + package, Type::E_NONE);
+                outName=package;
+                //TODO:
                 return true;
             }
             else
@@ -279,6 +232,41 @@ bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName,std::string&
 
 bool Deps::findBuildinBaseline(const std::string &name, const std::string &version, std::string &outBaseLine)
 {
+    std::string vcpkg{std::getenv("VCPKG_ROOT")};
+    if (vcpkg.length() <= 0)
+    {
+        Log::log("VCPKG_ROOT is not Set!", Type::E_ERROR);
+        return false;
+    }
+    boost::process::ipstream out;
+    boost::process::ipstream err;
+    boost::process::child c(boost::process::search_path("git"), boost::process::args({"-C", vcpkg, "log", "--format=%H %cd %s", "--date=short", "--left-only", "--", std::string("versions/") + name[0] + "-/" + name + ".json"}), boost::process::std_err > err, boost::process::std_out > out);
+    std::string line{}, first{};
+    std::stringstream ss(name);
+    std::getline(ss, first, '-');
+    while (std::getline(out, line) || std::getline(err, line))
+    {
+        if (version.length() <= 0)
+        {
+            if (line.find(first) != std::string::npos)
+            {
+                auto index = line.find(" ");
+                outBaseLine = line.substr(0, index);
+                std::string version = line.substr(index, line.find(" ", index));
+                Log::log(std::format("Package : {}, Version : {}, Baseline Commit : {}\n[{}]\n", name, version, outBaseLine, line), Type::E_NONE);
+                c.terminate();
+                return true;
+            }
+        }
+        else if (line.find(first) != std::string::npos && line.find(version) != std::string::npos)
+        {
+            outBaseLine = line.substr(0, line.find(" "));
+            Log::log(std::format("Package : {}, Version : {}, Baseline Commit : {}\n[{}]\n", name, version, outBaseLine, line), Type::E_NONE);
+            c.terminate();
+            return true;
+        }
+    }
+    c.wait();
     return false;
 }
 
