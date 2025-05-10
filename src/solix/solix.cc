@@ -276,8 +276,8 @@ void Solix::addToPathWin()
 	namespace fs = std::filesystem;
 	std::string Solix{getenv(USERNAME)};
 	Solix += "\\Solix";
-	std::string source{fs::current_path().string() + "\\Solix.exe"};
-	std::string destination{(Solix + "\\Solix.exe").c_str()};
+	std::string source{fs::current_path().string() + "\\solix.exe"};
+	std::string destination{(Solix + "\\solix.exe").c_str()};
 	if (source.compare(destination) != 0)
 	{
 		for (auto &dll : fs::directory_iterator(fs::current_path()))
@@ -518,7 +518,7 @@ void Solix::installTools(bool &isInstallationComplete)
 	std::string home = getenv(USERNAME);
 	if (!home.c_str())
 		return;
-	home += "\\Solix";
+	home += "\\solix";
 	// system(("start " + std::string(VS_URL)).c_str());
 	// Log::log("Make sure you download Desktop Development in C++ from Visual Studio Installer", Type::E_WARNING);
 	Downloader::download(std::string(COMPILER_URL), home + "\\compiler.tar.xz");
@@ -670,7 +670,7 @@ bool Solix::onSetup()
 	}
 	else
 	{
-		file.open((home + "\\Solix\\.cconfig").c_str(), std::ios::out);
+		file.open((home + "\\solix\\.cconfig").c_str(), std::ios::out);
 		if (file.is_open())
 		{
 			installTools(isInstallationComplete);
@@ -683,7 +683,7 @@ bool Solix::onSetup()
 	if (!isInstallationComplete)
 	{
 		installTools(isInstallationComplete);
-		file.open((home + "\\Solix\\.cconfig").c_str(), std::ios::out);
+		file.open((home + "\\solix\\.cconfig").c_str(), std::ios::out);
 		if (file.is_open())
 		{
 			file << isInstallationComplete;
@@ -695,7 +695,7 @@ bool Solix::onSetup()
 	};
 	return true;
 #else
-	if (!fs::create_directory(home + "/Solix"))
+	if (!fs::create_directory(home + "/solix"))
 	{
 		Log::log("Solix dir alread exist", Type::E_WARNING);
 	}
@@ -704,7 +704,7 @@ bool Solix::onSetup()
 		printf("%sCreating Solix dir at %s %s\n", BLUE, home.c_str(), WHITE);
 	};
 
-	file.open((home + "/Solix/.cconfig").c_str(), std::ios::in);
+	file.open((home + "/solix/.cconfig").c_str(), std::ios::in);
 	if (file.is_open())
 	{
 		file >> isInstallationComplete;
@@ -722,7 +722,7 @@ bool Solix::onSetup()
 
 	installTools(isInstallationComplete);
 
-	file.open((home + std::string("/Solix/.cconfig")).c_str(), std::ios::out);
+	file.open((home + std::string("/solix/.cconfig")).c_str(), std::ios::out);
 	if (file.is_open())
 	{
 		Log::log("writing to config file!", Type::E_DISPLAY);
@@ -822,10 +822,10 @@ void Solix::update()
 	Solix += getenv(USERNAME);
 #endif
 #ifdef _WIN32
-	Solix += "\\Solix";
+	Solix += "\\solix";
 	std::string source{Solix + "\\utool.exe"};
 #else
-	Solix += "/Solix";
+	Solix += "/solix";
 	std::string source{Solix + "/utool"};
 #endif
 	Log::log("updating Solix...", Type::E_DISPLAY);
