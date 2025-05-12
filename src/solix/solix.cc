@@ -1027,7 +1027,7 @@ void Solix::createSubProject()
 {
 	if (mArgs.size() < 3)
 	{
-		Log::log("Your must provide subproject name!", Type::E_ERROR);
+		Log::log("You must provide subproject name!", Type::E_ERROR);
 		return;
 	}
 	auto info = readuserInput();

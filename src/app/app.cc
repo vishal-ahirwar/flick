@@ -4,7 +4,7 @@
 #include <solixconfig.h>
 #include <string>
 #include <log/log.h>
-namespace CLI
+namespace solix
 {
     int showHelp()
     {
@@ -20,7 +20,7 @@ namespace CLI
         }
         else if (args.at(1) == ("help"))
         {
-            CLI::showHelp();
+            solix::showHelp();
         }
         else if (args.at(1) == ("compile"))
         {

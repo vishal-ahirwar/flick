@@ -2,7 +2,7 @@
 #include<vector>
 #include<string>
 
-namespace CLI
+namespace solix
 {
     int showHelp();
     int createApp(const std::vector<std::string>&args);

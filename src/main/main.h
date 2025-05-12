@@ -2,7 +2,7 @@
 #define MAIN_H
 #include <app/app.h>
 #include <log/log.h>
-namespace Main
+namespace 
 {
     std::vector<std::string> getArgs(int argc, char *argv[])
     {
