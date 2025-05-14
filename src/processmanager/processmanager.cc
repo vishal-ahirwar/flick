@@ -12,36 +12,38 @@ const int size{sizeof(SHAPES)};
 namespace fs = std::filesystem;
 int ProcessManager::startProcess(const std::vector<std::string> &args, std::string &processLog, const std::string &msg, bool b_log)
 {
-    Log::log(msg + ".." + SHAPES[rand() % size], Type::E_DISPLAY, "\r");
-
     if (!fs::exists("build"))
         fs::create_directories("build");
 
     std::ofstream logFile("build/build.log", std::ios::out);
     boost::process::ipstream outStream;
     boost::process::ipstream errStream;
-    boost::process::child process(boost::process::search_path(args[0]), boost::process::args(std::vector<std::string>(args.begin()+1,args.end())), boost::process::std_out > outStream, boost::process::std_err > errStream);
+    boost::process::child process(boost::process::search_path(args[0]), boost::process::args(std::vector<std::string>(args.begin() + 1, args.end())), boost::process::std_out > outStream, boost::process::std_err > errStream);
     std::string lineOut, lineErr;
     while (process.running() && (std::getline(outStream, lineOut) || std::getline(errStream, lineErr)))
     {
-        Log::log(msg + ".." + SHAPES[rand() % size], Type::E_DISPLAY, "\r");
         if (!lineErr.empty())
         {
             if (lineErr.find("warning") != std::string::npos)
                 Log::log(lineErr, Type::E_WARNING);
-            if (lineErr.find("error") != std::string::npos)
+            else if (lineErr.find("error") != std::string::npos)
                 Log::log(lineErr, Type::E_ERROR);
-            logFile<<lineErr<<"\n";
-            processLog.append(lineErr+"\n");
+            else
+                Log::log(lineErr, Type::E_DISPLAY);
+
+            logFile << lineErr << "\n";
+            processLog.append(lineErr + "\n");
         }
         if (!lineOut.empty())
         {
             if (lineOut.find("warning") != std::string::npos)
                 Log::log(lineOut, Type::E_WARNING);
-            if (lineOut.find("error") != std::string::npos)
+            else if (lineOut.find("error") != std::string::npos)
                 Log::log(lineOut, Type::E_ERROR);
-            logFile<<lineOut<<"\n";
-            processLog.append(lineOut+"\n");
+            else
+                Log::log(lineOut, Type::E_DISPLAY);
+            logFile << lineOut << "\n";
+            processLog.append(lineOut + "\n");
         }
     }
     process.wait();
