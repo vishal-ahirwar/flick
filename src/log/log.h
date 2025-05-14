@@ -1,6 +1,7 @@
 #ifndef _LOG_H_
 #define _LOG_H_
 #include <string_view>
+#include<string>
 enum class Type
 {
     E_DISPLAY,
@@ -118,7 +119,7 @@ private:
         switch (level)
         {
         case Level::Status:
-            return "Status";
+            return "[build]";
         case Level::Warning:
             return "Warning";
         case Level::Error:
