@@ -4,6 +4,9 @@
 > Solix brings the simplicity of dependency management from languages like Python, Rust, or JavaScript into C++—finally making C++ feel modern to work with.
 
 ---
+|![image](https://github.com/user-attachments/assets/9397ea15-9b4f-4e54-8000-8cc029fccf9a)|![image](https://github.com/user-attachments/assets/8417335d-fc28-4475-ad49-fdab9780bb1c)|
+|---|---|
+
 
 ## ✨ Features
 
