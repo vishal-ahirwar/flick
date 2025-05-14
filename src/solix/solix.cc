@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <format>
 #include <chrono>
-#include <Solix/Solix.hpp>
+#include <solix/solix.hpp>
 #include <projectgenerator/projectgenerator.h>
 #include <constants/colors.hpp>
 #include <constants/constant.hpp>
