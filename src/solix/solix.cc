@@ -152,7 +152,7 @@ bool Solix::compile()
 		std::vector<std::string> args{"-DCMAKE_BUILD_TYPE=Debug", "--preset=" + std::string(VCPKG_TRIPLET)};
 		if (!executeCMake(args))
 		{
-			Log::log("There are some errors in your CMakeLists.txt read build/build.log for more info", Type::E_ERROR);
+			Logger::error("There are some errors in your CMakeLists.txt read build/build.log for more info");
 			return false;
 		}; // TODO
 		// run ninja
@@ -165,12 +165,12 @@ bool Solix::compile()
 
 		if (ProcessManager::startProcess(args, pLog, "Compiling this may take minutes") == 0) // if there is any kind of error then don't clear the terminal
 		{
-			Log::log("BUILD SUCCESSFULL");
+			Logger::status("BUILD SUCCESSFULL");
 			return true;
 		}
 		else
 		{
-			Log::log("BUILD FAILED", Type::E_ERROR);
+			Logger::error("BUILD FAILED");
 			return false;
 		}
 	}
@@ -185,13 +185,13 @@ bool Solix::compile()
 		// run ninja
 		if (ProcessManager::startProcess(args, pLog, "Compiling this may take minutes") == 0) // if there is any kind of error then don't clear the terminal
 		{
-			Log::log("BUILD SUCCESSFULL");
+			Logger::status("BUILD SUCCESSFULL");
 
 			return true;
 		}
 		else
 		{
-			Log::log("BUILD FAILED", Type::E_ERROR);
+			Logger::error("BUILD FAILED");
 			return false;
 		}
 	}

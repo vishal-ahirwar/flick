@@ -25,11 +25,14 @@ int ProcessManager::startProcess(const std::vector<std::string> &args, std::stri
         if (!lineErr.empty())
         {
             if (lineErr.find("warning") != std::string::npos)
-                Log::log(lineErr, Type::E_WARNING);
+                Logger::warning(lineErr);
+            // Log::log(lineErr, Type::E_WARNING);
             else if (lineErr.find("error") != std::string::npos)
-                Log::log(lineErr, Type::E_ERROR);
+                Logger::error(lineErr);
+            // Log::log(lineErr, Type::E_ERROR);
             else
-                Log::log(lineErr, Type::E_DISPLAY);
+                Logger::status(lineErr);
+            // Log::log(lineErr, Type::E_DISPLAY);
 
             logFile << lineErr << "\n";
             processLog.append(lineErr + "\n");
@@ -37,11 +40,14 @@ int ProcessManager::startProcess(const std::vector<std::string> &args, std::stri
         if (!lineOut.empty())
         {
             if (lineOut.find("warning") != std::string::npos)
-                Log::log(lineOut, Type::E_WARNING);
+                Logger::warning(lineOut);
+            // Log::log(lineOut, Type::E_WARNING);
             else if (lineOut.find("error") != std::string::npos)
-                Log::log(lineOut, Type::E_ERROR);
+                Logger::error(lineOut);
+            // Log::log(lineOut, Type::E_ERROR);
             else
-                Log::log(lineOut, Type::E_DISPLAY);
+                Logger::status(lineOut);
+            // Log::log(lineOut, Type::E_DISPLAY);
             logFile << lineOut << "\n";
             processLog.append(lineOut + "\n");
         }
@@ -51,7 +57,7 @@ int ProcessManager::startProcess(const std::vector<std::string> &args, std::stri
     logFile.close();
     if (exitCode != 0)
     {
-        Log::log("For more info: " + (fs::current_path() / "build/build.log").generic_string(), Type::E_DISPLAY);
+        Logger::error("For more info: " + (fs::current_path() / "build/build.log").generic_string());
     }
 
     puts("");
