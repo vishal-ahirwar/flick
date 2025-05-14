@@ -11,7 +11,7 @@ enum class Type
 class Log
 {
 public:
-    static void log(const std::string_view &, Type = Type::E_NONE, const std::string_view &end = "\n");
+    static void log(const std::string &, Type = Type::E_NONE, const std::string_view &end = "\n");
     static void about();
 };
 
