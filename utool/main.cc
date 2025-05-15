@@ -26,7 +26,7 @@ int main()
     home += getenv(USERNAME);
     home += "/solix";
 #endif
-    Log::log("updating Solix...", Type::E_DISPLAY);
+    Log::log("Updating Solix...", Type::E_DISPLAY);
 #ifdef _WIN32
     Downloader::download(std::string(UPDATE_URL), home + "\\solix.exe");
 #else
