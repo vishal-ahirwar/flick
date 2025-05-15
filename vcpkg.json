@@ -1,5 +1,5 @@
 {
-  "name": "solix",
+  "name": "flick",
   "version": "3.0.0",
   "dependencies": [
     "boost-process",

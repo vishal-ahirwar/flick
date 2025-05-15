@@ -1,7 +1,7 @@
-# Solix
+# Flick
 
 > **Use external libraries in Modern C++ as easily as in other modern languages.**
-> Solix brings the simplicity of dependency management from languages like Python, Rust, or JavaScript into C++—finally making C++ feel modern to work with.
+> Flick brings the simplicity of dependency management from languages like Python, Rust, or JavaScript into C++—finally making C++ feel modern to work with.
 
 ---
 |![image](https://github.com/user-attachments/assets/9397ea15-9b4f-4e54-8000-8cc029fccf9a)|![image](https://github.com/user-attachments/assets/8417335d-fc28-4475-ad49-fdab9780bb1c)|
@@ -56,16 +56,16 @@
 * CMake
 * Clang (on all platforms)
 * Ninja (Recommended)
-* vcpkg (Handled internally by Solix)
+* vcpkg (Handled internally by Flick)
 
-### Building Solix
+### Building Flick
 
 ```bash
 cmake --preset=default
 cmake --build build/default
 ```
 
-> Or use Solix itself to bootstrap:
+> Or use Flick itself to bootstrap:
 
 ```bash
 aura build
@@ -76,7 +76,7 @@ aura build
 ## 🚀 Usage
 
 ```bash
-solix [command] [project-name]
+Flick [command] [project-name]
 ```
 
 ### Core Commands
@@ -91,12 +91,12 @@ solix [command] [project-name]
 | `tests`           | Enable and manage unit tests                                        |
 | `debug`           | Launch LLDB for debugging                                           |
 | `release`         | Compile in release mode                                             |
-| `add`             | Add external library using `vcpkg`. Example: `solix add fmt/11.0.2` |
+| `add`             | Add external library using `vcpkg`. Example: `Flick add fmt/11.0.2` |
 | `initVCPKG`       | Create `vcpkg.json` config in project                               |
 | `reload`          | Reload the vcpkg dependency cache                                   |
 | `createinstaller` | Generate an installable package                                     |
-| `fix`             | Diagnose and fix Solix issues                                       |
-| `update`          | Update Solix to the latest version                                  |
+| `fix`             | Diagnose and fix Flick issues                                       |
+| `update`          | Update Flick to the latest version                                  |
 | `setup`           | Auto install Clang, Ninja, CMake, and vcpkg                         |
 
 ---
@@ -104,16 +104,16 @@ solix [command] [project-name]
 ## 📂 Example
 
 ```bash
-solix create myApp
+Flick create myApp
 cd myApp
-solix add fmt/11.0.2
-solix build
-solix run
+Flick add fmt/11.0.2
+Flick build
+Flick run
 ```
 
 ---
 
-## 🧠 Why Use Solix?
+## 🧠 Why Use Flick?
 
 * Skip repetitive setup and config
 * Learn modern C++ without being blocked by tooling

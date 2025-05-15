@@ -1,4 +1,4 @@
-#include <projectgenerator/projectgenerator.h>
+﻿#include <projectgenerator/projectgenerator.h>
 #include <log/log.h>
 #include <filesystem>
 #include <deps/deps.h>
@@ -187,7 +187,7 @@ void ProjectGenerator::generateRootCMake()
 {
 	std::string config{(mProjectSetting.getProjectName() + "/res/config.h.in")};
 	std::ofstream cmake{mProjectSetting.getProjectName() + "/CMakeLists.txt"};
-	cmake << "#Auto Generated Root CMake file by Solix CLI\n";
+	cmake << "#Auto Generated Root CMake file by Flick CLI\n";
 	cmake << std::format("#Copyright(c) 2025 {}.All rights reerved.\n", mUserInfo.getUserName());
 	cmake << "cmake_minimum_required(VERSION 3.6...3.31)\n";
 	if (_lang == Language::CXX)

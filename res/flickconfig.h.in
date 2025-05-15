@@ -1,0 +1,6 @@
+﻿#define Flick_VERSION_MAJOR @flick_VERSION_MAJOR@
+#define Flick_VERSION_MINOR @flick_VERSION_MINOR@
+#define Flick_VERSION_PATCH @flick_VERSION_PATCH@
+#define Flick_COMPANY "@COMPANY@"
+#define Flick_COPYRIGHT "@COPYRIGHT@"
+

@@ -1,4 +1,4 @@
-#include <utils/utils.h>
+﻿#include <utils/utils.h>
 #ifdef _WIN32
 #include <windows.h>
 #define USERNAME "USERPROFILE"
@@ -9,13 +9,13 @@
 #endif
 #include <filesystem>
 namespace fs = std::filesystem;
-std::string Utils::getSolixPath()
+std::string Utils::getFlickPath()
 {
     std::string path{std::getenv(USERNAME)};
 #ifdef _WIN32
-    path += "\\Solix";
+    path += "\\Flick";
 #else
-    path += "/Solix";
+    path += "/Flick";
 #endif
     if (!fs::exists(path))
         return "";
@@ -66,3 +66,4 @@ int Utils::startApp(const std::string &path)
     return 0; // Parent returns immediately, process runs in the background
 #endif
 }
+

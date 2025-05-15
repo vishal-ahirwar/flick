@@ -1,10 +1,10 @@
-#include <app/app.h>
+﻿#include <app/app.h>
 #include <constants/colors.hpp>
-#include <solix/solix.hpp>
-#include <solixconfig.h>
+#include <flick/flick.hpp>
+#include <flickconfig.h>
 #include <string>
 #include <log/log.h>
-namespace solix
+namespace flick
 {
     int showHelp()
     {
@@ -13,32 +13,32 @@ namespace solix
     }
     int createApp(const std::vector<std::string> &args)
     {
-        Solix Solix{args};
+        Flick flick{args};
         if (args.at(1) == "create")
         {
-            Solix.createNewProject();
+            flick.createNewProject();
         }
         else if (args.at(1) == ("help"))
         {
-            solix::showHelp();
+            flick::showHelp();
         }
         else if (args.at(1) == ("compile"))
         {
-            Solix.compile();
+            flick.compile();
         }
         else if (args.at(1) == ("run"))
         {
-            Solix.run();
+            flick.run();
         }
         else if (args.at(1) == ("build"))
         {
-            Solix.build();
+            flick.build();
         }
         else if (args.at(1) == ("setup"))
         {
             try
             {
-                Solix.setup();
+                flick.setup();
             }
             catch (const std::exception &e)
             {
@@ -47,54 +47,55 @@ namespace solix
         }
         else if (args.at(1) == ("createinstaller"))
         {
-            Solix.createInstaller();
+            flick.createInstaller();
         }
         else if (args.at(1) == ("tests"))
         {
-            Solix.test();
+            flick.test();
         }
         else if (args.at(1) == ("doctor"))
         {
-            Solix.fixInstallation();
+            flick.fixInstallation();
         }
         else if (args.at(1) == ("update"))
         {
-            Solix.update();
+            flick.update();
         }
         else if (args.at(1) == ("debug"))
         {
-            Solix.debug();
+            flick.debug();
         }
         else if (args.at(1) == ("release"))
         {
-            Solix.release();
+            flick.release();
         }
         else if (args.at(1) == ("vscode"))
         {
-            Solix.vsCode();
+            flick.vsCode();
         }
         else if (args.at(1) == ("rebuild"))
         {
-            Solix.reBuild();
+            flick.reBuild();
         }
         else if (args.at(1) == "install")
         {
-            Solix.addDeps();
+            flick.addDeps();
         }
         else if (args.at(1) == "cmake-preset")
         {
-            Solix.genCMakePreset();
+            flick.genCMakePreset();
         }else if (args.at(1)=="subproject")
         {
-            Solix.createSubProject();
+            flick.createSubProject();
         }
         else
         {
             printf("%s[Error] Invalid Command !%s\n", RED, WHITE);
-            printf("Try again with 'Solix help' :(\n");
+            printf("Try again with 'Flick help' :(\n");
             return 0;
         };
         return 0;
     };
 
 }
+

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <string>
 #include<projectsetting/projectsetting.h>
@@ -6,12 +6,12 @@
 #include<rt/rt.h>
 #include<vector>
 #include<constants/constant.hpp>
-class Solix
+class Flick
 {
 private:
     ProjectSetting mProjectSetting{};
     UserInfo mUserInfo{};
-    RT mRt{"Solix"};
+    RT mRt{"Flick"};
     std::vector<std::string>mArgs{};
 public:
     void createNewProject();
@@ -42,6 +42,7 @@ private:
     const std::string getStandaloneTriplet();
     std::pair<ProjectType, Language> readuserInput();
 public:
-    Solix(const std::vector<std::string>&args={});
-    ~Solix();
+    Flick(const std::vector<std::string>&args={});
+    ~Flick();
 };
+

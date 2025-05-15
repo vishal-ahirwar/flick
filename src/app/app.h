@@ -1,9 +1,10 @@
-#pragma once
+﻿#pragma once
 #include<vector>
 #include<string>
 
-namespace solix
+namespace flick
 {
     int showHelp();
     int createApp(const std::vector<std::string>&args);
 }
+

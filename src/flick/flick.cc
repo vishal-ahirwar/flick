@@ -1,4 +1,4 @@
-#define NOMINMAX
+﻿#define NOMINMAX
 #include <thread>
 #include <limits>
 #include <ctime>
@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <format>
 #include <chrono>
-#include <solix/solix.hpp>
+#include <flick/flick.hpp>
 #include <projectgenerator/projectgenerator.h>
 #include <constants/colors.hpp>
 #include <constants/constant.hpp>
@@ -30,7 +30,7 @@ void clearInputBuffer()
 	std::cin.clear();
 }
 
-std::pair<ProjectType, Language> Solix::readuserInput()
+std::pair<ProjectType, Language> Flick::readuserInput()
 {
 	Log::log("Choose language: c / cc (default = cc), q = quit > ", Type::E_DISPLAY, "");
 
@@ -69,7 +69,7 @@ std::pair<ProjectType, Language> Solix::readuserInput()
 	}
 	return std::pair<ProjectType, Language>{projectType, lang};
 };
-Solix::Solix(const std::vector<std::string> &args)
+Flick::Flick(const std::vector<std::string> &args)
 {
 	mArgs = args;
 	std::string cmd{args.at(1)};
@@ -96,11 +96,11 @@ Solix::Solix(const std::vector<std::string> &args)
 	if (cmd != "setup" && cmd != "doctor" && cmd != "update" && cmd != "builddeps")
 		ProjectGenerator::readProjectSettings(&this->mProjectSetting);
 };
-Solix::~Solix() {
+Flick::~Flick() {
 
 };
 
-void Solix::createNewProject()
+void Flick::createNewProject()
 {
 	ProjectGenerator generator{};
 	auto info = readuserInput();
@@ -108,7 +108,7 @@ void Solix::createNewProject()
 	generator.generate();
 };
 
-bool Solix::executeCMake(const std::vector<std::string> &additionalCMakeArg)
+bool Flick::executeCMake(const std::vector<std::string> &additionalCMakeArg)
 {
 	std::string processLog{};
 	std::vector<std::string> args{"cmake", "-S", ".", "-DENABLE_TESTS=OFF", "-G", "Ninja"};
@@ -119,7 +119,7 @@ bool Solix::executeCMake(const std::vector<std::string> &additionalCMakeArg)
 	return ProcessManager::startProcess(args, processLog, "Generating CMake Files this may take a while") == 0;
 };
 
-const std::string Solix::getStandaloneTriplet()
+const std::string Flick::getStandaloneTriplet()
 {
 #if defined(_WIN32)
 	return std::string{"windows-static-build"};
@@ -130,7 +130,7 @@ const std::string Solix::getStandaloneTriplet()
 #endif
 }
 // TODO : add compile option
-bool Solix::compile()
+bool Flick::compile()
 {
 	// Temp Soln
 
@@ -197,7 +197,7 @@ bool Solix::compile()
 	}
 };
 //
-void Solix::run()
+void Flick::run()
 {
 	std::string run{};
 	std::string app{mProjectSetting.getProjectName()};
@@ -262,7 +262,7 @@ void Solix::run()
 }
 
 //
-void Solix::build()
+void Flick::build()
 {
 	if (!this->compile())
 		return;
@@ -270,14 +270,14 @@ void Solix::build()
 }
 
 //
-void Solix::addToPathWin()
+void Flick::addToPathWin()
 {
 #ifdef _WIN32
 	namespace fs = std::filesystem;
-	std::string Solix{getenv(USERNAME)};
-	Solix += "\\Solix";
-	std::string source{fs::current_path().string() + "\\solix.exe"};
-	std::string destination{(Solix + "\\solix.exe").c_str()};
+	std::string Flick{getenv(USERNAME)};
+	Flick += "\\Flick";
+	std::string source{fs::current_path().string() + "\\Flick.exe"};
+	std::string destination{(Flick + "\\Flick.exe").c_str()};
 	if (source.compare(destination) != 0)
 	{
 		for (auto &dll : fs::directory_iterator(fs::current_path()))
@@ -286,33 +286,33 @@ void Solix::addToPathWin()
 				continue;
 			if (dll.path().filename().string().find(".dll") != std::string::npos)
 			{
-				printf("%sCopying %s to %s%s\n", GREEN, dll.path().filename().string().c_str(), Solix.c_str(), WHITE);
-				// if (fs::copy_file(dll.path(), Solix, fs::copy_options::update_existing))
+				printf("%sCopying %s to %s%s\n", GREEN, dll.path().filename().string().c_str(), Flick.c_str(), WHITE);
+				// if (fs::copy_file(dll.path(), Flick, fs::copy_options::update_existing))
 				// {
-				// 	printf("%s copied to %s\n", dll.path().filename().string().c_str(), Solix.c_str());
+				// 	printf("%s copied to %s\n", dll.path().filename().string().c_str(), Flick.c_str());
 				// }
 			}
 		}
 		if (!fs::exists(source))
 		{
-			Log::log("Solix doesn't exist in current dir", Type::E_WARNING);
+			Log::log("Flick doesn't exist in current dir", Type::E_WARNING);
 		}
 		else
 		{
-			printf("%sCopying Solix into %s%s\n", GREEN, Solix.c_str(), WHITE);
+			printf("%sCopying Flick into %s%s\n", GREEN, Flick.c_str(), WHITE);
 			if (fs::copy_file(source, destination, fs::copy_options::update_existing))
 			{
 				printf("%s copied to %s\n", source.c_str(), destination.c_str());
 			}
 			else
 			{
-				Log::log("error while copying Solix.exe into Solix directory!", Type::E_ERROR);
+				Log::log("error while copying Flick.exe into Flick directory!", Type::E_ERROR);
 			};
 		}
 	}
-	std::string path{Solix + ";"};
+	std::string path{Flick + ";"};
 
-	for (const auto &dir : fs::directory_iterator(Solix))
+	for (const auto &dir : fs::directory_iterator(Flick))
 	{
 		if (dir.is_directory())
 		{
@@ -353,11 +353,11 @@ void Solix::addToPathWin()
 
 	if (found)
 	{
-		Log::log("All paths from Solix are in PATH", Type::E_DISPLAY);
+		Log::log("All paths from Flick are in PATH", Type::E_DISPLAY);
 	}
 	else
 	{
-		Log::log("Some paths from Solix are missing in PATH adding these entries into path make sure to restart your shell after that", Type::E_WARNING);
+		Log::log("Some paths from Flick are missing in PATH adding these entries into path make sure to restart your shell after that", Type::E_WARNING);
 		pathStream.clear();
 		pathStream.str(newPath);
 		std::string tempStr{};
@@ -370,24 +370,24 @@ void Solix::addToPathWin()
 #endif
 }
 //
-void Solix::addToPathUnix()
+void Flick::addToPathUnix()
 {
 
 	namespace fs = std::filesystem;
-	std::string Solix{"/home/"};
-	Solix += getenv(USERNAME);
-	Solix += "/Solix";
-	std::string source{fs::current_path().string() + "/Solix"};
-	std::string destination{(Solix + "/Solix").c_str()};
+	std::string Flick{"/home/"};
+	Flick += getenv(USERNAME);
+	Flick += "/Flick";
+	std::string source{fs::current_path().string() + "/Flick"};
+	std::string destination{(Flick + "/Flick").c_str()};
 	if (source.compare(destination) != 0)
 	{
 		if (!fs::exists(source))
 		{
-			Log::log("Solix doesn't exist in current dir", Type::E_ERROR);
+			Log::log("Flick doesn't exist in current dir", Type::E_ERROR);
 		}
 		else
 		{
-			printf("%sCopying Solix into %s%s\n", GREEN, destination.c_str(), WHITE);
+			printf("%sCopying Flick into %s%s\n", GREEN, destination.c_str(), WHITE);
 			fs::remove(destination);
 			if (fs::copy_file(source, destination, fs::copy_options::overwrite_existing))
 			{
@@ -395,12 +395,12 @@ void Solix::addToPathUnix()
 			}
 			else
 			{
-				Log::log("error while copying Solix.exe into Solix directory!", Type::E_ERROR);
+				Log::log("error while copying Flick.exe into Flick directory!", Type::E_ERROR);
 			};
 		}
 	}
-	std::string path{Solix + ";"};
-	for (const auto &dir : fs::directory_iterator(Solix))
+	std::string path{Flick + ";"};
+	for (const auto &dir : fs::directory_iterator(Flick))
 	{
 		if (dir.is_directory())
 		{
@@ -433,11 +433,11 @@ void Solix::addToPathUnix()
 	}
 	if (found)
 	{
-		Log::log("All paths from Solix are in PATH", Type::E_DISPLAY);
+		Log::log("All paths from Flick are in PATH", Type::E_DISPLAY);
 	}
 	else
 	{
-		Log::log("Some paths from Solix are missing in PATH adding these entries into path make sure to restart your shell after that", Type::E_WARNING);
+		Log::log("Some paths from Flick are missing in PATH adding these entries into path make sure to restart your shell after that", Type::E_WARNING);
 		pathStream.clear();
 		pathStream.str(newPath);
 		std::string tempStr{};
@@ -456,7 +456,7 @@ void Solix::addToPathUnix()
 	};
 };
 
-void Solix::setupVcpkg(const std::string &home, bool &is_install)
+void Flick::setupVcpkg(const std::string &home, bool &is_install)
 {
 	std::string processLog{};
 	try
@@ -497,7 +497,7 @@ void Solix::setupVcpkg(const std::string &home, bool &is_install)
 	is_install = true;
 };
 // installing dev tools
-void Solix::installTools(bool &isInstallationComplete)
+void Flick::installTools(bool &isInstallationComplete)
 {
 #ifdef _WIN32
 	namespace fs = std::filesystem;
@@ -518,7 +518,7 @@ void Solix::installTools(bool &isInstallationComplete)
 	std::string home = getenv(USERNAME);
 	if (!home.c_str())
 		return;
-	home += "\\solix";
+	home += "\\Flick";
 	// system(("start " + std::string(VS_URL)).c_str());
 	// Log::log("Make sure you download Desktop Development in C++ from Visual Studio Installer", Type::E_WARNING);
 	Downloader::download(std::string(COMPILER_URL), home + "\\compiler.tar.xz");
@@ -536,8 +536,8 @@ void Solix::installTools(bool &isInstallationComplete)
 	fs::remove((home + "\\cmake.zip"));
 	fs::remove((home + "\\ninja.zip"));
 	Downloader::download(std::string(VS_BUILD_TOOLS_INSTALLER_URL), home + "\\vs.exe");
-	Downloader::download("https://github.com/vishal-ahirwar/Solix/blob/master/res/Solix.vsconfig", home + "\\Solix.vsconfig");
-	if (system((home + "\\vs.exe --quiet --wait --config " + home + "\\Solix.vsconfig").c_str()))
+	Downloader::download("https://github.com/vishal-ahirwar/Flick/blob/master/res/Flick.vsconfig", home + "\\Flick.vsconfig");
+	if (system((home + "\\vs.exe --quiet --wait --config " + home + "\\Flick.vsconfig").c_str()))
 	{
 		Log::log("installing Visual Studio C++ Build Tools failed!", Type::E_ERROR);
 	}
@@ -561,7 +561,7 @@ void Solix::installTools(bool &isInstallationComplete)
 #endif
 };
 
-void Solix::setup()
+void Flick::setup()
 {
 	if (system("git --version") == 0)
 	{
@@ -580,7 +580,7 @@ void Solix::setup()
 };
 
 // creating packaged build [with installer for windows] using cpack
-void Solix::createInstaller()
+void Flick::createInstaller()
 {
 	for (auto &arg : mArgs)
 	{
@@ -614,7 +614,7 @@ void Solix::createInstaller()
 			ProjectGenerator::generateLicenceFile(mUserInfo);
 		};
 		if (system("cd build/release && cpack"))
-			Log::log("CPack added to cmake run 'Solix createinstaller' command again",
+			Log::log("CPack added to cmake run 'Flick createinstaller' command again",
 					 Type::E_DISPLAY);
 	}
 	else
@@ -624,7 +624,7 @@ void Solix::createInstaller()
 };
 
 // running utest
-void Solix::test()
+void Flick::test()
 {
 	UnitTester tester(mUserInfo);
 	tester.setupUnitTestingFramework();
@@ -639,7 +639,7 @@ void Solix::test()
 
 // TODO
 // implementation is buggy right now will fix later
-bool Solix::onSetup()
+bool Flick::onSetup()
 {
 	bool isInstallationComplete{false};
 	namespace fs = std::filesystem;
@@ -653,24 +653,24 @@ bool Solix::onSetup()
 		return false;
 	std::fstream file;
 #ifdef _WIN32
-	if (!fs::create_directory(home + "\\Solix"))
+	if (!fs::create_directory(home + "\\Flick"))
 	{
-		Log::log("Solix dir alread exist", Type::E_WARNING);
+		Log::log("Flick dir alread exist", Type::E_WARNING);
 	};
-	file.open((home + "\\Solix\\.cconfig").c_str(), std::ios::in);
+	file.open((home + "\\Flick\\.cconfig").c_str(), std::ios::in);
 	if (file.is_open())
 	{
 		file >> isInstallationComplete;
 		file.close();
 		if (isInstallationComplete)
 		{
-			Log::log("Compiler is already installed if you think you messed up with Solix installation please use this command Solix fix", Type::E_WARNING);
+			Log::log("Compiler is already installed if you think you messed up with Flick installation please use this command Flick fix", Type::E_WARNING);
 			return true;
 		}
 	}
 	else
 	{
-		file.open((home + "\\solix\\.cconfig").c_str(), std::ios::out);
+		file.open((home + "\\Flick\\.cconfig").c_str(), std::ios::out);
 		if (file.is_open())
 		{
 			installTools(isInstallationComplete);
@@ -683,7 +683,7 @@ bool Solix::onSetup()
 	if (!isInstallationComplete)
 	{
 		installTools(isInstallationComplete);
-		file.open((home + "\\solix\\.cconfig").c_str(), std::ios::out);
+		file.open((home + "\\Flick\\.cconfig").c_str(), std::ios::out);
 		if (file.is_open())
 		{
 			file << isInstallationComplete;
@@ -695,23 +695,23 @@ bool Solix::onSetup()
 	};
 	return true;
 #else
-	if (!fs::create_directory(home + "/solix"))
+	if (!fs::create_directory(home + "/Flick"))
 	{
-		Log::log("Solix dir alread exist", Type::E_WARNING);
+		Log::log("Flick dir alread exist", Type::E_WARNING);
 	}
 	else
 	{
-		printf("%sCreating Solix dir at %s %s\n", BLUE, home.c_str(), WHITE);
+		printf("%sCreating Flick dir at %s %s\n", BLUE, home.c_str(), WHITE);
 	};
 
-	file.open((home + "/solix/.cconfig").c_str(), std::ios::in);
+	file.open((home + "/Flick/.cconfig").c_str(), std::ios::in);
 	if (file.is_open())
 	{
 		file >> isInstallationComplete;
 		file.close();
 		if (isInstallationComplete)
 		{
-			Log::log("Compiler is already installed if you think you messed up with Solix installation please use this command Solix fix", Type::E_WARNING);
+			Log::log("Compiler is already installed if you think you messed up with Flick installation please use this command Flick fix", Type::E_WARNING);
 			return true;
 		}
 	}
@@ -722,7 +722,7 @@ bool Solix::onSetup()
 
 	installTools(isInstallationComplete);
 
-	file.open((home + std::string("/solix/.cconfig")).c_str(), std::ios::out);
+	file.open((home + std::string("/Flick/.cconfig")).c_str(), std::ios::out);
 	if (file.is_open())
 	{
 		Log::log("writing to config file!", Type::E_DISPLAY);
@@ -741,8 +741,8 @@ bool Solix::onSetup()
 #endif
 }
 // TODO
-// remove the ~/Solix and reinstall the Solix again with all the tools like cmake,g++ compiler,ninja,nsis
-void Solix::fixInstallation() {
+// remove the ~/Flick and reinstall the Flick again with all the tools like cmake,g++ compiler,ninja,nsis
+void Flick::fixInstallation() {
 	// TODO
 };
 
@@ -812,27 +812,27 @@ void createProcess(const std::string &path)
 #endif
 }
 // download the utool from github if it's not already there then download the latest build from github
-void Solix::update()
+void Flick::update()
 {
 	namespace fs = std::filesystem;
 #ifdef _WIN32
-	std::string Solix = getenv(USERNAME);
+	std::string Flick = getenv(USERNAME);
 #else
-	std::string Solix{"/home/"};
-	Solix += getenv(USERNAME);
+	std::string Flick{"/home/"};
+	Flick += getenv(USERNAME);
 #endif
 #ifdef _WIN32
-	Solix += "\\solix";
-	std::string source{Solix + "\\utool.exe"};
+	Flick += "\\Flick";
+	std::string source{Flick + "\\utool.exe"};
 #else
-	Solix += "/solix";
-	std::string source{Solix + "/utool"};
+	Flick += "/Flick";
+	std::string source{Flick + "/utool"};
 #endif
-	Log::log("updating Solix...", Type::E_DISPLAY);
+	Log::log("updating Flick...", Type::E_DISPLAY);
 	std::cout << source << "\n";
-	if (fs::exists(source)) // if utool is present in ~/Solix directory then start the utool if not download the utool first
+	if (fs::exists(source)) // if utool is present in ~/Flick directory then start the utool if not download the utool first
 	{
-		createProcess(source); // Windows//starting process parent-less which will start utool so Solix will shutdown and then utool override the Solix.exe
+		createProcess(source); // Windows//starting process parent-less which will start utool so Flick will shutdown and then utool override the Flick.exe
 	}
 	else
 	{
@@ -840,11 +840,11 @@ void Solix::update()
 #ifndef _WIN32 // for linux we have to set permission for the newly downloaded file
 		system(("chmod +x " + source).c_str());
 #endif
-		createProcess(source); // starting process parent-less which will start utool so Solix will shutdown and then utool override the Solix.exe
+		createProcess(source); // starting process parent-less which will start utool so Flick will shutdown and then utool override the Flick.exe
 	};
 };
 // TODO
-void Solix::debug()
+void Flick::debug()
 {
 	if (!compile())
 		return;
@@ -856,7 +856,7 @@ void Solix::debug()
 };
 // TODO
 // this is actually useless for now but will add usefull stuff to it in future
-bool Solix::release()
+bool Flick::release()
 {
 
 	namespace fs = std::filesystem;
@@ -922,7 +922,7 @@ bool Solix::release()
 };
 // for generating vscode intelligence
 // everytime user run this command it's will override everything in c_cpp_properties.json
-void Solix::vsCode()
+void Flick::vsCode()
 {
 	namespace fs = std::filesystem;
 	if (!fs::exists("vcpkg.json"))
@@ -947,7 +947,7 @@ void Solix::vsCode()
 }
 
 // it will simply delete the whole build folder and compile the project again
-void Solix::reBuild()
+void Flick::reBuild()
 {
 	for (auto &arg : mArgs)
 	{
@@ -971,13 +971,13 @@ void Solix::reBuild()
 	};
 };
 
-void Solix::buildDeps()
+void Flick::buildDeps()
 {
 	// building cmake external libraries
 	Deps deps;
 	deps.buildDeps();
 }
-void Solix::addDeps()
+void Flick::addDeps()
 {
 	if (mArgs.size() < 3)
 	{
@@ -1008,7 +1008,7 @@ void Solix::addDeps()
 		deps.updateCMakeFile(vcpkgLog, app, mArgs.at(2));
 	}
 }
-void Solix::genCMakePreset()
+void Flick::genCMakePreset()
 {
 	Log::log("Please Choose your Programming language c/cc default=cc,q=quit > ", Type::E_DISPLAY, "");
 	std::string input{};
@@ -1023,7 +1023,7 @@ void Solix::genCMakePreset()
 	ProjectGenerator::generateCMakePreset(lang);
 };
 
-void Solix::createSubProject()
+void Flick::createSubProject()
 {
 	if (mArgs.size() < 3)
 	{
@@ -1035,3 +1035,4 @@ void Solix::createSubProject()
 	generator.setProjectSetting(mProjectSetting, info.second, info.first);
 	generator.generateSubProject(mArgs.at(2));
 }
+
