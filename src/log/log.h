@@ -71,15 +71,15 @@ private:
         switch (level)
         {
         case Level::Status:
-            icon = "\033[32m✔\033[0m";
+            icon = "\033[32m✔\033[0m ";
             color = "\033[32m";
             break;
         case Level::Warning:
-            icon = "\033[33m⚠";
+            icon = "\033[33m⚠ ";
             color = "\033[33m";
             break;
         case Level::Error:
-            icon = "\033[31m✖";
+            icon = "\033[31m✖ ";
             color = "\033[31m";
             break;
         }
