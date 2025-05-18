@@ -67,7 +67,7 @@ int Extractor::extract(const std::string &vcpkgLog)
         std::string findPackage = vcpkgLog.substr(index, end - index + 1);
         index = end;
         auto name = getName(findPackage);
-        index = vcpkgLog.find("target", index);
+        index = vcpkgLog.find("target_link", index);
         if (index == std::string::npos)
             break;
         end = vcpkgLog.find(")", index);

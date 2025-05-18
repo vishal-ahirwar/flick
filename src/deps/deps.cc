@@ -10,19 +10,60 @@
 #include "processmanager/processmanager.h"
 #include <regex>
 #include <boost/process.hpp>
+#include<iostream>
 namespace fs = std::filesystem;
 bool Deps::buildDeps()
 {
     return true;
 }
 
-bool Deps::addDeps(const std::string &packageName)
+bool Deps::addDeps(const std::string &packageName,const std::string&version,bool forceUpdateBaseLine)
 {
-    std::string version{};
+    std::string _version{};
     std::string name{};
-    if (!isPackageAvailableOnVCPKG(packageName, name, version))
-        return false;
+    if (!isPackageAvailableOnVCPKG(packageName, name, _version));
+    if (!version.empty())
+    {
+        if (_version != version)
+        {
+            Log::log(std::format("Package version : {} does not match",version), Type::E_ERROR);
+            Log::log("Do you still want to add ?(y/n) ");
+            char y{};
+            std::cin>>y;
+            if (y=='y')_version=version;
+            else
+                return false;
+        }else
+        {
+            _version = version;
+        }
+    }
     std::string processLog{};
+    std::ifstream in("vcpkg.json");
+    if (!in.is_open())return false;
+    nlohmann::json data;
+    data<<in;
+    in.close();
+    data["overrides"].push_back(
+        {
+            {"name",name},
+            {"version",_version}
+        });
+    if(data.contains("builtin-baseline")==false||forceUpdateBaseLine)
+    {
+        std::string baseLine{};
+        findBuildinBaseline(name,version,baseLine);
+        if(baseLine.empty())
+        {
+            Log::log(std::format("Built-in baseline not found for version : {}",version), Type::E_ERROR);
+            return false;
+        }
+        data["builtin-baseline"]=baseLine;
+    };
+    std::ofstream out("vcpkg.json");
+    if (!out.is_open())return false;
+    out<<data.dump(4);
+    out.close();
     std::vector<std::string> args{"vcpkg", "add", "port", packageName};
     return ProcessManager::startProcess(args, processLog, "Adding " + packageName + " to vcpkg.json") == 0;
 };
@@ -204,7 +245,7 @@ bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName, std::string
     if (lines.size() == 0)
     {
         Log::log("No package found with name " + packageName, Type::E_ERROR);
-        return 0;
+        return false;
     }
     std::regex pattern(R"(^(\S+)\s+([^\s]+)\s+(.*)$)");
     for (const auto &package : lines)
@@ -215,9 +256,10 @@ bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName, std::string
             if (matches[1].str() == packageName)
             {
                 Log::log("Selected package info", Type::E_DISPLAY);
-                Log::log("\t" + package, Type::E_NONE);
-                outName=package;
-                //TODO:
+
+                outName = matches[1].str();
+                outVersion = matches[2].str();  // Extract version from second capture group
+                Log::log(std::format("\tname : {},  version : {}", outName,outVersion), Type::E_WARNING);
                 return true;
             }
             else
@@ -252,8 +294,8 @@ bool Deps::findBuildinBaseline(const std::string &name, const std::string &versi
             {
                 auto index = line.find(" ");
                 outBaseLine = line.substr(0, index);
-                std::string version = line.substr(index, line.find(" ", index));
-                Log::log(std::format("Package : {}, Version : {}, Baseline Commit : {}\n[{}]\n", name, version, outBaseLine, line), Type::E_NONE);
+                std::string _version = line.substr(index, line.find(" ", index));
+                Log::log(std::format("Package : {}, Version : {}, Baseline Commit : {}\n[{}]\n", name, _version, outBaseLine, line), Type::E_NONE);
                 c.terminate();
                 return true;
             }
@@ -270,10 +312,6 @@ bool Deps::findBuildinBaseline(const std::string &name, const std::string &versi
     return false;
 }
 
-bool Deps::isBaseLineAlreadyInJson()
-{
-    return false;
-}
 
 bool Deps::addToJson(const std::string &name, const std::string &version)
 {

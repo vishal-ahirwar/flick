@@ -43,7 +43,7 @@ bool ProjectSetting::writeConfig(const std::string &path)
     data["name"] = mProjectName;
     data["version"] = "1.0.0";
     data["dependencies"]=std::vector<std::string>();
-    out << data;
+    out << data.dump(4);
     out.close();
     return true;
 };

@@ -979,18 +979,44 @@ void Flick::buildDeps()
 }
 void Flick::addDeps()
 {
+	std::string name{},version{},project{};
+	bool bUpdateBaseline{};
 	if (mArgs.size() < 3)
 	{
 		Log::log("No Package name given", Type::E_ERROR);
 		return;
 	};
-	std::string app{mProjectSetting.getProjectName()};
-	if (mArgs.size() >= 4)
+	project=mProjectSetting.getProjectName();
+	for (const auto &arg : mArgs)
 	{
-		app = mArgs[3].find("--") == std::string::npos ? mArgs[3] : app;
+		if (arg.find("--package=") != std::string::npos)
+		{
+			// Extract package name after "--package="
+			name = arg.substr(arg.find("=") + 1);
+		}
+		else if (arg.find("--version=") != std::string::npos)
+		{
+			// Extract version number after "--version="
+			version = arg.substr(arg.find("=") + 1);
+		}
+		else if (arg.find("--project=") != std::string::npos)
+		{
+			// Extract project name after "--project="
+			project = arg.substr(arg.find("=") + 1);
+		}
+		else if (arg.find("--update-base-line") != std::string::npos)
+		{
+			bUpdateBaseline = true;
+		}
+	}
+	if (name.empty())
+	{
+		Log::log("Uses : flick install --package=boost-process --version=1.85.0 --project=demo --update-base-line",Type::E_ERROR);
+		Log::log("Other args are optional but package name must be provided: flick install --package=fmt", Type::E_ERROR);
+		return;
 	}
 	Deps deps;
-	if (deps.addDeps(mArgs.at(2)))
+	if (deps.addDeps(name,version,bUpdateBaseline))
 	{
 		std::string vcpkgLog{};
 		for (auto &arg : mArgs)
@@ -1005,7 +1031,7 @@ void Flick::addDeps()
 		{
 			return;
 		};
-		deps.updateCMakeFile(vcpkgLog, app, mArgs.at(2));
+		deps.updateCMakeFile(vcpkgLog, project, name);
 	}
 }
 void Flick::genCMakePreset()

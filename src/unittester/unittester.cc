@@ -92,7 +92,7 @@ void UnitTester::setupUnitTestingFramework()
             {
                 testFile << UNIT_TEST_CODE[static_cast<int>(lang)];
                 testFile.close();
-                deps.addDeps("cmocka");
+                deps.addDeps("cmocka","");
             }; }();
         break;
     case Language::CXX:
@@ -105,7 +105,7 @@ void UnitTester::setupUnitTestingFramework()
                 {
                     testFile << UNIT_TEST_CODE[static_cast<int>(lang)];
                     testFile.close();
-                    deps.addDeps("gtest");
+                    deps.addDeps("gtest","");
                 }; }();
         break;
     }
