@@ -27,7 +27,7 @@ find_package(fmt CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
 include_directories(src ${CMAKE_BINARY_DIR})
-configure_file(res/Flickconfig.h.in Flickconfig.h)
+configure_file(res/flickconfig.h.in flickconfig.h)
 file(GLOB SOURCES "src/*.cc" "src/*/*.cc")
 
     add_executable(${PROJECT_NAME} ${SOURCES} ${CMAKE_SOURCE_DIR}/src/main/main.cpp)
