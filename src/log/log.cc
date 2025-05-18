@@ -10,16 +10,16 @@ void Log::log(const std::string &formated_string, Type type, const std::string_v
     switch (type)
     {
     case Type::E_DISPLAY:
-        Logger::status(formated_string);
+        Logger::status(formated_string,end);
         break;
     case Type::E_ERROR:
-        Logger::error(formated_string);
+        Logger::error(formated_string,end);
         break;
     case Type::E_WARNING:
-        Logger::warning(formated_string);
+        Logger::warning(formated_string,end);
         break;
     case Type::E_NONE:
-        Logger::status(formated_string);
+        Logger::status(formated_string,end);
         break;
     default:
         break;

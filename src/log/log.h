@@ -30,12 +30,12 @@ public:
         Error
     };
 
-    static void status(const std::string &msg)
+    static void status(const std::string &msg,const std::string_view&end="\n")
     {
-        print(Level::Status, msg);
+        print(Level::Status, msg,end);
     }
 
-    static void warning(const std::string &message,
+    static void warning(const std::string &message,const std::string_view&end="\n",
                         const std::string &file = "",
                         int line = -1,
                         int column = -1,
@@ -43,10 +43,10 @@ public:
                         const std::string &sourceLine = "",
                         int highlightColumn = -1)
     {
-        print(Level::Warning, message, file, line, column, code, sourceLine, highlightColumn);
+        print(Level::Warning, message, end,file, line, column, code, sourceLine, highlightColumn);
     }
 
-    static void error(const std::string &message,
+    static void error(const std::string &message,const std::string_view&end="\n",
                       const std::string &file = "",
                       int line = -1,
                       int column = -1,
@@ -54,12 +54,12 @@ public:
                       const std::string &sourceLine = "",
                       int highlightColumn = -1)
     {
-        print(Level::Error, message, file, line, column, code, sourceLine, highlightColumn);
+        print(Level::Error, message, end,file, line, column, code, sourceLine, highlightColumn);
     }
 
 private:
     static void print(Level level,
-                      const std::string &message,
+                      const std::string &message,const std::string_view&end="\n",
                       const std::string &file = "",
                       int line = -1,
                       int column = -1,
@@ -71,15 +71,15 @@ private:
         switch (level)
         {
         case Level::Status:
-            icon = "✅";
+            icon = "\033[32m✔\033[0m";
             color = "\033[32m";
             break;
         case Level::Warning:
-            icon = "⚠️ ";
+            icon = "\033[33m⚠";
             color = "\033[33m";
             break;
         case Level::Error:
-            icon = "❌";
+            icon = "\033[31m✖";
             color = "\033[31m";
             break;
         }
@@ -89,7 +89,7 @@ private:
             fmt::print("────────────────────────────────────────────────────────────────────────────\n");
 
         // Main message
-        fmt::print("{}{} {:<8} {}\033[0m\n", color, icon, toLabel(level), message);
+        fmt::print("{}{} {:<8} {}\033[0m{}", color, icon, toLabel(level), message,end);
 
         // File + line + column
         if (!file.empty())
@@ -119,7 +119,7 @@ private:
         switch (level)
         {
         case Level::Status:
-            return "[build]";
+            return "[flick]";
         case Level::Warning:
             return "Warning";
         case Level::Error:
