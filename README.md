@@ -66,15 +66,18 @@ cmake --build build/default
 > Or use Flick itself to bootstrap:
 
 ```bash
-aura build
+flick build
 ```
-
+or
+```bash
+flick build --standalone
+```
 ---
 
 ## 🚀 Usage
 
 ```bash
-Flick [command] [project-name]
+flick <Core Commands>
 ```
 
 ### Core Commands
@@ -102,11 +105,15 @@ Flick [command] [project-name]
 ## 📂 Example
 
 ```bash
-Flick create myApp
-cd myApp
-Flick add fmt/11.0.2
-Flick build
-Flick run
+$ flick create my-awesome-app
+$ flick install --package=libpqxx --update-base-line
+$ flick install --package=restclient-cpp --version=0.5.2 --update-base-line
+$ flick install --package=qtbase
+$ flick build
+$ flick subproject client
+$ flick build client --standalone
+$ flick tests
+$ flick release --standalone
 ```
 
 ---
