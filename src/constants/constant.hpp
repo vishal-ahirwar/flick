@@ -339,7 +339,7 @@ constexpr std::string_view VSCODE_CONFIG{R"(     {
        "configurations": [
            {
                "name": "Linux OS",
-               "compileCommands": "${workspaceFolder}/build/debug/compile_commands.json",
+               "compileCommands": "${workspaceFolder}/build/default/compile_commands.json",
                "includePath": [
                    "${workspaceFolder}/**"
                ],
