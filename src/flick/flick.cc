@@ -28,6 +28,38 @@
 #include <archive_entry.h>
 namespace fs = std::filesystem;
 
+void Flick::addToPathPermanent(const std::vector<std::string>& paths)
+{
+    std::string bashrc = std::string("/home/") + getenv("USERNAME") + "/.bashrc";
+    std::ifstream checkFile(bashrc);
+    std::string existingContent;
+
+    if (checkFile.is_open()) {
+        existingContent.assign((std::istreambuf_iterator<char>(checkFile)), std::istreambuf_iterator<char>());
+        checkFile.close();
+    } else {
+        Log::log("failed to read ~/.bashrc file!", Type::E_ERROR);
+        return;
+    }
+
+    std::ofstream bashrcFile(bashrc, std::ios::app);
+    if (!bashrcFile.is_open()) {
+        Log::log("failed to open ~/.bashrc file for appending!", Type::E_ERROR);
+        return;
+    }
+
+    for (const auto& path : paths) {
+        if (existingContent.find(path) == std::string::npos) {
+            bashrcFile << "export PATH=\"$PATH:" << path << "\"\n";
+            printf("%sAdded to PATH: %s%s\n", GREEN, path.c_str(), WHITE);
+        } else {
+            printf("%sAlready in PATH: %s%s\n", GREEN, path.c_str(), WHITE);
+        }
+    }
+
+    bashrcFile.close();
+}
+
 // Helper function to copy data blocks
 static int copy_data(struct archive *ar, struct archive *aw)
 {
@@ -438,193 +470,246 @@ void Flick::build()
 		return;
 	this->run();
 }
+#ifdef _WIN32
+
+bool addToPathPermanentWindows(const std::string& newPath)
+{
+    HKEY hKey;
+    constexpr auto envKey = "Environment";
+    constexpr auto pathName = "Path";
+
+    // Open HKEY_CURRENT_USER\Environment
+    if (RegOpenKeyExA(HKEY_CURRENT_USER, envKey, 0, KEY_READ | KEY_WRITE, &hKey) != ERROR_SUCCESS)
+    {
+        std::cerr << "Failed to open registry key: HKCU\\Environment\n";
+        return false;
+    }
+
+    // Query existing PATH value
+    DWORD type = REG_EXPAND_SZ;
+    char buffer[8192];
+    DWORD bufferSize = sizeof(buffer);
+
+    std::string currentPath;
+    if (RegQueryValueExA(hKey, pathName, nullptr, &type, reinterpret_cast<LPBYTE>(buffer), &bufferSize) == ERROR_SUCCESS)
+    {
+        currentPath.assign(buffer, bufferSize - 1);
+    }
+
+    // Check if newPath is already in PATH (case-insensitive on Windows)
+    if (_stricmp(currentPath.c_str(), newPath.c_str()) == 0 ||
+        currentPath.find(newPath) != std::string::npos)
+    {
+        std::cout << "Path already exists in PATH.\n";
+        RegCloseKey(hKey);
+        return true;
+    }
+
+    // Append new path
+    std::string updatedPath = currentPath;
+    if (!updatedPath.empty() && updatedPath.back() != ';')
+        updatedPath += ';';
+
+    updatedPath += newPath;
+
+    // Write new value
+    if (RegSetValueExA(hKey, pathName, 0, REG_EXPAND_SZ,
+                       reinterpret_cast<const BYTE*>(updatedPath.c_str()),
+                       static_cast<DWORD>(updatedPath.size() + 1)) != ERROR_SUCCESS)
+    {
+        std::cerr << "Failed to set PATH in registry.\n";
+        RegCloseKey(hKey);
+        return false;
+    }
+
+    RegCloseKey(hKey);
+
+    // Broadcast WM_SETTINGCHANGE so new shells pick it up
+    SendMessageTimeoutA(HWND_BROADCAST, WM_SETTINGCHANGE, 0,
+                        reinterpret_cast<LPARAM>("Environment"),
+                        SMTO_ABORTIFHUNG, 5000, nullptr);
+
+    std::cout << "Added to PATH permanently: " << newPath << "\n";
+    return true;
+}
 
 //
 void Flick::addToPathWin()
 {
 #ifdef _WIN32
-	namespace fs = std::filesystem;
-	std::string Flick{getenv(USERNAME)};
-	Flick += "\\flick";
-	std::string source{fs::current_path().string() + "\\flick.exe"};
-	std::string destination{(Flick + "\\flick.exe").c_str()};
-	if (source.compare(destination) != 0)
-	{
-		for (auto &dll : fs::directory_iterator(fs::current_path()))
-		{
-			if (dll.is_directory())
-				continue;
-			if (dll.path().filename().string().find(".dll") != std::string::npos)
-			{
-				printf("%sCopying %s to %s%s\n", GREEN, dll.path().filename().string().c_str(), Flick.c_str(), WHITE);
-				// if (fs::copy_file(dll.path(), Flick, fs::copy_options::update_existing))
-				// {
-				// 	printf("%s copied to %s\n", dll.path().filename().string().c_str(), Flick.c_str());
-				// }
-			}
-		}
-		if (!fs::exists(source))
-		{
-			Log::log("Flick doesn't exist in current dir", Type::E_WARNING);
-		}
-		else
-		{
-			Log::log(std::format("Copying Flick into '{}'", Flick.c_str()));
-			if (fs::copy_file(source, destination, fs::copy_options::update_existing))
-			{
-				Log::log(std::format("{} copied to {}", source.c_str(), destination.c_str()));
-			}
-			else
-			{
-				Log::log("error while copying Flick.exe into Flick directory!", Type::E_ERROR);
-			};
-		}
-	}
-	std::string path{Flick + ";"};
+    namespace fs = std::filesystem;
 
-	for (const auto &dir : fs::directory_iterator(Flick))
-	{
-		if (dir.is_directory())
-		{
-			if (dir.path().string().find("_internal") != std::string::npos)
-				continue;
-			if (dir.path().string().find("vcpkg") != std::string::npos)
-			{
-				path += dir.path().string() + ";";
-				continue;
-			}
-			if (dir.path().string().find("nsis") != std::string::npos)
-			{
-				path += dir.path().string() + ";";
-				path += (dir.path().string() + "\\Bin;");
-				continue;
-			};
+    const char* username = getenv("USERNAME");
+    if (!username) {
+        Log::log("USERNAME environment variable not found", Type::E_ERROR);
+        return;
+    }
 
-			path += dir.path().string();
-			path += "\\bin;";
-		}
-	};
+    std::string flickDir = std::string("C:\\Users\\") + username + "\\flick";
+    std::string source = fs::current_path().string() + "\\flick.exe";
+    std::string destination = flickDir + "\\flick.exe";
 
-	std::string env{getenv("path")};
-	// Split path by semicolons and check each path individually
-	std::istringstream pathStream(path);
-	std::string singlePath;
-	bool found = true;
-	std::string newPath{};
-	while (std::getline(pathStream, singlePath, ';'))
-	{
-		if (env.find(singlePath) == std::string::npos)
-		{
-			found = false;
-			newPath += singlePath;
-			newPath += ";";
-		}
-	}
+    if (source != destination)
+    {
+        try {
+            fs::create_directories(flickDir);
+        } catch (const std::exception& e) {
+            Log::log(std::format("Failed to create flick directory: {}", e.what()), Type::E_ERROR);
+            return;
+        }
 
-	if (found)
-	{
-		Log::log("All paths from Flick are in PATH", Type::E_DISPLAY);
-	}
-	else
-	{
-		Log::log("Some paths from Flick are missing in PATH adding these entries into path make sure to restart your shell after that", Type::E_WARNING);
-		pathStream.clear();
-		pathStream.str(newPath);
-		std::string tempStr{};
-		while (std::getline(pathStream, tempStr, ';'))
-		{
-			std::cout << tempStr << "\n";
-		};
-		system(("setx PATH \"%PATH%;" + newPath + "\"").c_str());
-	}
+        for (const auto& dll : fs::directory_iterator(fs::current_path()))
+        {
+            if (dll.is_directory()) continue;
+
+            if (dll.path().extension() == ".dll")
+            {
+                std::string dllDest = flickDir + "\\" + dll.path().filename().string();
+                try {
+                    printf("%sCopying %s to %s%s\n", GREEN, dll.path().filename().string().c_str(), flickDir.c_str(), WHITE);
+                    fs::copy_file(dll.path(), dllDest, fs::copy_options::update_existing);
+                } catch (const std::exception& e) {
+                    Log::log(std::format("Failed to copy {}: {}", dll.path().filename().string(), e.what()), Type::E_WARNING);
+                }
+            }
+        }
+
+        if (!fs::exists(source))
+        {
+            Log::log("Flick.exe doesn't exist in current directory", Type::E_WARNING);
+        }
+        else
+        {
+            Log::log(std::format("Copying Flick.exe into '{}'", flickDir));
+            try {
+                fs::copy_file(source, destination, fs::copy_options::update_existing);
+                Log::log(std::format("{} copied to {}", source, destination));
+            } catch (const std::exception& e) {
+                Log::log(std::format("Error copying Flick.exe: {}", e.what()), Type::E_ERROR);
+            }
+        }
+    }
+
+    // Build desired PATH entries
+    std::string desiredPaths = flickDir + ";";
+
+    for (const auto& dir : fs::directory_iterator(flickDir))
+    {
+        if (!dir.is_directory()) continue;
+
+        const std::string pathStr = dir.path().string();
+
+        if (pathStr.find("_internal") != std::string::npos)
+            continue;
+
+        if (pathStr.find("vcpkg") != std::string::npos)
+        {
+            desiredPaths += pathStr + ";";
+            continue;
+        }
+
+        if (pathStr.find("nsis") != std::string::npos)
+        {
+            desiredPaths += pathStr + ";" + pathStr + "\\Bin;";
+            continue;
+        }
+
+        desiredPaths += pathStr + "\\bin;";
+    }
+
+    std::string currentEnvPath = getenv("PATH") ? getenv("PATH") : "";
+    std::istringstream pathStream(desiredPaths);
+    std::string singlePath;
+    std::string missingPaths;
+    bool allFound = true;
+
+    while (std::getline(pathStream, singlePath, ';'))
+    {
+        if (singlePath.empty()) continue;
+
+        if (currentEnvPath.find(singlePath) == std::string::npos)
+        {
+            allFound = false;
+            missingPaths += singlePath + ";";
+        }
+    }
+
+    if (allFound)
+    {
+        Log::log("All Flick paths are already in PATH", Type::E_DISPLAY);
+    }
+    else
+    {
+        Log::log("Some Flick paths are missing from PATH. Adding them permanently. Restart your shell or system to apply changes.", Type::E_WARNING);
+
+        std::istringstream missingStream(missingPaths);
+        std::string pathPart;
+        while (std::getline(missingStream, pathPart, ';'))
+        {
+            if (!pathPart.empty())
+            {
+                std::cout << pathPart << "\n";
+                addToPathPermanentWindows(pathPart); // your implementation
+            }
+        }
+    }
 #endif
 }
+#endif
+
 //
 void Flick::addToPathUnix()
 {
+    namespace fs = std::filesystem;
+    std::string homeDir = std::string("/home/") + getenv("USERNAME");
+    std::string flickDir = homeDir + "/flick";
+    std::string source = fs::current_path().string() + "/flick";
+    std::string destination = flickDir + "/flick";
 
-	namespace fs = std::filesystem;
-	std::string Flick{"/home/"};
-	Flick += getenv(USERNAME);
-	Flick += "/flick";
-	std::string source{fs::current_path().string() + "/flick"};
-	std::string destination{(Flick + "/flick").c_str()};
-	if (source.compare(destination) != 0)
-	{
-		if (!fs::exists(source))
-		{
-			Log::log("Flick doesn't exist in current dir", Type::E_ERROR);
-		}
-		else
-		{
-			printf("%sCopying Flick into %s%s\n", GREEN, destination.c_str(), WHITE);
-			fs::remove(destination);
-			if (fs::copy_file(source, destination, fs::copy_options::overwrite_existing))
-			{
-				printf("%s copied to %s\n", source.c_str(), destination.c_str());
-			}
-			else
-			{
-				Log::log("error while copying Flick.exe into Flick directory!", Type::E_ERROR);
-			};
-		}
-	}
-	std::string path{Flick + ";"};
-	for (const auto &dir : fs::directory_iterator(Flick))
-	{
-		if (dir.is_directory())
-		{
-			if (dir.path().string().find("_internal") != std::string::npos)
-				continue;
+    if (source != destination) {
+        if (!fs::exists(source)) {
+            Log::log("Flick doesn't exist in current dir", Type::E_ERROR);
+            return;
+        }
 
-			path += dir.path().string();
-			path += ";";
-		};
-	};
-	std::string env{getenv("PATH")};
-	// Split path by semicolons and check each path individually
-	std::istringstream pathStream(path);
-	std::string singlePath;
-	bool found = true;
-	std::string newPath{};
-	while (std::getline(pathStream, singlePath, ';'))
-	{
-		std::cout << singlePath << "\n";
-		if (env.find(singlePath) == std::string::npos)
-		{
-			found = false;
-			newPath += singlePath;
-			newPath += ":";
-		}
-	}
-	if (!newPath.empty() && newPath.back() == ':')
-	{
-		newPath.pop_back();
-	}
-	if (found)
-	{
-		Log::log("All paths from Flick are in PATH", Type::E_DISPLAY);
-	}
-	else
-	{
-		Log::log("Some paths from Flick are missing in PATH adding these entries into path make sure to restart your shell after that", Type::E_WARNING);
-		pathStream.clear();
-		pathStream.str(newPath);
-		std::string tempStr{};
-		std::string bashrc = std::string("/home/") + getenv(USERNAME) + "/.bashrc";
-		std::fstream file(bashrc.c_str(), std::ios::app);
-		if (file.is_open())
-		{
-			file << "export PATH=\"$PATH:" << newPath << "\"\n";
-			file.close();
-		}
-		else
-		{
-			Log::log("failed to open ~/.bashrc file!\n", Type::E_ERROR);
-			return;
-		}
-	};
-};
+        printf("%sCopying Flick into %s%s\n", GREEN, destination.c_str(), WHITE);
+        fs::remove(destination);
+        if (fs::copy_file(source, destination, fs::copy_options::overwrite_existing)) {
+            printf("%s copied to %s\n", source.c_str(), destination.c_str());
+        } else {
+            Log::log("Error while copying Flick into flick directory!", Type::E_ERROR);
+            return;
+        }
+    }
+
+    std::vector<std::string> flickPaths;
+    flickPaths.push_back(flickDir); // main flick path
+    for (const auto& dir : fs::directory_iterator(flickDir)) {
+        if (dir.is_directory()) {
+            std::string dirPath = dir.path().string();
+            if (dirPath.find("_internal") != std::string::npos)
+                continue;
+            flickPaths.push_back(dirPath);
+        }
+    }
+
+    // Check which ones are missing in PATH
+    std::string currentPath = getenv("PATH");
+    std::vector<std::string> missingPaths;
+    for (const auto& path : flickPaths) {
+        if (currentPath.find(path) == std::string::npos) {
+            missingPaths.push_back(path);
+        }
+    }
+
+    if (missingPaths.empty()) {
+        Log::log("All paths from Flick are already in PATH", Type::E_DISPLAY);
+    } else {
+        Log::log("Some paths from Flick are missing in PATH. Adding permanently to ~/.bashrc", Type::E_WARNING);
+        Flick::addToPathPermanent(missingPaths);
+    }
+}
+
 
 void Flick::setupVcpkg(const std::string &home, bool &is_install)
 {
