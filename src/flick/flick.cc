@@ -1012,7 +1012,7 @@ void Flick::fixInstallation()
 	Log::log("Cleaning flick installation", Type::E_WARNING);
 // TODO
 #ifdef _WIN32
-	std::string flickPath;
+	std::string flickPath{};
 #else
 	std::string flickPath = "/home/";
 #endif
