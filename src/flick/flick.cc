@@ -648,7 +648,7 @@ void Flick::addToPathWin()
         {
             if (!pathPart.empty())
             {
-                std::cout << pathPart << "\n";
+                Log::log(pathPart);
                 addToPathPermanentWindows(pathPart); // your implementation
             }
         }
@@ -993,7 +993,7 @@ bool Flick::onSetup()
 		Log::log("writing to config file!", Type::E_DISPLAY);
 		file << isInstallationComplete;
 		file.close();
-		std::cout << "done!\n";
+		Log::log("done!");
 		addToPathUnix();
 		return true;
 	}
@@ -1011,7 +1011,7 @@ void Flick::fixInstallation()
 {
 	Log::log("Cleaning flick installation", Type::E_WARNING);
 // TODO
-#if _WIN32
+#ifdef _WIN32
 	std::string flickPath;
 #else
 	std::string flickPath = "/home/";
@@ -1114,7 +1114,6 @@ void Flick::update()
 	std::string source{Flick + "/utool"};
 #endif
 	Log::log("updating Flick...", Type::E_DISPLAY);
-	std::cout << source << "\n";
 	if (fs::exists(source)) // if utool is present in ~/Flick directory then start the utool if not download the utool first
 	{
 		createProcess(source); // Windows//starting process parent-less which will start utool so Flick will shutdown and then utool override the Flick.exe
