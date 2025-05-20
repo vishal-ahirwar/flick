@@ -1019,7 +1019,6 @@ void Flick::fixInstallation()
 	flickPath +=getenv(USERNAME);
 	flickPath += "/flick";
 	auto path = fs::path(flickPath);
-	std::cout<<path<<"\n";
 	for (const auto &dir : fs::directory_iterator(path))
 	{
 		if (dir.is_directory())
