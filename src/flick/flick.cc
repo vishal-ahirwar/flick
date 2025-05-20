@@ -51,9 +51,9 @@ void Flick::addToPathPermanent(const std::vector<std::string>& paths)
     for (const auto& path : paths) {
         if (existingContent.find(path) == std::string::npos) {
             bashrcFile << "export PATH=\"$PATH:" << path << "\"\n";
-            printf("%sAdded to PATH: %s%s\n", GREEN, path.c_str(), WHITE);
+            Log::log(std::format("Added to PATH: {}",path.c_str()));
         } else {
-            printf("%sAlready in PATH: %s%s\n", GREEN, path.c_str(), WHITE);
+			Log::log(std::format("Already in PATH: {}",path.c_str()));
         }
     }
 
@@ -481,7 +481,7 @@ bool addToPathPermanentWindows(const std::string& newPath)
     // Open HKEY_CURRENT_USER\Environment
     if (RegOpenKeyExA(HKEY_CURRENT_USER, envKey, 0, KEY_READ | KEY_WRITE, &hKey) != ERROR_SUCCESS)
     {
-        std::cerr << "Failed to open registry key: HKCU\\Environment\n";
+        Log::log("Failed to open registry key: HKCU\\Environment",Type::E_ERROR);
         return false;
     }
 
@@ -500,7 +500,7 @@ bool addToPathPermanentWindows(const std::string& newPath)
     if (_stricmp(currentPath.c_str(), newPath.c_str()) == 0 ||
         currentPath.find(newPath) != std::string::npos)
     {
-        std::cout << "Path already exists in PATH.\n";
+        Log::log("Path already exists in PATH.");
         RegCloseKey(hKey);
         return true;
     }
@@ -517,7 +517,7 @@ bool addToPathPermanentWindows(const std::string& newPath)
                        reinterpret_cast<const BYTE*>(updatedPath.c_str()),
                        static_cast<DWORD>(updatedPath.size() + 1)) != ERROR_SUCCESS)
     {
-        std::cerr << "Failed to set PATH in registry.\n";
+        Log::log("Failed to set PATH in registry.",Type::E_ERROR);
         RegCloseKey(hKey);
         return false;
     }
@@ -529,7 +529,7 @@ bool addToPathPermanentWindows(const std::string& newPath)
                         reinterpret_cast<LPARAM>("Environment"),
                         SMTO_ABORTIFHUNG, 5000, nullptr);
 
-    std::cout << "Added to PATH permanently: " << newPath << "\n";
+    Log::log(std::format("Added to PATH permanently: {}" ,newPath));
     return true;
 }
 
@@ -566,7 +566,7 @@ void Flick::addToPathWin()
             {
                 std::string dllDest = flickDir + "\\" + dll.path().filename().string();
                 try {
-                    printf("%sCopying %s to %s%s\n", GREEN, dll.path().filename().string().c_str(), flickDir.c_str(), WHITE);
+                    Log::log(std::format("Copying {} to {}", dll.path().filename().string().c_str(), flickDir.c_str()));
                     fs::copy_file(dll.path(), dllDest, fs::copy_options::update_existing);
                 } catch (const std::exception& e) {
                     Log::log(std::format("Failed to copy {}: {}", dll.path().filename().string(), e.what()), Type::E_WARNING);
@@ -672,10 +672,10 @@ void Flick::addToPathUnix()
             return;
         }
 
-        printf("%sCopying Flick into %s%s\n", GREEN, destination.c_str(), WHITE);
+        Log::log(std::format("Copying Flick into {}",destination.c_str()));
         fs::remove(destination);
         if (fs::copy_file(source, destination, fs::copy_options::overwrite_existing)) {
-            printf("%s copied to %s\n", source.c_str(), destination.c_str());
+            Log::log(std::format("{} copied to {}", source.c_str(), destination.c_str()));
         } else {
             Log::log("Error while copying Flick into flick directory!", Type::E_ERROR);
             return;
@@ -966,7 +966,7 @@ bool Flick::onSetup()
 	}
 	else
 	{
-		printf("%sCreating Flick dir at %s %s\n", BLUE, home.c_str(), WHITE);
+		Log::log(std::format("Creating Flick dir at {}",home.c_str()));
 	};
 
 	file.open((home + "/flick/.cconfig").c_str(), std::ios::in);
