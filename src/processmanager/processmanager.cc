@@ -7,13 +7,10 @@
 #include <array>
 #include "log/log.h"
 #include "processmanager.h"
-const char SHAPES[]{'/', '+', '-', '\\'};
-const int size{sizeof(SHAPES)};
 namespace fs = std::filesystem;
 int ProcessManager::startProcess(const std::vector<std::string> &args, std::string &processLog, const std::string &msg, bool b_log)
 {
     Log::log(msg,Type::E_WARNING);
-    for(const auto&arg:args)Log::log(arg);
     if (!fs::exists("build"))
         fs::create_directories("build");
 
