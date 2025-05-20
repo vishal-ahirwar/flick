@@ -23,6 +23,7 @@
 #include <unittester/unittester.h>
 #include <regex>
 #include <processmanager/processmanager.h>
+
 namespace fs = std::filesystem;
 void clearInputBuffer()
 {
@@ -979,14 +980,15 @@ void Flick::buildDeps()
 }
 void Flick::addDeps()
 {
-	std::string name{},version{},project{};
+	std::string name{}, version{}, project{};
+	bool bUseLatest{};
 	bool bUpdateBaseline{};
 	if (mArgs.size() < 3)
 	{
 		Log::log("No Package name given", Type::E_ERROR);
 		return;
 	};
-	project=mProjectSetting.getProjectName();
+	project = mProjectSetting.getProjectName();
 	for (const auto &arg : mArgs)
 	{
 		if (arg.find("--package=") != std::string::npos)
@@ -1008,15 +1010,32 @@ void Flick::addDeps()
 		{
 			bUpdateBaseline = true;
 		}
+		else if (arg.find("--latest") != std::string::npos)
+		{
+			bUseLatest = true;
+		}
 	}
 	if (name.empty())
 	{
-		Log::log("Uses : flick install --package=boost-process --version=1.85.0 --project=demo --update-base-line",Type::E_ERROR);
+		Log::log("Uses : flick install --package=boost-process --version=1.85.0 --project=demo --update-base-line", Type::E_ERROR);
 		Log::log("Other args are optional but package name must be provided: flick install --package=fmt", Type::E_ERROR);
 		return;
 	}
+	if (bUseLatest)
+	{
+		Log::log("fetching latest packages from vcpkg", Type::E_WARNING);
+		std::string log{};
+		std::string vcpkg{std::getenv("VCPKG_ROOT")};
+		if (vcpkg.length() <= 0)
+		{
+			Log::log("VCPKG_ROOT is not Set!", Type::E_ERROR);
+			return;
+		}
+		std::vector<std::string> args{"git", "-C", vcpkg, "pull"};
+		ProcessManager::startProcess(args, log, "", false);
+	}
 	Deps deps;
-	if (deps.addDeps(name,version,bUpdateBaseline))
+	if (deps.addDeps(name, version, bUpdateBaseline))
 	{
 		std::string vcpkgLog{};
 		for (auto &arg : mArgs)
@@ -1061,4 +1080,3 @@ void Flick::createSubProject()
 	generator.setProjectSetting(mProjectSetting, info.second, info.first);
 	generator.generateSubProject(mArgs.at(2));
 }
-

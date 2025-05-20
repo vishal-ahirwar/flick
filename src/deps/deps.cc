@@ -65,7 +65,7 @@ bool Deps::addDeps(const std::string &packageName,const std::string&version,bool
     out<<data.dump(4);
     out.close();
     std::vector<std::string> args{"vcpkg", "add", "port", packageName};
-    return ProcessManager::startProcess(args, processLog, "Adding " + packageName + " to vcpkg.json") == 0;
+    return ProcessManager::startProcess(args, processLog, "Adding " + packageName + " to vcpkg.json",false) == 0;
 };
 
 bool Deps::updateCMakeFile(const std::string &vcpkgLog, const std::string &projectName, const std::string &packageName)
@@ -225,7 +225,7 @@ bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName, std::string
 {
     std::vector<std::string> args{"vcpkg", "search", packageName};
     std::string processLog{};
-    ProcessManager::startProcess(args, processLog, "Searching Package info");
+    ProcessManager::startProcess(args, processLog, "Searching Package info",false);
 
     std::string line{};
     std::vector<std::string> lines{};

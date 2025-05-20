@@ -30,7 +30,7 @@ int ProcessManager::startProcess(const std::vector<std::string> &args, std::stri
             else if (lineErr.find("error") != std::string::npos)
                 Logger::error(lineErr);
             // Log::log(lineErr, Type::E_ERROR);
-            else
+            else if (b_log)
                 Logger::status(lineErr);
             // Log::log(lineErr, Type::E_DISPLAY);
 
@@ -45,7 +45,7 @@ int ProcessManager::startProcess(const std::vector<std::string> &args, std::stri
             else if (lineOut.find("error") != std::string::npos)
                 Logger::error(lineOut);
             // Log::log(lineOut, Type::E_ERROR);
-            else
+            else if (b_log)
                 Logger::status(lineOut);
             // Log::log(lineOut, Type::E_DISPLAY);
             logFile << lineOut << "\n";
