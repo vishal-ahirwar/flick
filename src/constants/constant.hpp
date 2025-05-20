@@ -14,6 +14,11 @@ static std::string VCPKG_TRIPLET{"default"};
 #include "Flick.hpp"
 #define USERNAME "USER" // macOS environment variable
 #endif
+#ifdef _WIN32
+#define IS_WINDOWS true
+#else
+#define IS_WINDOWS false
+#endif
 
 enum class Language
 {

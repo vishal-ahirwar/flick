@@ -84,22 +84,23 @@ as today’s most developer-friendly languages.
         fmt::print(fg(color::white_smoke), "- {}\n", desc);
     };
 
-    cmd("create", "Create a new C/C++ project. e.g. flick create myProject");
+    cmd("new", "Create a new C/C++ project. e.g. flick new myProject");
     cmd("subproject", "Create a C/C++ subproject. e.g. flick subproject core");
     cmd("compile", "Compile the project. Use --standalone for static linking");
     cmd("run", "Run the compiled binary. Use --args to pass args to executable");
     cmd("build", "Compile and run. Use --standalone for static linking");
     cmd("install", "Install external lib via vcpkg to use in your project");
-    cmd("setup", "Install LLVM, Ninja, CMake, and vcpkg if not already installed");
-    cmd("tests", "Enable unit testing. e.g. Flick tests");
-    cmd("createinstaller", "Create a packaged build of your app");
+    cmd("init", "Install LLVM, Ninja, CMake, and vcpkg if not already installed");
+    cmd("tests", "Enable unit testing. e.g. flick tests");
+    cmd("installer", "Create a packaged build of your app");
     cmd("update", "Update Flick to the latest version");
-    cmd("rebuild", "Clean and rebuild. Use --standalone for static linking");
+    cmd("clean", "Clean and rebuild. Use --standalone for static linking");
     cmd("debug", "Compile in Debug mode and start LLDB. Use --standalone");
     cmd("release", "Build in release mode. Use --standalone for dynamic linking");
     cmd("vscode", "Generate VSCode C/C++ configuration files");
-    cmd("cmake-preset", "Generate CMakePresets.json");
+    cmd("preset", "Generate CMakePresets.json");
     cmd("doctor", "Check and install missing tools for C++ development");
+    cmd("help", "Display this help menu");
 
     divider();
 }

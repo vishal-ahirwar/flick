@@ -14,7 +14,7 @@ namespace flick
     int createApp(const std::vector<std::string> &args)
     {
         Flick flick{args};
-        if (args.at(1) == "create")
+        if (args.at(1) == "new")
         {
             flick.createNewProject();
         }
@@ -34,7 +34,7 @@ namespace flick
         {
             flick.build();
         }
-        else if (args.at(1) == ("setup"))
+        else if (args.at(1) == ("init"))
         {
             try
             {
@@ -45,7 +45,7 @@ namespace flick
                 Log::log(e.what(), Type::E_ERROR);
             }
         }
-        else if (args.at(1) == ("createinstaller"))
+        else if (args.at(1) == ("installer"))
         {
             flick.createInstaller();
         }
@@ -73,7 +73,7 @@ namespace flick
         {
             flick.vsCode();
         }
-        else if (args.at(1) == ("rebuild"))
+        else if (args.at(1) == ("clean"))
         {
             flick.reBuild();
         }
@@ -81,7 +81,7 @@ namespace flick
         {
             flick.addDeps();
         }
-        else if (args.at(1) == "cmake-preset")
+        else if (args.at(1) == "preset")
         {
             flick.genCMakePreset();
         }else if (args.at(1)=="subproject")

@@ -16,7 +16,7 @@ void Downloader::download(const std::string &url, const std::string &outputFileP
 #endif
     // Perform the HTTP GET request
     cpr::Response response = cpr::Get(cpr::Url{url},cpr::ReserveSize{1024 * 1024 * 8},cpr::ProgressCallback([&](cpr::cpr_off_t download_total, cpr::cpr_off_t download_now, cpr::cpr_off_t upload_total, cpr::cpr_off_t upload_now, intptr_t user_data) -> bool
-                                                                           { Log::log(std::format("Downloading {} : {:.2f}%", name.c_str(),((double)download_now / download_total) * 100.0));return true; }));
+                                                                           { Log::log(std::format("Downloading {} : {:.2f}%", name.c_str(),((double)download_now / download_total) * 100.0),Type::E_DISPLAY,"\r");return true; }));
 
     // Check if the download was successful
     if (response.status_code == 200)

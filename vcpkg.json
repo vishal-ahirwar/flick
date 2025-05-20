@@ -5,14 +5,35 @@
   "dependencies": [
     "boost-process",
     "cpr",
-    "fmt",
     "gtest",
-    "nlohmann-json"
+    "libarchive",
+    "nlohmann-json",
+    "fmt"
   ],
   "overrides": [
     {
       "name": "boost-process",
       "version": "1.87.0"
+    },
+    {
+      "name": "libarchive",
+      "version": "3.7.8#1"
+    },
+    {
+      "name": "cpr",
+      "version": "1.11.2"
+    },
+    {
+      "name": "gtest",
+      "version": "1.16.0"
+    },
+    {
+      "name": "nlohmann-json",
+      "version": "3.11.3#1"
+    },
+    {
+      "name": "fmt",
+      "version": "11.0.2#1"
     }
   ]
 }

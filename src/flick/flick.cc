@@ -23,8 +23,65 @@
 #include <unittester/unittester.h>
 #include <regex>
 #include <processmanager/processmanager.h>
-
+#include <archive.h>
+#include <archive_entry.h>
 namespace fs = std::filesystem;
+
+bool extractArchive(const std::string &archivePath, const std::string &outputDir)
+{
+	namespace fs = std::filesystem;
+
+	struct archive *archiveReader = archive_read_new();
+	struct archive *archiveWriter = archive_write_disk_new();
+	struct archive_entry *entry;
+
+	archive_read_support_format_all(archiveReader); // includes ZIP, TAR, etc.
+	archive_read_support_filter_all(archiveReader); // includes gzip, xz, bzip2, etc.
+
+	if (archive_read_open_filename(archiveReader, archivePath.c_str(), 10240) != ARCHIVE_OK)
+	{
+		std::cerr << "Error opening archive: " << archive_error_string(archiveReader) << "\n";
+		return false;
+	}
+
+	while (archive_read_next_header(archiveReader, &entry) == ARCHIVE_OK)
+	{
+		const char *currentFile = archive_entry_pathname(entry);
+		fs::path fullPath = fs::path(outputDir) / currentFile;
+
+		archive_entry_set_pathname(entry, fullPath.string().c_str());
+
+		if (archive_write_header(archiveWriter, entry) != ARCHIVE_OK)
+		{
+			std::cerr << "Header write error: " << archive_error_string(archiveWriter) << "\n";
+		}
+		else
+		{
+			const void *buffer;
+			size_t size;
+			la_int64_t offset;
+
+			while (archive_read_data_block(archiveReader, &buffer, &size, &offset) == ARCHIVE_OK)
+			{
+				if (archive_write_data_block(archiveWriter, buffer, size, offset) != ARCHIVE_OK)
+				{
+					std::cerr << "Data block write error: " << archive_error_string(archiveWriter) << "\n";
+					break;
+				}
+			}
+		}
+
+		archive_write_finish_entry(archiveWriter);
+	}
+
+	archive_read_close(archiveReader);
+	archive_read_free(archiveReader);
+	archive_write_close(archiveWriter);
+	archive_write_free(archiveWriter);
+
+	return true;
+}
+
 void clearInputBuffer()
 {
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -75,7 +132,7 @@ Flick::Flick(const std::vector<std::string> &args)
 	mArgs = args;
 	std::string cmd{args.at(1)};
 	UserInfo::readUserInfoFromConfigFile(&this->mUserInfo);
-	if (cmd == "create")
+	if (cmd == "new")
 	{
 		if (args.size() < 3)
 		{
@@ -94,7 +151,7 @@ Flick::Flick(const std::vector<std::string> &args)
 		mProjectSetting.set(mArgs.at(2));
 		return;
 	};
-	if (cmd != "setup" && cmd != "doctor" && cmd != "update" && cmd != "builddeps")
+	if (cmd != "init" && cmd != "doctor" && cmd != "update" && cmd != "help")
 		ProjectGenerator::readProjectSettings(&this->mProjectSetting);
 };
 Flick::~Flick() {
@@ -276,9 +333,9 @@ void Flick::addToPathWin()
 #ifdef _WIN32
 	namespace fs = std::filesystem;
 	std::string Flick{getenv(USERNAME)};
-	Flick += "\\Flick";
-	std::string source{fs::current_path().string() + "\\Flick.exe"};
-	std::string destination{(Flick + "\\Flick.exe").c_str()};
+	Flick += "\\flick";
+	std::string source{fs::current_path().string() + "\\flick.exe"};
+	std::string destination{(Flick + "\\flick.exe").c_str()};
 	if (source.compare(destination) != 0)
 	{
 		for (auto &dll : fs::directory_iterator(fs::current_path()))
@@ -377,9 +434,9 @@ void Flick::addToPathUnix()
 	namespace fs = std::filesystem;
 	std::string Flick{"/home/"};
 	Flick += getenv(USERNAME);
-	Flick += "/Flick";
-	std::string source{fs::current_path().string() + "/Flick"};
-	std::string destination{(Flick + "/Flick").c_str()};
+	Flick += "/flick";
+	std::string source{fs::current_path().string() + "/flick"};
+	std::string destination{(Flick + "/flick").c_str()};
 	if (source.compare(destination) != 0)
 	{
 		if (!fs::exists(source))
@@ -519,34 +576,39 @@ void Flick::installTools(bool &isInstallationComplete)
 	std::string home = getenv(USERNAME);
 	if (!home.c_str())
 		return;
-	home += "\\Flick";
+	home += "\\flick";
 	// system(("start " + std::string(VS_URL)).c_str());
 	// Log::log("Make sure you download Desktop Development in C++ from Visual Studio Installer", Type::E_WARNING);
 	Downloader::download(std::string(COMPILER_URL), home + "\\compiler.tar.xz");
 	Downloader::download(std::string(CMAKE_URL), home + "\\cmake.zip");
 	Downloader::download(std::string(NINJA_URL), home + "\\ninja.zip");
 	printf("%sextracting file at %s%s\n", BLUE, home.c_str(), WHITE);
-	if (system((std::string("tar -xvjf ") + "\"" + home + "\\compiler.tar.xz\"" + " -C " + "\"" + home + "\"").c_str()))
-		return;
-	if (system((std::string("tar -xf ") + "\"" + home + "\\cmake.zip\"" + " -C " + "\"" + home + "\"").c_str()))
-		return;
-	if (system((std::string("tar -xf ") + "\"" + home + "\\ninja.zip\"" + " -C " + "\"" + home + "\"").c_str()))
-		return;
+	extractArchive(home + "\\compiler.tar.xz", home);
+	extractArchive(home + "\\cmake.zip", home);
+	extractArchive(home + "\\ninja.zip", home);
 	Log::log("removing downloaded archives...", Type::E_DISPLAY);
 	fs::remove((home + "\\compiler.tar.xz"));
 	fs::remove((home + "\\cmake.zip"));
 	fs::remove((home + "\\ninja.zip"));
-	Downloader::download(std::string(VS_BUILD_TOOLS_INSTALLER_URL), home + "\\vs.exe");
-	Downloader::download("https://github.com/vishal-ahirwar/Flick/blob/master/res/Flick.vsconfig", home + "\\Flick.vsconfig");
-	if (system((home + "\\vs.exe --quiet --wait --config " + home + "\\Flick.vsconfig").c_str()))
+	if (!fs::exists(fs::path("C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\vswhere.exe")))
 	{
-		Log::log("installing Visual Studio C++ Build Tools failed!", Type::E_ERROR);
+
+		Downloader::download(std::string(VS_BUILD_TOOLS_INSTALLER_URL), home + "\\vs.exe");
+		Downloader::download("https://github.com/vishal-ahirwar/flick/blob/master/res/flick.vsconfig", home + "\\flick.vsconfig");
+		if (system((home + "\\vs.exe --quiet --wait --config " + home + "\\flick.vsconfig").c_str()))
+		{
+			Log::log("installing Visual Studio C++ Build Tools failed!", Type::E_ERROR);
+		}
+		else
+		{
+			Log::log("Visual Studio C++ Build Tools has been installed!", Type::E_DISPLAY);
+			fs::remove((home + "\\vs.exe"));
+		};
 	}
 	else
 	{
-		Log::log("Visual Studio C++ Build Tools has been installed!", Type::E_DISPLAY);
-		fs::remove((home + "\\vs.exe"));
-	};
+		Log::log("Visual Studio Installer already installed on your system install buildtools now", Type::E_WARNING);
+	}
 	isInstallationComplete = true;
 	addToPathWin();
 	home = getenv(USERNAME);
@@ -615,7 +677,7 @@ void Flick::createInstaller()
 			ProjectGenerator::generateLicenceFile(mUserInfo);
 		};
 		if (system("cd build/release && cpack"))
-			Log::log("CPack added to cmake run 'Flick createinstaller' command again",
+			Log::log("CPack added to cmake run 'flick createinstaller' command again",
 					 Type::E_DISPLAY);
 	}
 	else
@@ -654,11 +716,11 @@ bool Flick::onSetup()
 		return false;
 	std::fstream file;
 #ifdef _WIN32
-	if (!fs::create_directory(home + "\\Flick"))
+	if (!fs::create_directory(home + "\\flick"))
 	{
-		Log::log("Flick dir alread exist", Type::E_WARNING);
+		Log::log("flick dir alread exist", Type::E_WARNING);
 	};
-	file.open((home + "\\Flick\\.cconfig").c_str(), std::ios::in);
+	file.open((home + "\\flick\\.cconfig").c_str(), std::ios::in);
 	if (file.is_open())
 	{
 		file >> isInstallationComplete;
@@ -671,7 +733,7 @@ bool Flick::onSetup()
 	}
 	else
 	{
-		file.open((home + "\\Flick\\.cconfig").c_str(), std::ios::out);
+		file.open((home + "\\flick\\.cconfig").c_str(), std::ios::out);
 		if (file.is_open())
 		{
 			installTools(isInstallationComplete);
@@ -684,7 +746,7 @@ bool Flick::onSetup()
 	if (!isInstallationComplete)
 	{
 		installTools(isInstallationComplete);
-		file.open((home + "\\Flick\\.cconfig").c_str(), std::ios::out);
+		file.open((home + "\\flick\\.cconfig").c_str(), std::ios::out);
 		if (file.is_open())
 		{
 			file << isInstallationComplete;
@@ -696,16 +758,16 @@ bool Flick::onSetup()
 	};
 	return true;
 #else
-	if (!fs::create_directory(home + "/Flick"))
+	if (!fs::create_directory(home + "/flick"))
 	{
-		Log::log("Flick dir alread exist", Type::E_WARNING);
+		Log::log("flick dir alread exist", Type::E_WARNING);
 	}
 	else
 	{
 		printf("%sCreating Flick dir at %s %s\n", BLUE, home.c_str(), WHITE);
 	};
 
-	file.open((home + "/Flick/.cconfig").c_str(), std::ios::in);
+	file.open((home + "/flick/.cconfig").c_str(), std::ios::in);
 	if (file.is_open())
 	{
 		file >> isInstallationComplete;
@@ -723,7 +785,7 @@ bool Flick::onSetup()
 
 	installTools(isInstallationComplete);
 
-	file.open((home + std::string("/Flick/.cconfig")).c_str(), std::ios::out);
+	file.open((home + std::string("/flick/.cconfig")).c_str(), std::ios::out);
 	if (file.is_open())
 	{
 		Log::log("writing to config file!", Type::E_DISPLAY);
@@ -743,8 +805,28 @@ bool Flick::onSetup()
 }
 // TODO
 // remove the ~/Flick and reinstall the Flick again with all the tools like cmake,g++ compiler,ninja,nsis
-void Flick::fixInstallation() {
-	// TODO
+void Flick::fixInstallation()
+{
+	Log::log("Cleaning flick installation", Type::E_WARNING);
+// TODO
+#if _WIN32
+	std::string flickPath;
+#else
+	std::string flickPath = "/home/";
+#endif
+	flickPath = +getenv(USERNAME);
+	flickPath += "/flick";
+	auto path = fs::path(flickPath);
+	for (const auto &dir : fs::directory_iterator(path))
+	{
+		if (dir.is_directory())
+		{
+			fs::remove_all(dir);
+			Log::log(std::format("{} removed.", dir.path().string()), Type::E_WARNING);
+		}
+	}
+	bool status{};
+	installTools(status);
 };
 
 // cross-platform : creating processs to start the update
@@ -823,10 +905,10 @@ void Flick::update()
 	Flick += getenv(USERNAME);
 #endif
 #ifdef _WIN32
-	Flick += "\\Flick";
+	Flick += "\\flick";
 	std::string source{Flick + "\\utool.exe"};
 #else
-	Flick += "/Flick";
+	Flick += "/flick";
 	std::string source{Flick + "/utool"};
 #endif
 	Log::log("updating Flick...", Type::E_DISPLAY);
