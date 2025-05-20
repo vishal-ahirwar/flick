@@ -661,7 +661,7 @@ void Flick::addToPathWin()
 void Flick::addToPathUnix()
 {
     namespace fs = std::filesystem;
-    std::string homeDir = std::string("/home/") + getenv("USERNAME");
+    std::string homeDir = std::string("/home/") + getenv(USERNAME);
     std::string flickDir = homeDir + "/flick";
     std::string source = fs::current_path().string() + "/flick";
     std::string destination = flickDir + "/flick";
@@ -1016,9 +1016,10 @@ void Flick::fixInstallation()
 #else
 	std::string flickPath = "/home/";
 #endif
-	flickPath = +getenv(USERNAME);
+	flickPath +=getenv(USERNAME);
 	flickPath += "/flick";
 	auto path = fs::path(flickPath);
+	std::cout<<path<<"\n";
 	for (const auto &dir : fs::directory_iterator(path))
 	{
 		if (dir.is_directory())
