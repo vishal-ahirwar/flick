@@ -52,13 +52,13 @@ std::string getName(const std::string &findPackgeString)
         return "";
     return findPackgeString.substr(start + 1, end - start);
 }
-
+//TODO FIX THIS:/
 int Extractor::extract(const std::string &vcpkgLog)
 {
     size_t index{0};
     while (true)
     {
-        index = vcpkgLog.find("find", index);
+        index = vcpkgLog.find("find_package", index);
         if (index == std::string::npos)
             break;
         auto end = vcpkgLog.find(")", index);
@@ -67,7 +67,11 @@ int Extractor::extract(const std::string &vcpkgLog)
         std::string findPackage = vcpkgLog.substr(index, end - index + 1);
         index = end;
         auto name = getName(findPackage);
-        index = vcpkgLog.find("target_link", index);
+        {
+            index = vcpkgLog.find("target_link", index);
+            if (index == std::string::npos)
+                index = vcpkgLog.find("target_include", index);
+        }
         if (index == std::string::npos)
             break;
         end = vcpkgLog.find(")", index);
