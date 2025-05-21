@@ -732,6 +732,7 @@ void Flick::setupVcpkg(const std::string &home, bool &is_install)
 	};
 #ifdef _WIN32
 	std::string cmd{"setx VCPKG_ROOT " + home + "\\vcpkg"};
+	addToPathPermanentWindows(home + "\\vcpkg");
 	system(cmd.c_str());
 	std::vector<std::string> args{home + "\\vcpkg\\bootstrap-vcpkg.bat"};
 	if (!ProcessManager::startProcess(args, processLog, "Installing VCPKG From Github"))
