@@ -1,4 +1,4 @@
-# Flick
+<img src="https://github.com/user-attachments/assets/c91707ed-4f5c-43e6-b39c-e9e592d94a7c" width="255" height="255" />
 
 > **Use external libraries in Modern C++ as easily as in other modern languages.**
 > Flick brings the simplicity of dependency management from languages like Python, Rust, or JavaScript into C++—finally making C++ feel modern to work with.
@@ -83,7 +83,7 @@ flick <Core Commands>
 
 | Command           | Description                                                         |
 | ----------------- | ------------------------------------------------------------------- |
-| `create`          | Create a new C/C++ project with all defaults                        |
+| `new`          | Create a new C/C++ project with all defaults                        |
 | `subproject`      | Add a subproject (executable or library)                            |
 | `build`           | Configure and compile using Clang + Ninja                           |
 | `run`             | Run the compiled binary                                             |
@@ -91,13 +91,12 @@ flick <Core Commands>
 | `tests`           | Enable and manage unit tests                                        |
 | `debug`           | Launch LLDB for debugging                                           |
 | `release`         | Compile in release mode                                             |
-| `add`             | Add external library using `vcpkg`. Example: `Flick add fmt/11.0.2` |
-| `initVCPKG`       | Create `vcpkg.json` config in project                               |
-| `reload`          | Reload the vcpkg dependency cache                                   |
-| `createinstaller` | Generate an installable package                                     |
-| `fix`             | Diagnose and fix Flick issues                                       |
+| `install`         | Add external library using `vcpkg`. Example: `Flick add fmt/11.0.2` |
+| `clean`           | Reload the vcpkg dependency cache                                   |
+| `installer`       | Generate an installable package                                     |
+| `doctor`          | Diagnose and fix Flick issues                                       |
 | `update`          | Update Flick to the latest version                                  |
-| `setup`           | Auto install Clang, Ninja, CMake, and vcpkg                         |
+| `init`            | Auto install Clang, Ninja, CMake, and vcpkg                         |
 
 ---
 
