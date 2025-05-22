@@ -722,8 +722,11 @@ void Flick::setupVcpkg(const std::string &home, bool &is_install)
 	try
 	{
 		std::vector<std::string> args{"git", "clone", "https://github.com/microsoft/vcpkg.git", std::string(home) + "/vcpkg"};
-		if (!ProcessManager::startProcess(args, processLog, "Installing VCPKG From Github"))
+		if (ProcessManager::startProcess(args, processLog, "Installing VCPKG From Github",false)!=0)
+		{
+			Log::log("failed to clone vcpkg",Type::E_ERROR);
 			return;
+		}
 	}
 	catch (std::exception &e)
 	{
@@ -735,11 +738,11 @@ void Flick::setupVcpkg(const std::string &home, bool &is_install)
 	addToPathPermanentWindows(home + "\\vcpkg");
 	system(cmd.c_str());
 	std::vector<std::string> args{home + "\\vcpkg\\bootstrap-vcpkg.bat"};
-	if (!ProcessManager::startProcess(args, processLog, "Installing VCPKG From Github"))
+	if (!ProcessManager::startProcess(args, processLog, "Setting up vcpkg ...",false))
 		return;
 #else
 	std::vector<std::string> args{home + "/vcpkg/bootstrap-vcpkg.sh"};
-	if (!ProcessManager::startProcess(args, processLog, "Installing VCPKG From Github"))
+	if (!ProcessManager::startProcess(args, processLog, "Setting up vcpkg ..."))
 		return;
 	std::string bashrc = std::string("/home/") + getenv(USERNAME) + "/.bashrc";
 	std::fstream file(bashrc.c_str(), std::ios::app);
