@@ -5,6 +5,7 @@
 #include <regex>
 #include <list>
 #include <unordered_set>
+#include<format>
 std::vector<std::pair<std::string, std::regex>> patterns = {
     {"find_package", std::regex(R"(find_package\([^\)]+\))", std::regex_constants::icase)},
     {"target_link_libraries", std::regex(R"(target_link_libraries\([^)]*\))", std::regex_constants::icase)},
@@ -68,12 +69,18 @@ int Extractor::extract(const std::string &vcpkgLog)
         index = end;
         auto name = getName(findPackage);
         {
-            index = vcpkgLog.find("target_link", index);
-            if (index == std::string::npos)
+            auto tempIndex = vcpkgLog.find("target_link", index);
+            if (tempIndex == std::string::npos)
                 index = vcpkgLog.find("target_include", index);
+            else
+                index = tempIndex;
         }
         if (index == std::string::npos)
+        {
+            Log::log(std::format("skipping {}",name));
             break;
+        }
+
         end = vcpkgLog.find(")", index);
         if (index == std::string::npos)
             break;
