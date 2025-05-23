@@ -10,62 +10,93 @@
 #include "processmanager/processmanager.h"
 #include <regex>
 #include <boost/process.hpp>
-#include<iostream>
+#include <iostream>
 namespace fs = std::filesystem;
 bool Deps::buildDeps()
 {
     return true;
 }
 
-bool Deps::addDeps(const std::string &packageName,const std::string&version,bool forceUpdateBaseLine)
+bool Deps::addDeps(const std::string &packageName, const std::string &version, bool forceUpdateBaseLine)
 {
     std::string _version{};
     std::string name{};
-    if (!isPackageAvailableOnVCPKG(packageName, name, _version));
+    if (!isPackageAvailableOnVCPKG(packageName, name, _version))
+        ;
     if (!version.empty())
     {
         if (_version != version)
         {
-            Log::log(std::format("Package version : {} does not match",version), Type::E_ERROR);
+            Log::log(std::format("Package version : {} does not match", version), Type::E_ERROR);
             Log::log("Do you still want to add ?(y/n) ");
             char y{};
-            std::cin>>y;
-            if (y=='y')_version=version;
+            std::cin >> y;
+            if (y == 'y')
+                _version = version;
             else
                 return false;
-        }else
+        }
+        else
         {
             _version = version;
         }
     }
+    if (name.empty()||_version.empty())
+    {
+        Log::log("could not find package!", Type::E_ERROR);
+        return false;
+    }
     std::string processLog{};
     std::ifstream in("vcpkg.json");
-    if (!in.is_open())return false;
+    if (!in.is_open())
+        return false;
     nlohmann::json data;
-    data<<in;
+    data << in;
     in.close();
-    data["overrides"].push_back(
+    if (data.contains("overrides") && data["overrides"].is_array())
+    {
+        bool found = false;
+        for (auto &overrideEntry : data["overrides"])
         {
-            {"name",name},
-            {"version",_version}
-        });
-    if(data.contains("builtin-baseline")==false||forceUpdateBaseLine)
+            if (overrideEntry.contains("name") && overrideEntry["name"] == name)
+            {
+                overrideEntry["version"] = _version;
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+        {
+            data["overrides"].push_back({{"name", name},
+                                         {"version", _version}});
+        }
+    }
+    else
+    {
+        // Create "overrides" array if it doesn't exist
+        data["overrides"] = nlohmann::json::array();
+        data["overrides"].push_back({{"name", name},
+                                     {"version", _version}});
+    }
+
+    if (data.contains("builtin-baseline") == false || forceUpdateBaseLine)
     {
         std::string baseLine{};
-        findBuildinBaseline(name,version,baseLine);
-        if(baseLine.empty())
+        findBuildinBaseline(name, _version, baseLine);
+        if (baseLine.empty())
         {
-            Log::log(std::format("Built-in baseline not found for version : {}",version), Type::E_ERROR);
+            Log::log(std::format("Built-in baseline not found for version : {}", _version), Type::E_ERROR);
             return false;
         }
-        data["builtin-baseline"]=baseLine;
+        data["builtin-baseline"] = baseLine;
     };
     std::ofstream out("vcpkg.json");
-    if (!out.is_open())return false;
-    out<<data.dump(4);
+    if (!out.is_open())
+        return false;
+    out << data.dump(4);
     out.close();
     std::vector<std::string> args{"vcpkg", "add", "port", packageName};
-    return ProcessManager::startProcess(args, processLog, "Adding " + packageName + " to vcpkg.json",false) == 0;
+    return ProcessManager::startProcess(args, processLog, "Adding " + packageName + " to vcpkg.json", false) == 0;
 };
 
 bool Deps::updateCMakeFile(const std::string &vcpkgLog, const std::string &projectName, const std::string &packageName)
@@ -225,7 +256,7 @@ bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName, std::string
 {
     std::vector<std::string> args{"vcpkg", "search", packageName};
     std::string processLog{};
-    ProcessManager::startProcess(args, processLog, "Searching Package info",false);
+    ProcessManager::startProcess(args, processLog, "Searching Package info", false);
 
     std::string line{};
     std::vector<std::string> lines{};
@@ -258,8 +289,8 @@ bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName, std::string
                 Log::log("Selected package info", Type::E_DISPLAY);
 
                 outName = matches[1].str();
-                outVersion = matches[2].str();  // Extract version from second capture group
-                Log::log(std::format("\tname : {},  version : {}", outName,outVersion), Type::E_WARNING);
+                outVersion = matches[2].str(); // Extract version from second capture group
+                Log::log(std::format("\tname : {},  version : {}", outName, outVersion), Type::E_WARNING);
                 return true;
             }
             else
@@ -311,7 +342,6 @@ bool Deps::findBuildinBaseline(const std::string &name, const std::string &versi
     c.wait();
     return false;
 }
-
 
 bool Deps::addToJson(const std::string &name, const std::string &version)
 {
