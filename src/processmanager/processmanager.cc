@@ -10,7 +10,8 @@
 namespace fs = std::filesystem;
 int ProcessManager::startProcess(const std::vector<std::string> &args, std::string &processLog, const std::string &msg, bool b_log)
 {
-    Log::log(msg,Type::E_WARNING);
+    if (msg.length() > 0)
+        Log::log(msg, Type::E_WARNING);
     if (!fs::exists("build"))
         fs::create_directories("build");
 
