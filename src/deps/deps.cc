@@ -256,7 +256,7 @@ bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName, std::string
 {
     std::vector<std::string> args{"vcpkg", "search", packageName};
     std::string processLog{};
-    ProcessManager::startProcess(args, processLog, "Searching Package info", false);
+    ProcessManager::startProcess(args, processLog, "Searching Package info");
 
     std::string line{};
     std::vector<std::string> lines{};
