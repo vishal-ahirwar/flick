@@ -96,7 +96,7 @@ bool Deps::addDeps(const std::string &packageName, const std::string &version, b
     out << data.dump(4);
     out.close();
     std::vector<std::string> args{"vcpkg", "add", "port", packageName};
-    return ProcessManager::startProcess(args, processLog, "Adding " + packageName + " to vcpkg.json", false) == 0;
+    return ProcessManager::startProcess(args, processLog, "", false) == 0;
 };
 
 bool Deps::updateCMakeFile(const std::string &vcpkgLog, const std::string &projectName, const std::string &packageName)
@@ -254,52 +254,51 @@ bool Deps::rebuildDeps(const std::string &url)
 
 bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName, std::string &outName, std::string &outVersion)
 {
-    std::vector<std::string> args{"vcpkg", "search", packageName};
-    std::string processLog{};
-    ProcessManager::startProcess(args, processLog, "Searching Package info");
-
+    Log::log("Searching for package : " + packageName, Type::E_DISPLAY);
+    std::vector<std::string> args{"search", packageName};
+    boost::process::ipstream out;
+    boost::process::ipstream err;
+    std::vector<std::string>similiarPackages{};
+    try
+    {
+    boost::process::child c(boost::process::search_path("vcpkg"),args,boost::process::std_err > err,boost::process::std_out > out);
     std::string line{};
-    std::vector<std::string> lines{};
-    std::stringstream ss{processLog};
-    while (std::getline(ss, line, '\n'))
+    std::regex pattern(R"(^(\S+)\s+(\S+(?:#\d+)?|\d{4}-\d{2}-\d{2})\s+(.*))");
+    while (std::getline(out, line) || std::getline(err, line))
     {
-        if (line.find(packageName) != std::string::npos)
-            lines.push_back(line);
-    };
-    if (lines.size() > 1)
-    {
-        Log::log("Found more than 1 packages with similiar name " + packageName, Type::E_WARNING);
-        for (const auto &package : lines)
-            Log::log(package, Type::E_DISPLAY);
+        std::smatch match{};
+        if (std::regex_match(line, match, pattern))
+        {
+            if (match.size()<3)
+            {
+                Log::log("Failed to parse vcpkg search output", Type::E_ERROR);
+                return false;
+            }else if (match[1]!=packageName)
+            {
+                similiarPackages.push_back(match[1]);
+                continue;
+            }
+            outName = match[1];
+            outVersion = match[2];
+            Log::log(std::format("Selected Package : {}, Version : {}, About : {}", outName, outVersion, match[3].str()), Type::E_WARNING);
+            c.terminate();
+            return true;
+        }
     }
-
-    if (lines.size() == 0)
+    }catch (std::exception &e)
     {
-        Log::log("No package found with name " + packageName, Type::E_ERROR);
+        Log::log(std::format("Exception : {}",e.what()),Type::E_ERROR);
         return false;
     }
-    std::regex pattern(R"(^(\S+)\s+([^\s]+)\s+(.*)$)");
-    for (const auto &package : lines)
+    if (outName.empty())
     {
-        std::smatch matches{};
-        if (std::regex_match(package, matches, pattern))
+        Log::log("Package not found!", Type::E_ERROR);
+        Log::log("Did you mean one of these packages ?\n", Type::E_NONE);
+        for (const auto&package:similiarPackages)
         {
-            if (matches[1].str() == packageName)
-            {
-                Log::log("Selected package info", Type::E_DISPLAY);
-
-                outName = matches[1].str();
-                outVersion = matches[2].str(); // Extract version from second capture group
-                Log::log(std::format("\tname : {},  version : {}", outName, outVersion), Type::E_WARNING);
-                return true;
-            }
-            else
-            {
-                if (lines.size() <= 2)
-                    Log::log("You might be looking for : " + package);
-            }
+            Log::log(package,Type::E_NONE);
         }
-    };
+    }
     return false;
 }
 
@@ -317,6 +316,7 @@ bool Deps::findBuildinBaseline(const std::string &name, const std::string &versi
     std::string line{}, first{};
     std::stringstream ss(name);
     std::getline(ss, first, '-');
+    std::string latestBaseLine{};
     while (std::getline(out, line) || std::getline(err, line))
     {
         if (version.length() <= 0)
@@ -337,10 +337,18 @@ bool Deps::findBuildinBaseline(const std::string &name, const std::string &versi
             Log::log(std::format("Package : {}, Version : {}, Baseline Commit : {}\n[{}]\n", name, version, outBaseLine, line), Type::E_NONE);
             c.terminate();
             return true;
+        }else if (latestBaseLine.empty())
+        {
+            latestBaseLine = line.substr(0, line.find(" "));
         }
     }
     c.wait();
-    return false;
+    if (outBaseLine.empty())
+    {
+        Log::log(std::format("Failed to find Baseline Commit for version : {} using latest baseline commit {}",version,latestBaseLine), Type::E_WARNING);
+        outBaseLine=latestBaseLine;
+    }
+    return true;
 }
 
 bool Deps::addToJson(const std::string &name, const std::string &version)
