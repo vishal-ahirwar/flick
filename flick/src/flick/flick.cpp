@@ -482,13 +482,8 @@ void Flick::run()
 	}
 	boost::process::ipstream out;
 	boost::process::ipstream err;
-	boost::process::child c{run, args,boost::process::std_out > out, boost::process::std_err > err};
-	std::string line;
+	boost::process::child c{run, args};
 	Log::log(std::format("Running {}...", app), Type::E_DISPLAY);
-	while (std::getline(out, line)||std::getline(err,line))
-	{
-		fmt::println("{}",line);
-	};
 	c.wait();
 	Log::log(std::format("{} exited with code {}", app, c.exit_code()), Type::E_DISPLAY);
 }
