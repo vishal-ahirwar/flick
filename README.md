@@ -1,4 +1,3 @@
-<img src="https://github.com/user-attachments/assets/c91707ed-4f5c-43e6-b39c-e9e592d94a7c" width="255" height="255" />
 
 > **Use external libraries in Modern C++ as easily as in other modern languages.**
 > Flick brings the simplicity of dependency management from languages like Python, Rust, or JavaScript into C++—finally making C++ feel modern to work with.
