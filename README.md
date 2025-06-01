@@ -36,12 +36,6 @@
 * 🧰 **Environment Setup**
   Automatically installs and configures Clang, Ninja, and CMake.
 
-* 🧭 **LLDB Debugger Integration**
-  Start debugging sessions with one command.
-
-* 🧹 **.gitignore Generator**
-  Prevents unwanted clutter from entering version control.
-
 ---
 
 ## 🔧 Installation
