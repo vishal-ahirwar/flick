@@ -26,6 +26,10 @@
 #include <processmanager/processmanager.h>
 #include <archive.h>
 #include <archive_entry.h>
+#include <boost/process/v1/child.hpp>
+#include <boost/process/v1/io.hpp>
+#include <boost/process/v1/pipe.hpp>
+#include <boost/process/v1/search_path.hpp>
 namespace fs = std::filesystem;
 
 void Flick::addToPathPermanent(const std::vector<std::string> &paths)
@@ -457,7 +461,13 @@ void Flick::run()
 		run += "/" + app;
 #endif // _WIN32
 	}
+	if (!fs::exists(run))
+	{
+		Log::log("Subproject '" + app + "' has no executable. Try verifying the name and rebuilding the project.", Type::E_ERROR);
+		return;
+	}
 	bool isArg{false};
+	std::vector<std::string> args{};
 	for (auto &arg : mArgs)
 	{
 		if (arg.find("--args") != std::string::npos)
@@ -467,17 +477,20 @@ void Flick::run()
 		}
 		if (isArg)
 		{
-			run += " ";
-			run += arg;
+			args.push_back(arg);
 		};
 	}
-
-	if (system(run.c_str()))
+	boost::process::ipstream out;
+	boost::process::ipstream err;
+	boost::process::child c{run, args,boost::process::std_out > out, boost::process::std_err > err};
+	std::string line;
+	Log::log(std::format("Running {}...", app), Type::E_DISPLAY);
+	while (std::getline(out, line)||std::getline(err,line))
 	{
-		Log::log("Maybe You should Compile First Before run or You have Permission to "
-				 "execute program!",
-				 Type::E_ERROR);
+		fmt::println("{}",line);
 	};
+	c.wait();
+	Log::log(std::format("{} exited with code {}", app, c.exit_code()), Type::E_DISPLAY);
 }
 
 //

@@ -263,7 +263,7 @@ bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName, std::string
     {
     boost::process::child c(boost::process::search_path("vcpkg"),args,boost::process::std_err > err,boost::process::std_out > out);
     std::string line{};
-    std::regex pattern(R"(^(\S+)\s+(\S+(?:#\d+)?|\d{4}-\d{2}-\d{2})\s+(.*))");
+    std::regex pattern(R"(^\s*([a-zA-Z0-9\-_]+)\s+((?:\d{4}-\d{2}-\d{2})|(?:\d+\.\d+\.\d+(?:#\d+)?))\s+(.*))");
     while (std::getline(out, line) || std::getline(err, line))
     {
         std::smatch match{};
@@ -273,7 +273,7 @@ bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName, std::string
             {
                 Log::log("Failed to parse vcpkg search output", Type::E_ERROR);
                 return false;
-            }else if (match[1]!=packageName)
+            }else if (match[1]!=packageName && match.size()>=2)
             {
                 similiarPackages.push_back(match[1]);
                 continue;
