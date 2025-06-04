@@ -14,7 +14,7 @@ int ProcessManager::startProcess(const std::vector<std::string> &args, std::stri
 {
     std::shared_ptr<barkeep::AnimationDisplay>anim{};
     if (!msg.empty()){
-        if (!b_log)anim = bk::Animation({.message = "\033[32m✔\033[0m  [flick]  "+msg+"\033[32m",.style = bk::Bar,.interval = 0.1});
+        if (!b_log)anim = bk::Animation({.message = "\033[32m[flick]\033[0m  "+msg+"\033[32m",.style = bk::Bar,.interval = 0.1});
     }
     if (!fs::exists("build")){
         fs::create_directories("build");}

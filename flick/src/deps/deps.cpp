@@ -263,7 +263,7 @@ bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName, std::string
     {
     boost::process::child c(boost::process::search_path("vcpkg"),args,boost::process::std_err > err,boost::process::std_out > out);
     std::string line{};
-    std::regex pattern(R"(^\s*([a-zA-Z0-9\-_]+)\s+([\d]{1,4}(?:\.[\d]+){1,2}(?:#\d+)?)(?:\s{2,}(.*))?)");
+    std::regex pattern(R"(^\s*([a-zA-Z0-9\-_]+)\s+((?:\d{4}-\d{2}-\d{2}|\d+(?:\.\d+){0,2})(?:#\d+)?)(?:\s{2,}(.*))?$)");
     while (std::getline(out, line) || std::getline(err, line))
     {
         std::smatch match{};
