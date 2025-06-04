@@ -62,7 +62,7 @@ void UnitTester::setupUnitTestingFramework()
     {
         return;
     };
-    Log::log("Please Choose your Programming language c/cc default=cc,q=quit > ", Type::E_DISPLAY, "");
+    Log::log("Please Choose your Programming language \033[95mc/cc\033[0m default=cc,q=quit > ", Type::E_DISPLAY, "");
     std::string input{};
     std::getline(std::cin, input);
     Language lang{};

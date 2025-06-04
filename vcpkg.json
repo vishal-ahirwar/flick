@@ -1,14 +1,14 @@
 {
   "name": "flick",
   "version": "3.0.0",
-  "builtin-baseline": "566f9496b7e00ee0cc00aca0ab90493d122d148a",
   "dependencies": [
     "boost-process",
     "cpr",
     "fmt",
     "gtest",
     "libarchive",
-    "nlohmann-json"
+    "nlohmann-json",
+    "barkeep"
   ],
   "overrides": [
     {
@@ -34,6 +34,11 @@
     {
       "name": "fmt",
       "version": "11.0.2#1"
+    },
+    {
+      "name": "barkeep",
+      "version": "0.1.5"
     }
-  ]
+  ],
+  "builtin-baseline": "566f9496b7e00ee0cc00aca0ab90493d122d148a"
 }

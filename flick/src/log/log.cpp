@@ -54,7 +54,7 @@ A lightweight CLI tool built for modern C++ developers.
 It handles compilation, dependency setup, and project scaffolding  
 with minimal configuration.
 
-Use external libraries in C++ as effortlessly as in Python, Rust, or JavaScript.  
+Use external libraries in C++ as effortlessly as in Python, Rust, or JavaScript.
 flick brings modern dependency management to C++,  
 eliminating boilerplate and build headaches.
 
@@ -67,12 +67,12 @@ as today’s most developer-friendly languages.
     // Version & Author
     fmt::print(emphasis::bold | fg(color::green), "Version: ");
     fmt::print(fg(color::white), "{}.{}.{}\n", Flick_VERSION_MAJOR, Flick_VERSION_MINOR, Flick_VERSION_PATCH);
-    fmt::print(fg(color::gray), "© 2025 Vishal Ahirwar and all Contributors. All rights reserved.\n\n");
+    fmt::print(fg(color::gray), "©2025 Vishal Ahirwar and Contributors. All rights reserved.\n\n");
 
     // Usage
     divider();
     fmt::print(emphasis::bold | fg(color::light_sky_blue), "Usage:\n");
-    fmt::print(fg(color::white_smoke), "   flick <command>\n");
+    fmt::print(fg(color::white_smoke), "   flick \033[95m<command>\033[0m\n");
 
     // Commands
     divider();
@@ -84,19 +84,19 @@ as today’s most developer-friendly languages.
         fmt::print(fg(color::white_smoke), "- {}\n", desc);
     };
 
-    cmd("new", "Create a new C/C++ project. e.g. flick new myProject");
-    cmd("subproject", "Create a C/C++ subproject. e.g. flick subproject core");
-    cmd("compile", "Compile the project. Use --standalone for static linking");
-    cmd("run", "Run the compiled binary. Use --args to pass args to executable");
-    cmd("build", "Compile and run. Use --standalone for static linking");
-    cmd("install", "Install external lib via vcpkg to use in your project");
+    cmd("new", "Create a new C/C++ project. e.g. \033[95mflick\033[0m new myProject");
+    cmd("subproject", "Create a C/C++ subproject. e.g. \033[95mflick\033[0m subproject core");
+    cmd("compile", "Compile the project. Use \033[95m--standalone\033[0m for static linking");
+    cmd("run", "Run the compiled binary. Use \033[95m--args\033[0m to pass args to executable");
+    cmd("build", "Compile and run. Use \033[95m--standalone\033[0m for static linking");
+    cmd("install", "Install packages to use in your project, \033[95mflick\033[0m install \033[95m--package=fmt --version=11.0.2\033[0m");
     cmd("init", "Install LLVM, Ninja, CMake, and vcpkg if not already installed");
-    cmd("tests", "Enable unit testing. e.g. flick tests");
+    cmd("tests", "Enable unit testing. e.g. \033[95mflick\033[0m tests");
     cmd("installer", "Create a packaged build of your app");
-    cmd("update", "Update Flick to the latest version");
-    cmd("clean", "Clean and rebuild. Use --standalone for static linking");
-    cmd("debug", "Compile in Debug mode and start LLDB. Use --standalone");
-    cmd("release", "Build in release mode. Use --standalone for dynamic linking");
+    cmd("update", "Update \033[95mflick\033[0m to the latest version");
+    cmd("clean", "Clean and rebuild. Use \033[95m--standalone\033[0m for static linking");
+    cmd("debug", "Compile in Debug mode and start LLDB. Use \033[95m--standalone\033[0m");
+    cmd("release", "Build in release mode. Use \033[95m--standalone\033[0m for dynamic linking");
     cmd("vscode", "Generate VSCode C/C++ configuration files");
     cmd("preset", "Generate CMakePresets.json");
     cmd("doctor", "Check and install missing tools for C++ development");

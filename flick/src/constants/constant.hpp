@@ -121,7 +121,7 @@ _deps
 build
 install
 __pycache__
-log.txt
+.compile.logs
 )"};
 
 constexpr std::string_view CONFIG_CMAKE[]{

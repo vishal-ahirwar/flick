@@ -63,7 +63,41 @@ int Extractor::extract(const std::string &vcpkgLog)
         if (index == std::string::npos)
             break;
         auto end = vcpkgLog.find(")", index);
+        if (end == std::string::npos)
+            break;
+        std::string findPackage = vcpkgLog.substr(index, end - index + 1);
+        index = end;
+        auto name = getName(findPackage);
+        {
+            auto tempIndex = vcpkgLog.find("target_link", index);
+            if (tempIndex == std::string::npos)
+                index = vcpkgLog.find("target_include", index);
+            else
+                index = tempIndex;
+        }
         if (index == std::string::npos)
+        {
+            Log::log(std::format("skipping {}",name));
+            break;
+        }
+
+        end = vcpkgLog.find(")", index);
+        if (index == std::string::npos)
+            break;
+        std::string linkTarget = vcpkgLog.substr(index, end - index + 1);
+        index = end;
+        if (mPackages.contains(name))
+            continue;
+        mPackages[name] = std::vector{findPackage, formatToOneLine(linkTarget)};
+    }
+    index=0;
+    while (true)
+    {
+        index = vcpkgLog.find("find_path", index);
+        if (index == std::string::npos)
+            break;
+        auto end = vcpkgLog.find(")", index);
+        if (end == std::string::npos)
             break;
         std::string findPackage = vcpkgLog.substr(index, end - index + 1);
         index = end;

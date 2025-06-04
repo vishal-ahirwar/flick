@@ -264,7 +264,7 @@ std::pair<ProjectType, Language> Flick::readuserInput()
 		mRt.~RT();
 		std::exit(0);
 	}
-	Log::log("Choose project type: x = executable, l = library (Enter to cancel) > ", Type::E_DISPLAY, "");
+	Log::log("Choose project type:\033[95m x = executable, l = library \033[0m(Enter to cancel) > ", Type::E_DISPLAY, "");
 
 	// clearInputBuffer();
 	std::getline(std::cin, input, '\n');
@@ -310,7 +310,7 @@ Flick::Flick(const std::vector<std::string> &args)
 		// 				{ return !((c >= 'a' && c <= 'z') || isdigit(c) || c == '-'); }))
 		if (!std::regex_match(projectName, pattern))
 		{
-			Log::log("Project name must be in lowercase with no space and special characters allowed name : ^[a-z][a-z0-9-]*$", Type::E_ERROR);
+			Log::log("Project name must be in lowercase with no space and special characters allowed name : \033[95m^[a-z][a-z0-9-]*$\033[0m", Type::E_ERROR);
 			std::exit(0);
 		};
 		mProjectSetting.set(mArgs.at(2));
@@ -375,7 +375,6 @@ bool Flick::compile()
 		std::vector<std::string> args{"-DCMAKE_BUILD_TYPE=Debug", "--preset=" + std::string(VCPKG_TRIPLET)};
 		if (!executeCMake(args))
 		{
-			Logger::error("There are some errors in your CMakeLists.txt read build/build.log for more info");
 			return false;
 		}; // TODO
 		// run ninja
@@ -463,7 +462,7 @@ void Flick::run()
 	}
 	if (!fs::exists(run))
 	{
-		Log::log("Subproject '" + app + "' has no executable. Try verifying the name and rebuilding the project.", Type::E_ERROR);
+		Log::log("Subproject \033[95m'" + app + "'\033[0m has no executable. Try verifying the name and rebuilding the project.", Type::E_ERROR);
 		return;
 	}
 	bool isArg{false};
@@ -483,9 +482,10 @@ void Flick::run()
 	boost::process::ipstream out;
 	boost::process::ipstream err;
 	boost::process::child c{run, args};
-	Log::log(std::format("Running {}...", app), Type::E_DISPLAY);
+	Log::log(std::format("Running \033[95m{}\033[0m...\n────────────────────────────────────────────────────────────", app), Type::E_DISPLAY);
 	c.wait();
-	Log::log(std::format("{} exited with code {}", app, c.exit_code()), Type::E_DISPLAY);
+	fmt::println("────────────────────────────────────────────────────────────");
+	Log::log(std::format("\033[95m{}\033[0m exited with code {}", app, c.exit_code()), Type::E_DISPLAY);
 }
 
 //
@@ -554,7 +554,7 @@ bool addToPathPermanentWindows(const std::string &newPath)
 						reinterpret_cast<LPARAM>("Environment"),
 						SMTO_ABORTIFHUNG, 5000, nullptr);
 
-	Log::log(std::format("Added to PATH permanently: {}", newPath));
+	Log::log(std::format("Added to PATH permanently: \033[95m{}\033[0m", newPath));
 	return true;
 }
 
@@ -1077,7 +1077,7 @@ void Flick::fixInstallation()
 		if (dir.is_directory())
 		{
 			fs::remove_all(dir);
-			Log::log(std::format("{} removed.", dir.path().string()), Type::E_WARNING);
+			Log::log(std::format("\033[95m{}\033[0m removed.", dir.path().string()), Type::E_WARNING);
 		}
 	}
 	bool status{};
@@ -1166,7 +1166,7 @@ void Flick::update()
 	Flick += "/flick";
 	std::string source{Flick + "/utool"};
 #endif
-	Log::log("updating Flick...", Type::E_DISPLAY);
+	Log::log("Updating Flick...", Type::E_DISPLAY);
 	if (fs::exists(source)) // if utool is present in ~/Flick directory then start the utool if not download the utool first
 	{
 		createProcess(source); // Windows//starting process parent-less which will start utool so Flick will shutdown and then utool override the Flick.exe
@@ -1213,7 +1213,6 @@ bool Flick::release()
 		std::vector<std::string> args{"-Bbuild/release", "-DCMAKE_BUILD_TYPE=Release", "--preset=" + std::string(VCPKG_TRIPLET)};
 		if (!executeCMake(args))
 		{
-			Log::log("There are some errors in your CMakeLists.txt read build/build.log for more info", Type::E_ERROR);
 			return false;
 		}; // TODO
 		// run ninja
@@ -1321,7 +1320,7 @@ void Flick::addDeps()
 	bool bUpdateBaseline{};
 	if (mArgs.size() < 3)
 	{
-		Log::log("No Package name given", Type::E_ERROR);
+		Log::log("No Package \033[95mname\033[0m given", Type::E_ERROR);
 		return;
 	};
 	project = mProjectSetting.getProjectName();
@@ -1353,18 +1352,18 @@ void Flick::addDeps()
 	}
 	if (name.empty())
 	{
-		Log::log("Uses : flick install --package=boost-process --version=1.85.0 --project=demo --update-base-line", Type::E_ERROR);
-		Log::log("Other args are optional but package name must be provided: flick install --package=fmt", Type::E_ERROR);
+		Log::log("Uses : flick install \033[95m--package=boost-process --version=1.85.0 --project=demo --update-base-line\033[0m", Type::E_ERROR);
+		Log::log("Other args are optional but package name must be provided: flick install \033[95m--package=fmt\033[0m", Type::E_ERROR);
 		return;
 	}
 	if (bUseLatest)
 	{
-		Log::log("fetching latest packages from vcpkg", Type::E_WARNING);
+		Log::log("fetching latest packages from \033[95mvcpkg\033[0m", Type::E_WARNING);
 		std::string log{};
 		std::string vcpkg{std::getenv("VCPKG_ROOT")};
 		if (vcpkg.length() <= 0)
 		{
-			Log::log("VCPKG_ROOT is not Set!", Type::E_ERROR);
+			Log::log("\033[95mVCPKG_ROOT\033[0m is not Set!", Type::E_ERROR);
 			return;
 		}
 		std::vector<std::string> args{"git", "-C", vcpkg, "pull"};
@@ -1391,7 +1390,7 @@ void Flick::addDeps()
 }
 void Flick::genCMakePreset()
 {
-	Log::log("Please Choose your Programming language c/cc default=cc,q=quit > ", Type::E_DISPLAY, "");
+	Log::log("Please Choose your Programming language \033[95mc/cc\033[0m default=cc,q=quit > ", Type::E_DISPLAY, "");
 	std::string input{};
 	std::getline(std::cin, input);
 	Language lang{};

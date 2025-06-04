@@ -10,6 +10,7 @@ find_package(cpr CONFIG REQUIRED)
 find_package(boost_process CONFIG REQUIRED)
 find_package(LibArchive REQUIRED)
 find_package(GTest CONFIG REQUIRED)
+find_path(BARKEEP_INCLUDE_DIRS "barkeep/barkeep.h")
 #@add_subproject Warning: Do not remove this line
 add_subdirectory(utool)
 add_subdirectory(flick)

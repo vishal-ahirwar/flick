@@ -84,10 +84,6 @@ private:
             break;
         }
 
-        // Print top separator for warning/error
-        if (level != Level::Status)
-            fmt::print("────────────────────────────────────────────────────────────────────────────\n");
-
         // Main message
         fmt::print("{}{} {:<8} {}\033[0m{}", color, icon, toLabel(level), message,end);
 
@@ -110,8 +106,6 @@ private:
             }
         }
 
-        if (level != Level::Status)
-            fmt::print("────────────────────────────────────────────────────────────────────────────\n");
     }
 
     static std::string toLabel(Level level)
@@ -121,9 +115,9 @@ private:
         case Level::Status:
             return "[flick]";
         case Level::Warning:
-            return "Warning";
+            return "[flick]";
         case Level::Error:
-            return "Error";
+            return "[Error]";
         default:
             return "Log";
         }

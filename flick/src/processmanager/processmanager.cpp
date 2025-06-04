@@ -7,15 +7,17 @@
 #include <array>
 #include "log/log.h"
 #include "processmanager.h"
+#include<barkeep/barkeep.h>
 namespace fs = std::filesystem;
+namespace bk = barkeep;
 int ProcessManager::startProcess(const std::vector<std::string> &args, std::string &processLog, const std::string &msg, bool b_log)
 {
-    if (msg.length() > 0)
-        Log::log(msg, Type::E_WARNING);
-    if (!fs::exists("build"))
-        fs::create_directories("build");
-
-    std::ofstream logFile("build/build.log", std::ios::out);
+    std::shared_ptr<barkeep::AnimationDisplay>anim{};
+    if (!msg.empty()){
+        if (!b_log)anim = bk::Animation({.message = "\033[32m✔\033[0m  [flick]  "+msg+"\033[32m",.style = bk::Bar,.interval = 0.1});
+    }
+    if (!fs::exists("build")){
+        fs::create_directories("build");}
     boost::process::ipstream outStream;
     boost::process::ipstream errStream;
     boost::process::child process(boost::process::search_path(args[0]), boost::process::args(std::vector<std::string>(args.begin() + 1, args.end())), boost::process::std_out > outStream, boost::process::std_err > errStream);
@@ -25,41 +27,67 @@ int ProcessManager::startProcess(const std::vector<std::string> &args, std::stri
         if (!lineErr.empty())
         {
             if (lineErr.find("warning") != std::string::npos)
+            {
+                puts("");
                 Logger::warning(lineErr);
-            // Log::log(lineErr, Type::E_WARNING);
+                // puts("");
+            }
+
             else if (lineErr.find("error") != std::string::npos)
+            {
+                puts("");
                 Logger::error(lineErr);
-            // Log::log(lineErr, Type::E_ERROR);
+                // puts("");
+            }
             else if (b_log)
                 Logger::status(lineErr);
-            // Log::log(lineErr, Type::E_DISPLAY);
-
-            logFile << lineErr << "\n";
-            processLog.append(lineErr + "\n");
+            processLog.append(lineErr+"\n");
         }
         if (!lineOut.empty())
         {
             if (lineOut.find("warning") != std::string::npos)
+            {
+                puts("");
                 Logger::warning(lineOut);
-            // Log::log(lineOut, Type::E_WARNING);
+                // puts("");
+            }
+
             else if (lineOut.find("error") != std::string::npos)
+            {
+                puts("");
                 Logger::error(lineOut);
-            // Log::log(lineOut, Type::E_ERROR);
+                // puts("");
+            }
+
             else if (b_log)
                 Logger::status(lineOut);
-            // Log::log(lineOut, Type::E_DISPLAY);
-            logFile << lineOut << "\n";
-            processLog.append(lineOut + "\n");
+            processLog.append(lineOut+"\n");
         }
     }
     process.wait();
     int exitCode = process.exit_code();
-    logFile.close();
-    if (exitCode != 0)
+    if (anim)
     {
-        Logger::error("For more info: " + (fs::current_path() / "build/build.log").generic_string());
+        anim->done();
     }
-
-    puts("");
+    std::fstream fs("compile.logs",std::ios::out);
+    if (!fs.is_open())
+    {
+        Log::log("failed to open compile.logs",Type::E_ERROR);
+    }
+    else
+    {
+        if (processLog.length() <= 0)
+        {
+            processLog.append("[Important Advice] Check Your CMakeLists.txt\n");
+            processLog.append("[Important Advice] Check Your vcpkg.json\n");
+        }
+        fs.write(processLog.c_str(), processLog.length());
+        if (exitCode != 0)
+        {
+            Log::log("You can find more info in \033[95mcompile.logs\033[0m",Type::E_DISPLAY);
+        }
+        fs.close();
+    }
     return exitCode;
 }

@@ -133,12 +133,12 @@ bool Deps::updateCMakeFile(const std::string &vcpkgLog, const std::string &proje
         return false;
     };
     auto packages{extractor.getPackages()};
-    Log::log("Packages :", Type::E_DISPLAY);
+    Log::log("Packages being used in your current project", Type::E_DISPLAY);
     for (auto &[name, values] : packages)
     {
         if (name.empty())
             continue;
-        Log::log("\t+" + name, Type::E_NONE);
+        Log::log(std::format("\033[95m-----------+{} \033[0m",name), Type::E_NONE);
 
         for (auto &package : values)
         {
@@ -255,7 +255,7 @@ bool Deps::rebuildDeps(const std::string &url)
 bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName, std::string &outName, std::string &outVersion)
 {
     Log::log("Searching for package : " + packageName, Type::E_DISPLAY);
-    std::vector<std::string> args{"search", packageName};
+    std::vector<std::string> args{"search", packageName,"--classic"};
     boost::process::ipstream out;
     boost::process::ipstream err;
     std::vector<std::string>similiarPackages{};
@@ -263,8 +263,7 @@ bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName, std::string
     {
     boost::process::child c(boost::process::search_path("vcpkg"),args,boost::process::std_err > err,boost::process::std_out > out);
     std::string line{};
-    std::regex pattern(R"(^\s*([a-zA-Z0-9\-_]+)\s+((?:\d{4}-\d{2}-\d{2}|\d+\.\d+\.\d+)(?:#\d+)?)(?:\s+(.*))?)");
-
+    std::regex pattern(R"(^\s*([a-zA-Z0-9\-_]+)\s+([\d]{1,4}(?:\.[\d]+){1,2}(?:#\d+)?)(?:\s{2,}(.*))?)");
     while (std::getline(out, line) || std::getline(err, line))
     {
         std::smatch match{};
@@ -294,11 +293,15 @@ bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName, std::string
     if (outName.empty())
     {
         Log::log("Package not found!", Type::E_ERROR);
-        Log::log("Did you mean one of these packages ?\n", Type::E_NONE);
-        for (const auto&package:similiarPackages)
+        if (similiarPackages.size()>0)
         {
-            Log::log(package,Type::E_NONE);
+            Log::log("Did you mean one of these packages ?\n", Type::E_NONE);
+            for (const auto&package:similiarPackages)
+            {
+                Log::log(package,Type::E_NONE);
+            }
         }
+
     }
     return false;
 }

@@ -150,25 +150,25 @@ void ProjectGenerator::generateProject()
 	if (_lang == Language::C)
 	{
 
-		Log::log("Generating Starter Project C language", Type::E_DISPLAY);
+		Log::log("Generating Starter Project \033[95mC\033[0m language", Type::E_DISPLAY);
 	}
 	if (_lang == Language::CXX)
 	{
 
-		Log::log("Generating Starter Project C++ language", Type::E_DISPLAY);
+		Log::log("Generating Starter Project \033[95mC++\033[0m language", Type::E_DISPLAY);
 	}
 	if (_type == ProjectType::EXECUTABLE)
 	{
 
-		Log::log("Project Type is Executable", Type::E_DISPLAY);
+		Log::log("Project Type is \033[95mExecutable\033[0m", Type::E_DISPLAY);
 	}
 	if (_type == ProjectType::LIBRARY)
 	{
 
-		Log::log("Project Type is Library", Type::E_DISPLAY);
+		Log::log("Project Type is \033[95mLibrary\033[0m", Type::E_DISPLAY);
 	}
 	generateSubProject(mProjectSetting.getProjectName(), true);
-	Log::log("with great power comes great responsibility", Type::E_WARNING);
+	Log::log("The compiler is silent... for now.", Type::E_WARNING);
 	writeProjectSettings(&mProjectSetting);
 }
 
