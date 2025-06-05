@@ -18,3 +18,4 @@ __pycache__
 install
 demoapp
 .idea
+compile.logs

@@ -93,8 +93,7 @@ namespace flick
         }
         else
         {
-            printf("%s[Error] Invalid Command !%s\n", RED, WHITE);
-            printf("Try again with 'Flick help' :(\n");
+            Log::log("Invalid Command! try 'flick help' for more info");
             return 0;
         };
         return 0;
