@@ -83,14 +83,19 @@ Packages Extractor::extract(const std::string &vcpkgLog,std::string package)
         searchStart = match.suffix().first;
     }
     std::transform(package.begin(), package.end(), package.begin(), ::tolower);
-    std::replace(package.begin(), package.end(), '-', '_');
     Packages packages{};
-    for (const auto &entry : mPackages)
+    const char hyphen[]={'-','_'};
+    for (int i=0;i<2;++i)
     {
-        auto tmpName = entry.first;
-        std::transform(tmpName.begin(), tmpName.end(), tmpName.begin(), ::tolower);
-        if (tmpName.find(package) != std::string::npos)
-            packages[entry.first]=entry.second;
+        std::replace(package.begin(), package.end(), hyphen[i], hyphen[(i+1)%2]);
+        for (const auto &entry : mPackages)
+        {
+            auto tmpName = entry.first;
+            std::transform(tmpName.begin(), tmpName.end(), tmpName.begin(), ::tolower);
+            if (tmpName.find(package) != std::string::npos)
+                if (!packages.contains(entry.first))
+                    packages[entry.first]=entry.second;
+        }
     }
     return packages;
 };

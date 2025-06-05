@@ -302,10 +302,11 @@ bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName, std::string
     }
     if (outName.empty())
     {
+        puts("");
         Log::log("Package not found!", Type::E_ERROR);
         if (similiarPackages.size()>0)
         {
-            Log::log("Did you mean one of these packages ?\n", Type::E_NONE);
+            Log::log("Did you mean one of these packages ?", Type::E_NONE);
             for (const auto&package:similiarPackages)
             {
                 Log::log(package,Type::E_NONE);
@@ -341,7 +342,7 @@ bool Deps::findBuildinBaseline(const std::string &name, const std::string &versi
                 auto index = line.find(" ");
                 outBaseLine = line.substr(0, index);
                 std::string _version = line.substr(index, line.find(" ", index));
-                Log::log(std::format("Package : {}, Version : {}, Baseline Commit : {}\n[{}]\n", name, _version, outBaseLine, line), Type::E_NONE);
+                Log::log(std::format("Package : {}, Version : {}, Baseline Commit : {}", name, _version, outBaseLine), Type::E_NONE);
                 c.terminate();
                 return true;
             }
@@ -349,7 +350,7 @@ bool Deps::findBuildinBaseline(const std::string &name, const std::string &versi
         else if (line.find(first) != std::string::npos && line.find(version) != std::string::npos)
         {
             outBaseLine = line.substr(0, line.find(" "));
-            Log::log(std::format("Package : {}, Version : {}, Baseline Commit : {}\n[{}]\n", name, version, outBaseLine, line), Type::E_NONE);
+            Log::log(std::format("Package : {}, Version : {}, Baseline Commit : {}", name, version, outBaseLine), Type::E_NONE);
             c.terminate();
             return true;
         }else if (latestBaseLine.empty())
