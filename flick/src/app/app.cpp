@@ -93,7 +93,7 @@ namespace flick
         }
         else
         {
-            Log::log("Invalid Command! try 'flick help' for more info");
+            Log::log("Invalid Command! try 'flick help' for more info",Type::E_ERROR);
             return 0;
         };
         return 0;
