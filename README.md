@@ -3,43 +3,17 @@
 > Flick brings the simplicity of dependency management from languages like Python, Rust, or JavaScript into C++—finally making C++ feel modern to work with.
 
 ---
-|![image](https://github.com/user-attachments/assets/9bf99d88-423b-42b8-b6b8-cbc0bfbb62e8)|![image](https://github.com/user-attachments/assets/a0a98710-d695-45ea-9662-7e1ce1957ae8)|
+|![image](https://github.com/user-attachments/assets/7711dc54-9bf3-419f-b11d-09c929871090)|![image](https://github.com/user-attachments/assets/56595300-3309-4179-b409-67e4461ecee4)|
 |---|---|
 
-
-## ✨ Features
-
-* 📦 **Modern C++ Package Management**
-  Easily add external libraries using `vcpkg`, without writing CMake by hand.
-
-* ⚡ **Faster Builds**
-  Optimized build presets with Clang and Ninja ensure rapid compilation.
-
-* 🧱 **Cross-Platform & Cross-Compiling**
-  Build the same project seamlessly across Windows and Linux, and target other platforms too.
-
-* 📁 **Professional Project Structure**
-  Automatically generates clean CMake-based layouts.
-
-* 🔄 **Repeatable Builds**
-  Get consistent output across machines with unified presets.
-
-* 🎯 **Build From Scratch? Never Again**
-  Save hours by never manually writing CMake files again.
-
-* 🧪 **Unit Testing Integration**
-  Enable and run tests with ease.
-
-* 🛠️ **Installer Generation**
-  Easily package your application for distribution.
-
-* 🧰 **Environment Setup**
-  Automatically installs and configures Clang, Ninja, and CMake.
 
 ---
 
 ## 🔧 Installation
 
+[![Use Flick Installer](https://img.shields.io/badge/Use-Flick_Installer-blue?style=for-the-badge)](https://github.com/vishal-ahirwar/flick-installer)
+
+### Or Build from Source
 ### Prerequisites
 
 * Git
