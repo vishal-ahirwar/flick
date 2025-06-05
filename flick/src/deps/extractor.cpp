@@ -54,75 +54,43 @@ std::string getName(const std::string &findPackgeString)
     return findPackgeString.substr(start + 1, end - start);
 }
 //TODO FIX THIS:/
-int Extractor::extract(const std::string &vcpkgLog)
+Packages Extractor::extract(const std::string &vcpkgLog,std::string package)
 {
-    size_t index{0};
-    while (true)
-    {
-        index = vcpkgLog.find("find_package", index);
-        if (index == std::string::npos)
-            break;
-        auto end = vcpkgLog.find(")", index);
-        if (end == std::string::npos)
-            break;
-        std::string findPackage = vcpkgLog.substr(index, end - index + 1);
-        index = end;
-        auto name = getName(findPackage);
-        {
-            auto tempIndex = vcpkgLog.find("target_link", index);
-            if (tempIndex == std::string::npos)
-                index = vcpkgLog.find("target_include", index);
-            else
-                index = tempIndex;
-        }
-        if (index == std::string::npos)
-        {
-            Log::log(std::format("skipping {}",name));
-            break;
-        }
+    // Regex for find_package or find_path blocks
+    std::regex blockRegex(R"((find_(package|path)\([^\)]+\))\s+([^\n]*target_(link_libraries|include_directories)[^\)]+\)))");
 
-        end = vcpkgLog.find(")", index);
-        if (index == std::string::npos)
-            break;
-        std::string linkTarget = vcpkgLog.substr(index, end - index + 1);
-        index = end;
-        if (mPackages.contains(name))
-            continue;
-        mPackages[name] = std::vector{findPackage, formatToOneLine(linkTarget)};
-    }
-    index=0;
-    while (true)
-    {
-        index = vcpkgLog.find("find_path", index);
-        if (index == std::string::npos)
-            break;
-        auto end = vcpkgLog.find(")", index);
-        if (end == std::string::npos)
-            break;
-        std::string findPackage = vcpkgLog.substr(index, end - index + 1);
-        index = end;
-        auto name = getName(findPackage);
-        {
-            auto tempIndex = vcpkgLog.find("target_link", index);
-            if (tempIndex == std::string::npos)
-                index = vcpkgLog.find("target_include", index);
-            else
-                index = tempIndex;
-        }
-        if (index == std::string::npos)
-        {
-            Log::log(std::format("skipping {}",name));
-            break;
-        }
+    std::smatch match;
+    std::string::const_iterator searchStart(vcpkgLog.cbegin());
 
-        end = vcpkgLog.find(")", index);
-        if (index == std::string::npos)
-            break;
-        std::string linkTarget = vcpkgLog.substr(index, end - index + 1);
-        index = end;
-        if (mPackages.contains(name))
-            continue;
-        mPackages[name] = std::vector{findPackage, formatToOneLine(linkTarget)};
+    while (std::regex_search(searchStart, vcpkgLog.cend(), match, blockRegex))
+    {
+        std::string declaration = match[1].str();
+        std::string targetLine = match[3].str();
+
+        // Extract name from find_(package|path)(NAME ...)
+        std::regex nameRegex(R"(\(([^)\s]+))");
+        std::smatch nameMatch;
+        if (std::regex_search(declaration, nameMatch, nameRegex))
+        {
+            std::string name = nameMatch[1].str();
+            if (!mPackages.contains(name))
+            {
+                mPackages[name] = {
+                    formatToOneLine(declaration),
+                    formatToOneLine(targetLine)};
+            }
+        }
+        searchStart = match.suffix().first;
     }
-    return 0;
+    std::transform(package.begin(), package.end(), package.begin(), ::tolower);
+    std::replace(package.begin(), package.end(), '-', '_');
+    Packages packages{};
+    for (const auto &entry : mPackages)
+    {
+        auto tmpName = entry.first;
+        std::transform(tmpName.begin(), tmpName.end(), tmpName.begin(), ::tolower);
+        if (tmpName.find(package) != std::string::npos)
+            packages[entry.first]=entry.second;
+    }
+    return packages;
 };

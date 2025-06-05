@@ -11,6 +11,8 @@
 #include <regex>
 #include <boost/process.hpp>
 #include <iostream>
+#include <barkeep/barkeep.h>
+namespace bk=barkeep;
 namespace fs = std::filesystem;
 bool Deps::buildDeps()
 {
@@ -28,7 +30,7 @@ bool Deps::addDeps(const std::string &packageName, const std::string &version, b
         if (_version != version)
         {
             Log::log(std::format("Package version : {} does not match", version), Type::E_ERROR);
-            Log::log("Do you still want to add ?(y/n) ");
+            Log::log("Do you still want to add ?(y/n) ",Type::E_DISPLAY,"");
             char y{};
             std::cin >> y;
             if (y == 'y')
@@ -127,7 +129,8 @@ bool Deps::updateCMakeFile(const std::string &vcpkgLog, const std::string &proje
     rootCMake.close();
     subProjectCMake.close();
     Extractor extractor;
-    if (extractor.extract(vcpkgLog))
+    auto out=extractor.extract(vcpkgLog,packageName);
+    if (out.empty())
     {
         Log::log("Extraction failed!", Type::E_ERROR);
         return false;
@@ -139,7 +142,10 @@ bool Deps::updateCMakeFile(const std::string &vcpkgLog, const std::string &proje
         if (name.empty())
             continue;
         Log::log(std::format("\033[95m-----------+{} \033[0m",name), Type::E_NONE);
-
+    }
+    packages.clear();
+    packages=out;
+    for (auto &[name, values] : packages){
         for (auto &package : values)
         {
             bool shouldAdd{true};
@@ -254,7 +260,7 @@ bool Deps::rebuildDeps(const std::string &url)
 
 bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName, std::string &outName, std::string &outVersion)
 {
-    Log::log("Searching for package : " + packageName, Type::E_DISPLAY);
+    auto anim = bk::Animation({.message = "\033[32m[+]\033[0m Searching for package : "+packageName+"\033[32m",.style = bk::Bar,.interval = 0.1});
     std::vector<std::string> args{"search", packageName,"--classic"};
     boost::process::ipstream out;
     boost::process::ipstream err;
@@ -272,6 +278,7 @@ bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName, std::string
             if (match.size()<3)
             {
                 Log::log("Failed to parse vcpkg search output", Type::E_ERROR);
+                if (anim)anim->done();
                 return false;
             }else if (match[1]!=packageName && match.size()>=2)
             {
@@ -280,14 +287,17 @@ bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName, std::string
             }
             outName = match[1];
             outVersion = match[2];
+            puts("");
             Log::log(std::format("Selected Package : {}, Version : {}, About : {}", outName, outVersion, match[3].str()), Type::E_WARNING);
             c.terminate();
+            if (anim)anim->done();
             return true;
         }
     }
     }catch (std::exception &e)
     {
         Log::log(std::format("Exception : {}",e.what()),Type::E_ERROR);
+        if (anim)anim->done();
         return false;
     }
     if (outName.empty())
@@ -303,6 +313,7 @@ bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName, std::string
         }
 
     }
+    if (anim)anim->done();
     return false;
 }
 

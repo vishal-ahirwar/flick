@@ -9,6 +9,6 @@ class Extractor
     Packages mPackages{};
 public:
     const Packages&getPackages()const;
-    int extract(const std::string&vcpkgLog);
+    Packages extract(const std::string&vcpkgLog,std::string);
 };
 #endif

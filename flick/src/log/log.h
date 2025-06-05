@@ -85,7 +85,7 @@ private:
         }
 
         // Main message
-        fmt::print("{}{:<8}\033[0m {}{}", color, toLabel(level), message,end);
+        fmt::print("{}{:<3}\033[0m {}{}", color, toLabel(level), message,end);
 
         // File + line + column
         if (!file.empty())
@@ -113,11 +113,11 @@ private:
         switch (level)
         {
         case Level::Status:
-            return "[flick]";
+            return "[+]";
         case Level::Warning:
-            return "[flick]";
+            return "[*]";
         case Level::Error:
-            return "[Error]";
+            return "[-]";
         default:
             return "Log";
         }

@@ -246,7 +246,7 @@ void clearInputBuffer()
 
 std::pair<ProjectType, Language> Flick::readuserInput()
 {
-	Log::log("Choose language: c / cc (default = cc), q = quit > ", Type::E_DISPLAY, "");
+	Log::log("Choose language: \033[95mc / cc \033[0m(default = cc), q = quit > ", Type::E_DISPLAY, "");
 
 	std::string input{};
 	std::getline(std::cin, input);
@@ -301,7 +301,7 @@ Flick::Flick(const std::vector<std::string> &args)
 	{
 		if (args.size() < 3)
 		{
-			Log::log("No name for project! are you serious?", Type::E_ERROR);
+			Log::log("Forgot to name your project? Even \033[95m‘untitled’\033[0m would’ve worked", Type::E_ERROR);
 			exit(0);
 		};
 		auto projectName{mArgs.at(2)};
@@ -1407,7 +1407,7 @@ void Flick::createSubProject()
 {
 	if (mArgs.size() < 3)
 	{
-		Log::log("You must provide subproject name!", Type::E_ERROR);
+		Log::log("No subproject name? What do you want me to do, \033[95mguess\033[0m?", Type::E_ERROR);
 		return;
 	}
 	auto info = readuserInput();
