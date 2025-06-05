@@ -90,6 +90,7 @@ as today’s most developer-friendly languages.
     cmd("run", "Run the compiled binary. Use \033[95m--args\033[0m to pass args to executable");
     cmd("build", "Compile and run. Use \033[95m--standalone\033[0m for static linking");
     cmd("install", "Install packages to use in your project, \033[95mflick\033[0m install \033[95m--package=fmt --version=11.0.2\033[0m");
+    cmd("list", "List all packages used in the current project");
     cmd("init", "Install LLVM, Ninja, CMake, and vcpkg if not already installed");
     cmd("tests", "Enable unit testing. e.g. \033[95mflick\033[0m tests");
     cmd("installer", "Create a packaged build of your app");

@@ -17,6 +17,9 @@ namespace flick
         if (args.at(1) == "new")
         {
             flick.createNewProject();
+        }else if (args.at(1) == "list")
+        {
+            flick.listPackages();
         }
         else if (args.at(1) == ("help"))
         {

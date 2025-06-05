@@ -1415,3 +1415,37 @@ void Flick::createSubProject()
 	generator.setProjectSetting(mProjectSetting, info.second, info.first);
 	generator.generateSubProject(mArgs.at(2));
 }
+
+void Flick::listPackages()
+{
+	std::ifstream in("vcpkg.json");
+	if (in.is_open())
+	{
+		nlohmann::json j;
+		in >> j;
+		if (!j.contains("dependencies"))
+		{
+			Log::log("No dependencies are being used");
+			return;
+		}
+		const auto dependencies = j["dependencies"];
+		Log::log(std::format("total dependencies: \033[95m{}\033[0m", dependencies.size()));
+		for (const auto& dep :dependencies)
+		{
+			Log::log(std::format("\033[95m------{} \033[0mversion : {}",dep.get<std::string>(),[&j](const std::string&dep)->std::string
+			{
+				if (!j.contains("overrides"))return "latest";
+				const auto overrides = j["overrides"];
+				for (const auto& override : overrides)
+				{
+					if (override.contains("name")&&override["name"].get<std::string>()==dep)
+					{
+						return override.contains("version")?override["version"].get<std::string>():"latest";
+					};
+				};
+				return "latest";
+			}(dep)), Type::E_NONE);
+		}
+	}
+	in.close();
+}

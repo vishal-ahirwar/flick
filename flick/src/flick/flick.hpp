@@ -32,7 +32,7 @@ public:
     void addDeps();
     void genCMakePreset();
     void createSubProject();
-
+    void listPackages();
 private:
     void addToPathPermanent(const std::vector<std::string> &);
     bool onSetup();
