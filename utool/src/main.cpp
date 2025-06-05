@@ -20,17 +20,17 @@ int main()
     RT rt("utool");
 #ifdef _WIN32
     std::string home = getenv(USERNAME);
-    home += "\\Flick";
+    home += "\\flick";
 #else
     std::string home{"/home/"};
     home += getenv(USERNAME);
-    home += "/Flick";
+    home += "/flick";
 #endif
     Log::log("Updating Flick...", Type::E_DISPLAY);
 #ifdef _WIN32
-    Downloader::download(std::string(UPDATE_URL), home + "\\Flick.exe");
+    Downloader::download(std::string(UPDATE_URL), home + "\\flick.exe");
 #else
-    Downloader::download(std::string(UPDATE_URL), home + "/Flick");
+    Downloader::download(std::string(UPDATE_URL), home + "/flick");
 #endif
     Log::log("done!", Type::E_DISPLAY);
     Log::log("Press any key to quit!", Type::E_DISPLAY);
