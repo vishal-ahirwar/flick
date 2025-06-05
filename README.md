@@ -3,7 +3,7 @@
 > Flick brings the simplicity of dependency management from languages like Python, Rust, or JavaScript into C++—finally making C++ feel modern to work with.
 
 ---
-|![image](https://github.com/user-attachments/assets/9bf99d88-423b-42b8-b6b8-cbc0bfbb62e8)|![image](https://github.com/user-attachments/assets/a0a98710-d695-45ea-9662-7e1ce1957ae8)|
+|![image](https://github.com/user-attachments/assets/7711dc54-9bf3-419f-b11d-09c929871090)|![image](https://github.com/user-attachments/assets/56595300-3309-4179-b409-67e4461ecee4)|
 |---|---|
 
 
