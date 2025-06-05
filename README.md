@@ -7,35 +7,6 @@
 |---|---|
 
 
-## ✨ Features
-
-* 📦 **Modern C++ Package Management**
-  Easily add external libraries using `vcpkg`, without writing CMake by hand.
-
-* ⚡ **Faster Builds**
-  Optimized build presets with Clang and Ninja ensure rapid compilation.
-
-* 🧱 **Cross-Platform & Cross-Compiling**
-  Build the same project seamlessly across Windows and Linux, and target other platforms too.
-
-* 📁 **Professional Project Structure**
-  Automatically generates clean CMake-based layouts.
-
-* 🔄 **Repeatable Builds**
-  Get consistent output across machines with unified presets.
-
-* 🎯 **Build From Scratch? Never Again**
-  Save hours by never manually writing CMake files again.
-
-* 🧪 **Unit Testing Integration**
-  Enable and run tests with ease.
-
-* 🛠️ **Installer Generation**
-  Easily package your application for distribution.
-
-* 🧰 **Environment Setup**
-  Automatically installs and configures Clang, Ninja, and CMake.
-
 ---
 
 ## 🔧 Installation
