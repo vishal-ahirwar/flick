@@ -11,6 +11,9 @@
 
 ## 🔧 Installation
 
+[![Use Flick Installer](https://img.shields.io/badge/Use-Flick_Installer-blue?style=for-the-badge)](https://github.com/vishal-ahirwar/flick-installer)
+
+### Or Build from Source
 ### Prerequisites
 
 * Git
