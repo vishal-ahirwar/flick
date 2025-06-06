@@ -1,101 +1,91 @@
 #include "extractor.h"
-#include <sstream>
-#include <log/log.h>
-#include <string.h>
-#include <regex>
+#include <format>
 #include <list>
+#include <log/log.h>
+#include <regex>
+#include <sstream>
+#include <string.h>
 #include <unordered_set>
-#include<format>
-std::vector<std::pair<std::string, std::regex>> patterns = {
-    {"find_package", std::regex(R"(find_package\([^\)]+\))", std::regex_constants::icase)},
-    {"target_link_libraries", std::regex(R"(target_link_libraries\([^)]*\))", std::regex_constants::icase)},
-    {"find_path", std::regex(R"(find_path\([^\)]+\))", std::regex_constants::icase)},
-    {"target_include_directories", std::regex(R"(target_include_directories\([^)]*\))", std::regex_constants::icase)}};
 
-const Packages &Extractor::getPackages() const
-{
-    return mPackages;
-};
+std::vector<std::pair<std::string, std::regex>> patterns = {
+  {"find_package", std::regex(R"(find_package\([^\)]+\))", std::regex_constants::icase)},
+  {"target_link_libraries", std::regex(R"(target_link_libraries\([^)]*\))", std::regex_constants::icase)},
+  {"find_path", std::regex(R"(find_path\([^\)]+\))", std::regex_constants::icase)},
+  {"target_include_directories", std::regex(R"(target_include_directories\([^)]*\))", std::regex_constants::icase)}};
+
+const Packages& Extractor::getPackages() const { return mPackages; };
 #include <regex>
 
-std::string formatToOneLine(const std::string &multiline)
+std::string formatToOneLine(const std::string& multiline)
 {
-    std::regex newlineAndIndentRegex(R"(\s*\n\s*)"); // Matches newlines and surrounding spaces
-    return std::regex_replace(multiline, newlineAndIndentRegex, " ");
+	std::regex newlineAndIndentRegex(R"(\s*\n\s*)"); // Matches newlines and surrounding spaces
+	return std::regex_replace(multiline, newlineAndIndentRegex, " ");
 }
-int compareWeight(const std::string &a, const std::string &b)
+int compareWeight(const std::string& a, const std::string& b)
 {
-    std::string s1 = a;
-    std::string s2 = b;
+	std::string s1 = a;
+	std::string s2 = b;
 
-    // Convert both to lowercase
-    std::transform(s1.begin(), s1.end(), s1.begin(), ::tolower);
-    std::transform(s2.begin(), s2.end(), s2.begin(), ::tolower);
+	// Convert both to lowercase
+	std::transform(s1.begin(), s1.end(), s1.begin(), ::tolower);
+	std::transform(s2.begin(), s2.end(), s2.begin(), ::tolower);
 
-    int weight = 0;
-    size_t minLen = std::min(s1.length(), s2.length());
+	int weight = 0;
+	size_t minLen = std::min(s1.length(), s2.length());
 
-    for (size_t i = 0; i < minLen; ++i)
-    {
-        if (s1[i] == s2[i])
-            ++weight;
-        else
-            --weight;
-    }
+	for (size_t i = 0; i < minLen; ++i) {
+		if (s1[i] == s2[i])
+			++weight;
+		else
+			--weight;
+	}
 
-    return ((a.length() + b.length())) / weight;
+	return ((a.length() + b.length())) / weight;
 }
-std::string getName(const std::string &findPackgeString)
+std::string getName(const std::string& findPackgeString)
 {
-    auto start = findPackgeString.find("(");
-    auto end = findPackgeString.find(" ");
-    if (start == std::string::npos || end == std::string::npos)
-        return "";
-    return findPackgeString.substr(start + 1, end - start);
+	auto start = findPackgeString.find("(");
+	auto end = findPackgeString.find(" ");
+	if (start == std::string::npos || end == std::string::npos)
+		return "";
+	return findPackgeString.substr(start + 1, end - start);
 }
-//TODO FIX THIS:/
-Packages Extractor::extract(const std::string &vcpkgLog,std::string package)
+// TODO FIX THIS:/
+Packages Extractor::extract(const std::string& vcpkgLog, std::string package)
 {
-    // Regex for find_package or find_path blocks
-    std::regex blockRegex(R"((find_(package|path)\([^\)]+\))\s+([^\n]*target_(link_libraries|include_directories)[^\)]+\)))");
+	// Regex for find_package or find_path blocks
+	std::regex blockRegex(R"((find_(package|path)\([^\)]+\))\s+([^\n]*target_(link_libraries|include_directories)[^\)]+\)))");
 
-    std::smatch match;
-    std::string::const_iterator searchStart(vcpkgLog.cbegin());
+	std::smatch match;
+	std::string::const_iterator searchStart(vcpkgLog.cbegin());
 
-    while (std::regex_search(searchStart, vcpkgLog.cend(), match, blockRegex))
-    {
-        std::string declaration = match[1].str();
-        std::string targetLine = match[3].str();
+	while (std::regex_search(searchStart, vcpkgLog.cend(), match, blockRegex)) {
+		std::string declaration = match[1].str();
+		std::string targetLine = match[3].str();
 
-        // Extract name from find_(package|path)(NAME ...)
-        std::regex nameRegex(R"(\(([^)\s]+))");
-        std::smatch nameMatch;
-        if (std::regex_search(declaration, nameMatch, nameRegex))
-        {
-            std::string name = nameMatch[1].str();
-            if (!mPackages.contains(name))
-            {
-                mPackages[name] = {
-                    formatToOneLine(declaration),
-                    formatToOneLine(targetLine)};
-            }
-        }
-        searchStart = match.suffix().first;
-    }
-    std::transform(package.begin(), package.end(), package.begin(), ::tolower);
-    Packages packages{};
-    const char hyphen[]={'-','_'};
-    for (int i=0;i<2;++i)
-    {
-        std::replace(package.begin(), package.end(), hyphen[i], hyphen[(i+1)%2]);
-        for (const auto &entry : mPackages)
-        {
-            auto tmpName = entry.first;
-            std::transform(tmpName.begin(), tmpName.end(), tmpName.begin(), ::tolower);
-            if (tmpName.find(package) != std::string::npos)
-                if (!packages.contains(entry.first))
-                    packages[entry.first]=entry.second;
-        }
-    }
-    return packages;
+		// Extract name from find_(package|path)(NAME ...)
+		std::regex nameRegex(R"(\(([^)\s]+))");
+		std::smatch nameMatch;
+		if (std::regex_search(declaration, nameMatch, nameRegex)) {
+			std::string name = nameMatch[1].str();
+			if (!mPackages.contains(name)) {
+				mPackages[name] = {formatToOneLine(declaration), formatToOneLine(targetLine)};
+			}
+		}
+		searchStart = match.suffix().first;
+	}
+	std::transform(package.begin(), package.end(), package.begin(), ::tolower);
+	Packages packages{};
+	const char hyphen[] = {'-', '_'};
+	for (int i = 0; i < 2; ++i) {
+		std::replace(package.begin(), package.end(), hyphen[i], hyphen[(i + 1) % 2]);
+		for (const auto& entry : mPackages) {
+			auto tmpName = entry.first;
+			std::transform(tmpName.begin(), tmpName.end(), tmpName.begin(), ::tolower);
+			if (tmpName.find(package) != std::string::npos)
+				if (!packages.contains(entry.first))
+					packages[entry.first] = entry.second;
+		}
+	}
+	return packages;
 };

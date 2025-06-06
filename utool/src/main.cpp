@@ -1,8 +1,9 @@
-#include <iostream>
 #include <constants/colors.hpp>
 #include <downloader/downloader.h>
+#include <iostream>
 #include <log/log.h>
 #include <rt/rt.h>
+
 #ifdef _WIN32
 constexpr std::string_view UPDATE_URL{"https://github.com/vishal-ahirwar/Flick/releases/latest/download/flick.exe"};
 #else
@@ -17,25 +18,24 @@ constexpr std::string_view UPDATE_URL{"https://github.com/vishal-ahirwar/Flick/r
 
 int main()
 {
-    RT rt("utool");
+	RT rt("utool");
 #ifdef _WIN32
-    std::string home = getenv(USERNAME);
-    home += "\\flick";
+	std::string home = getenv(USERNAME);
+	home += "\\flick";
 #else
-    std::string home{"/home/"};
-    home += getenv(USERNAME);
-    home += "/flick";
+	std::string home{"/home/"};
+	home += getenv(USERNAME);
+	home += "/flick";
 #endif
-    Log::log("Updating Flick...", Type::E_DISPLAY);
+	Log::log("Updating Flick...", Type::E_DISPLAY);
 #ifdef _WIN32
-    Downloader::download(std::string(UPDATE_URL), home + "\\flick.exe");
+	Downloader::download(std::string(UPDATE_URL), home + "\\flick.exe");
 #else
-    Downloader::download(std::string(UPDATE_URL), home + "/flick");
+	Downloader::download(std::string(UPDATE_URL), home + "/flick");
 #endif
-    Log::log("done!", Type::E_DISPLAY);
-    Log::log("Press any key to quit!", Type::E_DISPLAY);
-    getchar();
+	Log::log("done!", Type::E_DISPLAY);
+	Log::log("Press any key to quit!", Type::E_DISPLAY);
+	getchar();
 
-    return 0;
+	return 0;
 }
-

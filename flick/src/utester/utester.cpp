@@ -1,9 +1,5 @@
-#include<utester/utester.h>
+#include <utester/utester.h>
 
-void UTester::runTests()
-{
-}
+void UTester::runTests() {}
 
-void UTester::setupUnitTesting()
-{
-}
+void UTester::setupUnitTesting() {}

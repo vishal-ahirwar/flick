@@ -1,6 +1,7 @@
 ﻿#ifndef _CONSTANT_
 #define _CONSTANT_
 #include <string>
+#include <string_view>
 static std::string VCPKG_TRIPLET{"default"};
 
 #if defined(_WIN32)
@@ -10,8 +11,9 @@ static std::string VCPKG_TRIPLET{"default"};
 #include <unistd.h>
 #define USERNAME "USER" // Linux environment variable
 #elif defined(__APPLE__)
-#include <unistd.h> // For macOS
 #include "Flick.hpp"
+#include <unistd.h>	// For macOS
+
 #define USERNAME "USER" // macOS environment variable
 #endif
 #ifdef _WIN32
@@ -20,18 +22,65 @@ static std::string VCPKG_TRIPLET{"default"};
 #define IS_WINDOWS false
 #endif
 
-enum class Language
-{
-  CXX,
-  C,
-  NONE
-};
-enum class ProjectType
-{
-  NONE,
-  EXECUTABLE,
-  LIBRARY
-};
+enum class Language { CXX, C, NONE };
+enum class ProjectType { NONE, EXECUTABLE, LIBRARY };
+constexpr std::string_view CLANGD{R"(CompileFlags:
+  CompilationDatabase: build/default/
+)"};
+constexpr std::string_view CLANG_FORMAT{R"(
+# .clang-format for Flick
+BasedOnStyle: LLVM
+
+# General formatting rules
+IndentWidth: 8
+TabWidth: 8
+UseTab: Always
+ContinuationIndentWidth: 2
+ColumnLimit: 150
+BreakBeforeBraces: Linux
+IndentCaseLabels: false
+AllowShortIfStatementsOnASingleLine: false
+
+# Optional: Improve readability by ensuring clarity in template and lambda formatting
+SpacesInAngles: false
+SpaceBeforeParens: ControlStatements
+
+# Optional: For namespace and class definition spacing
+DerivePointerAlignment: false
+PointerAlignment: Left
+)"};
+
+constexpr std::string_view CLANG_TIDY{
+  R"(Checks: >
+  clang-analyzer-*,bugprone-*,performance-*,portability-*,readability-*,modernize-*
+WarningsAsErrors: clang-analyzer-*,bugprone-*
+HeaderFilterRegex: .*
+FormatStyle: file
+CheckOptions:
+  - key:             modernize-use-nullptr.NullMacros
+    value:           'NULL'
+  - key:             readability-identifier-naming.VariableCase
+    value:           camelCase
+  - key:             readability-identifier-naming.MemberPrefix
+    value:           m
+  - key:             readability-identifier-naming.ClassCase
+    value:           PascalCase
+)"};
+constexpr std::string_view EDITOR_CONFIG{R"(# EditorConfig for Flick-style C++ projects
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{cpp,h,hpp,c}]
+indent_style = tab
+indent_size = 8
+tab_width = 8
+max_line_length = 150
+)"};
 
 constexpr std::string_view LICENSE_TEXT{R"(
 Copyright (c) @_YEAR_, @_OWNER_
@@ -58,7 +107,7 @@ set(CPACK_PACKAGE_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
 set(CPACK_PACKAGE_VENDOR ${COMPANY})
 include(CPack))"};
 constexpr std::string_view UNIT_TEST_CODE[]{
-    R"(
+  R"(
 #include <gtest/gtest.h>
 int add(int a,int b){return a+b;};
 int subtract(int a,int b){return a-b;};
@@ -77,7 +126,7 @@ int main(int argc, char **argv) {
     return RUN_ALL_TESTS();
 }
   )",
-    R"(#include <stdarg.h>
+  R"(#include <stdarg.h>
 #include <stddef.h>
 #include <setjmp.h>
 #include <cmocka.h>
@@ -106,7 +155,7 @@ int main(void) {
 })"};
 
 constexpr std::string_view GITIGNORE_CODE{
-    R"(.vs
+  R"(.vs
 CMakeLists.txt.user
 CMakeCache.txt
 CMakeFiles
@@ -125,7 +174,7 @@ __pycache__
 )"};
 
 constexpr std::string_view CONFIG_CMAKE[]{
-    R"(
+  R"(
 #Auto Generated Root CMake file by Flick CLI
 #@COPYRIGHT
 set(CMAKE_CXX_STANDARD 20)
@@ -162,7 +211,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     )
 endif()
 )",
-    R"(
+  R"(
 #Auto Generated Root CMake file by Flick CLI
 #@COPYRIGHT
 set(CMAKE_C_STANDARD 17)
@@ -214,7 +263,7 @@ int main(int argc,char*argv[])
     return 0;
 }
 )",
- R"(//Auto Genrated C file by Flick CLI
+			       R"(//Auto Genrated C file by Flick CLI
 //@COPYRIGHT
 #include<stdio.h>
 _HEADER_
@@ -270,7 +319,7 @@ constexpr std::string_view CMAKE_PRESETS[]{R"(
     }
   ]
 })",
-                                           R"(
+					   R"(
 {
   "version": 2,
   "configurePresets": [
@@ -334,7 +383,8 @@ constexpr std::string_view VSCODE_CONFIG{R"(    {
    })"};
 
 constexpr std::string_view UPDATER_URL{"https://github.com/vishal-ahirwar/Flick/releases/latest/download/utool.exe"};
-constexpr std::string_view COMPILER_URL{"https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/clang+llvm-19.1.7-x86_64-pc-windows-msvc.tar.xz"};
+constexpr std::string_view COMPILER_URL{
+  "https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/clang+llvm-19.1.7-x86_64-pc-windows-msvc.tar.xz"};
 constexpr std::string_view CMAKE_URL{"https://github.com/Kitware/CMake/releases/download/v3.31.5/cmake-3.31.5-windows-x86_64.zip"};
 constexpr std::string_view NINJA_URL{"https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-win.zip"};
 constexpr std::string_view VS_BUILD_TOOLS_INSTALLER_URL{"https://aka.ms/vs/17/release/vs_BuildTools.exe"};
@@ -363,4 +413,3 @@ constexpr std::string_view VSCODE_CONFIG{R"(     {
 constexpr std::string_view UPDATER_URL{"https://github.com/vishal-ahirwar/Flick/releases/latest/download/utool"};
 #endif
 #endif
-

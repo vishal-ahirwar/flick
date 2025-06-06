@@ -1,26 +1,16 @@
 #include <userinfo/userinfo.h>
 
-void UserInfo::readUserInfo()
-{
-}
+void UserInfo::readUserInfo() {}
 
-void UserInfo::writeUserInfo()
-{
-}
-UserInfo::UserInfo() : mUserName{"None"}
-{
-}
+void UserInfo::writeUserInfo() {}
+UserInfo::UserInfo() : mUserName{"None"} {}
 
-std::string UserInfo::getUserName() const
-{
-    return mUserName;
-}
+std::string UserInfo::getUserName() const { return mUserName; }
 
-
-void UserInfo::readUserInfoFromConfigFile(UserInfo *user) {
+void UserInfo::readUserInfoFromConfigFile(UserInfo* user) {
 
 };
 
-void UserInfo::writeUserInfoToConfigFile(UserInfo *user) {
+void UserInfo::writeUserInfoToConfigFile(UserInfo* user) {
 
 };

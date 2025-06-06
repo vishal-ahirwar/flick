@@ -1,0 +1,21 @@
+
+# .clang-format for Flick
+BasedOnStyle: LLVM
+
+# General formatting rules
+IndentWidth: 8
+TabWidth: 8
+UseTab: Always
+ContinuationIndentWidth: 2
+ColumnLimit: 150
+BreakBeforeBraces: Linux
+IndentCaseLabels: false
+AllowShortIfStatementsOnASingleLine: false
+
+# Optional: Improve readability by ensuring clarity in template and lambda formatting
+SpacesInAngles: false
+SpaceBeforeParens: ControlStatements
+
+# Optional: For namespace and class definition spacing
+DerivePointerAlignment: false
+PointerAlignment: Left

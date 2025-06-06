@@ -1,10 +1,9 @@
 ﻿#pragma once
-#include<vector>
-#include<string>
+#include <string>
+#include <vector>
 
 namespace flick
 {
-    int showHelp();
-    int createApp(const std::vector<std::string>&args);
-}
-
+int showHelp();
+int createApp(const std::vector<std::string>& args);
+} // namespace flick

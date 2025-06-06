@@ -3,10 +3,10 @@
 
 class UTester
 {
-private:
-public:
-    void runTests();
-    void setupUnitTesting();
+      private:
+      public:
+	void runTests();
+	void setupUnitTesting();
 };
 
 #endif // U_TESTER

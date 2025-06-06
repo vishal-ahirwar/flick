@@ -1,5 +1,5 @@
 #pragma once
-//Copyright Vishal Ahirwar.All rights reserved. 
+// Copyright Vishal Ahirwar.All rights reserved.
 #define RED "\x1b[38;5;196m"
 #define BLUE "\x1b[38;5;21m"
 #define YELLOW "\x1b[38;5;226m"

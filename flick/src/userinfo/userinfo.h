@@ -3,16 +3,16 @@
 #include <string>
 class UserInfo
 {
-    std::string mUserName{};
+	std::string mUserName{};
 
-public:
-    void readUserInfo();
-    void writeUserInfo();
-    UserInfo();
-    std::string getUserName() const;
-    static void askUserinfo(UserInfo *user);
-    static void readUserInfoFromConfigFile(UserInfo *user);
-    static void writeUserInfoToConfigFile(UserInfo *user);
+      public:
+	void readUserInfo();
+	void writeUserInfo();
+	UserInfo();
+	std::string getUserName() const;
+	static void askUserinfo(UserInfo* user);
+	static void readUserInfoFromConfigFile(UserInfo* user);
+	static void writeUserInfoToConfigFile(UserInfo* user);
 };
 
 #endif
