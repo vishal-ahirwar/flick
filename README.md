@@ -36,7 +36,7 @@ flick build
 ```
 or
 ```bash
-flick build --standalone
+flick build --static
 ```
 ---
 
@@ -50,15 +50,16 @@ flick <Core Commands>
 
 | Command           | Description                                                         |
 | ----------------- | ------------------------------------------------------------------- |
-| `new`          | Create a new C/C++ project with all defaults                        |
+| `new`             | Create a new C/C++ project with all defaults                        |
 | `subproject`      | Add a subproject (executable or library)                            |
 | `build`           | Configure and compile using Clang + Ninja                           |
 | `run`             | Run the compiled binary                                             |
-| `compile`         | Compile with custom flags (e.g. Debug or Release)                   |
+| `compile`         | Compile with custom flags                   |
 | `tests`           | Enable and manage unit tests                                        |
 | `debug`           | Launch LLDB for debugging                                           |
 | `release`         | Compile in release mode                                             |
-| `install`         | Add external library using `vcpkg`. Example: `Flick add fmt/11.0.2` |
+| `install`         | Add external library                                                |
+| `list`            | list down the libraries used in current project                     |
 | `clean`           | Reload the vcpkg dependency cache                                   |
 | `installer`       | Generate an installable package                                     |
 | `doctor`          | Diagnose and fix Flick issues                                       |
@@ -76,9 +77,9 @@ $ flick install --package=restclient-cpp --version=0.5.2 --update-base-line
 $ flick install --package=qtbase
 $ flick build
 $ flick subproject client
-$ flick build client --standalone
+$ flick build client --static
 $ flick tests
-$ flick release --standalone
+$ flick release --static
 ```
 
 ---
