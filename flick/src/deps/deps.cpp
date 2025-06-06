@@ -4,6 +4,7 @@
 #include "processmanager/processmanager.h"
 #include <barkeep/barkeep.h>
 #include <boost/process.hpp>
+#include <cstddef>
 #include <filesystem>
 #include <format>
 #include <fstream>
@@ -133,7 +134,7 @@ bool Deps::updateCMakeFile(const std::string& vcpkgLog, const std::string& proje
 			}
 			if (shouldAdd) {
 				if (package.find("find") != std::string::npos) {
-					for (int i = 0; i < rootCMakeLines.size(); ++i) {
+					for (size_t i = 0; i < rootCMakeLines.size(); ++i) {
 						if (rootCMakeLines.at(i).find("@add_find_package") != std::string::npos) {
 							rootCMakeLines.insert(rootCMakeLines.begin() + i + 1, package);
 							break;
@@ -191,36 +192,7 @@ void Deps::findCMakeConfig(const std::string& root, std::vector<std::string>& co
 		};
 	};
 };
-[[deprecated("Will be removed in future")]]
-bool Deps::checkIfLibIsPresentInGlobalDir(const std::string& url)
-{
-	return false;
-}
-[[deprecated("Will be removed in future")]]
-bool Deps::checkIfLibIsPresentInLocalDir(const std::string& url)
-{
-	return false;
-}
-[[deprecated("Will be removed in future")]]
-bool Deps::installLocally(const std::string& url)
-{
-	return false;
-}
-[[deprecated("Will be removed in future")]]
-bool Deps::installGlobally(const std::string& url)
-{
-	return false;
-}
-[[deprecated("Will be removed in future")]]
-bool Deps::addToConfig(const std::string& path)
-{
-	return false;
-}
-[[deprecated("Will be removed in future")]]
-bool Deps::rebuildDeps(const std::string& url)
-{
-	return false;
-}
+
 
 bool Deps::isPackageAvailableOnVCPKG(const std::string& packageName, std::string& outName, std::string& outVersion)
 {
@@ -323,7 +295,3 @@ bool Deps::findBuildinBaseline(const std::string& name, const std::string& versi
 	}
 	return true;
 }
-
-bool Deps::addToJson(const std::string& name, const std::string& version) { return false; }
-
-void Deps::updateBaseLine(const std::string& baseLine) {}
