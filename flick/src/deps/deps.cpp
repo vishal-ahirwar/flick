@@ -260,7 +260,7 @@ bool Deps::rebuildDeps(const std::string &url)
 
 bool Deps::isPackageAvailableOnVCPKG(const std::string &packageName, std::string &outName, std::string &outVersion)
 {
-    auto anim = bk::Animation({.message = "\033[32m[+]\033[0m Searching for package : "+packageName+"\033[32m",.style = bk::Bar,.interval = 0.1});
+    auto anim = bk::Animation({.message = "\033[32m[+]\033[0m Searching for package : "+packageName+"\033[32m",.style = bk::AnimationStyle::Ellipsis,.interval = 0.1});
     std::vector<std::string> args{"search", packageName,"--classic"};
     boost::process::ipstream out;
     boost::process::ipstream err;
