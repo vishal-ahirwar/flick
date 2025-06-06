@@ -4,9 +4,9 @@
 #include <log/log.h>
 #include <rt/rt.h>
 #ifdef _WIN32
-constexpr std::string_view UPDATE_URL{"https://github.com/vishal-ahirwar/Flick/releases/latest/download/Flick.exe"};
+constexpr std::string_view UPDATE_URL{"https://github.com/vishal-ahirwar/Flick/releases/latest/download/flick.exe"};
 #else
-constexpr std::string_view UPDATE_URL{"https://github.com/vishal-ahirwar/Flick/releases/latest/download/Flick"};
+constexpr std::string_view UPDATE_URL{"https://github.com/vishal-ahirwar/Flick/releases/latest/download/flick"};
 #endif
 
 #ifdef _WIN32
