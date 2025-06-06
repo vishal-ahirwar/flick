@@ -86,18 +86,18 @@ as today’s most developer-friendly languages.
 
     cmd("new", "Create a new C/C++ project. e.g. \033[95mflick\033[0m new myProject");
     cmd("subproject", "Create a C/C++ subproject. e.g. \033[95mflick\033[0m subproject core");
-    cmd("compile", "Compile the project. Use \033[95m--standalone\033[0m for static linking");
+    cmd("compile", "Compile the project. Use \033[95m--static\033[0m for static linking");
     cmd("run", "Run the compiled binary. Use \033[95m--args\033[0m to pass args to executable");
-    cmd("build", "Compile and run. Use \033[95m--standalone\033[0m for static linking");
+    cmd("build", "Compile and run. Use \033[95m--static\033[0m for static linking");
     cmd("install", "Install packages to use in your project, \033[95mflick\033[0m install \033[95m--package=fmt --version=11.0.2\033[0m");
     cmd("list", "List all packages used in the current project");
     cmd("init", "Install LLVM, Ninja, CMake, and vcpkg if not already installed");
     cmd("tests", "Enable unit testing. e.g. \033[95mflick\033[0m tests");
     cmd("installer", "Create a packaged build of your app");
     cmd("update", "Update \033[95mflick\033[0m to the latest version");
-    cmd("clean", "Clean and rebuild. Use \033[95m--standalone\033[0m for static linking");
-    cmd("debug", "Compile in Debug mode and start LLDB. Use \033[95m--standalone\033[0m");
-    cmd("release", "Build in release mode. Use \033[95m--standalone\033[0m for dynamic linking");
+    cmd("clean", "Clean and rebuild. Use \033[95m--static\033[0m for static linking");
+    cmd("debug", "Compile in Debug mode and start LLDB. Use \033[95m--static\033[0m");
+    cmd("release", "Build in release mode. Use \033[95m--static\033[0m for dynamic linking");
     cmd("vscode", "Generate VSCode C/C++ configuration files");
     cmd("preset", "Generate CMakePresets.json");
     cmd("doctor", "Check and install missing tools for C++ development");

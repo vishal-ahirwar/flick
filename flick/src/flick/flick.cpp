@@ -363,7 +363,7 @@ bool Flick::compile()
 	// Log::log(formatedString, Type::E_DISPLAY);
 	for (auto &arg : mArgs)
 	{
-		if (arg.find("--standalone") != std::string::npos)
+		if (arg.find("--static") != std::string::npos)
 		{
 			VCPKG_TRIPLET = getStandaloneTriplet();
 			break;
@@ -432,7 +432,7 @@ void Flick::run()
 	}
 	for (auto &arg : mArgs)
 	{
-		if (arg.find("--standalone") != std::string::npos)
+		if (arg.find("--static") != std::string::npos)
 		{
 			VCPKG_TRIPLET = getStandaloneTriplet();
 			break;
@@ -482,7 +482,7 @@ void Flick::run()
 	boost::process::ipstream out;
 	boost::process::ipstream err;
 	boost::process::child c{run, args};
-	Log::log(std::format("Running \033[95m{}\033[0m...\n────────────────────────────────────────────────────────────", app), Type::E_DISPLAY);
+	Log::log(std::format("Running \033[95m{}\033[0m\n────────────────────────────────────────────────────────────", app), Type::E_DISPLAY);
 	c.wait();
 	fmt::println("────────────────────────────────────────────────────────────");
 	Log::log(std::format("\033[95m{}\033[0m exited with code {}", app, c.exit_code()), Type::E_DISPLAY);
@@ -902,7 +902,7 @@ void Flick::createInstaller()
 {
 	for (auto &arg : mArgs)
 	{
-		if (arg.find("--standalone") != std::string::npos)
+		if (arg.find("--static") != std::string::npos)
 		{
 			VCPKG_TRIPLET = getStandaloneTriplet();
 			break;
@@ -1202,7 +1202,7 @@ bool Flick::release()
 	// Log::log(formatedString, Type::E_DISPLAY);
 	for (auto &arg : mArgs)
 	{
-		if (arg.find("--standalone") != std::string::npos)
+		if (arg.find("--static") != std::string::npos)
 		{
 			VCPKG_TRIPLET = getStandaloneTriplet();
 			break;
@@ -1287,7 +1287,7 @@ void Flick::reBuild()
 {
 	for (auto &arg : mArgs)
 	{
-		if (arg.find("--standalone") != std::string::npos)
+		if (arg.find("--static") != std::string::npos)
 		{
 			VCPKG_TRIPLET = getStandaloneTriplet();
 			break;
@@ -1375,7 +1375,7 @@ void Flick::addDeps()
 		std::string vcpkgLog{};
 		for (auto &arg : mArgs)
 		{
-			if (arg.find("--standalone") != std::string::npos)
+			if (arg.find("--static") != std::string::npos)
 			{
 				VCPKG_TRIPLET = getStandaloneTriplet();
 				break;
