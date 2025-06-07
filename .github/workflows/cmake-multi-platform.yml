@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v4
         
       - name: Clone vcpkg
-        run: git clone https://github.com/microsoft/vcpkg.git vcpkg --depth 1
+        run: git clone https://github.com/microsoft/vcpkg.git vcpkg
         
       - name: Cache vcpkg
         uses: actions/cache@v3
