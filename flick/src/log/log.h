@@ -7,7 +7,7 @@ enum class Type { E_DISPLAY, E_WARNING, E_ERROR, E_NONE };
 class Log
 {
       public:
-	static void log(const std::string&, Type = Type::E_NONE, const std::string_view& end = "");
+	static void log(const std::string&, Type = Type::E_NONE, const std::string_view& end = "\n");
 	static void about();
 };
 
@@ -54,7 +54,7 @@ class Logger
 			break;
 		}
 		if (level==Level::Error||level==Level::Warning) {
-			fmt::print(fmt::emphasis::underline,"{}{:<3}\033[0m {}{}", color, toLabel(level), message, end);
+			fmt::print(fmt::emphasis::bold,"{}{:<3}\033[0m {}{}", color, toLabel(level), message, end);
 		}else {
 			// Main message
 			fmt::print("{}{:<3}\033[0m {}{}", color, toLabel(level), message, end);

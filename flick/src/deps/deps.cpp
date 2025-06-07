@@ -242,7 +242,7 @@ bool Deps::isPackageAvailableOnVCPKG(const std::string& packageName, std::string
 		if (similiarPackages.size() > 0) {
 			Log::log("Did you mean one of these packages ?", Type::E_NONE);
 			for (const auto& package : similiarPackages) {
-				Log::log(package, Type::E_NONE);
+				Log::log(std::format("\033[95m------{} \033[0m",package));
 			}
 		}
 	}

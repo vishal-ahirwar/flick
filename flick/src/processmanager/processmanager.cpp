@@ -17,7 +17,7 @@ int ProcessManager::startProcess(const std::vector<std::string>& args, std::stri
 	if (!msg.empty()) {
 		if (!b_log)
 			anim = bk::Animation(
-			  {.message = "\033[32m[+]\033[0m " + msg, .style = bk::AnimationStyle::Ellipsis, .interval = 0.1});
+			  {.message = "\033[32m[+]\033[0m " + msg, .style = bk::AnimationStyle::Ellipsis});
 	}
 	if (!fs::exists("build")) {
 		fs::create_directories("build");
@@ -31,6 +31,7 @@ int ProcessManager::startProcess(const std::vector<std::string>& args, std::stri
 	while (process.running() && (std::getline(outStream, lineOut) || std::getline(errStream, lineErr))) {
 		if (!lineErr.empty()) {
 			if (lineErr.find("warning") != std::string::npos) {
+
 				puts("");
 				Logger::warning(lineErr);
 				// puts("");
