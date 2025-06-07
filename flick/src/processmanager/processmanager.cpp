@@ -17,7 +17,7 @@ int ProcessManager::startProcess(const std::vector<std::string>& args, std::stri
 	if (!msg.empty()) {
 		if (!b_log)
 			anim = bk::Animation(
-			  {.message = "\033[32m[+]\033[0m " + msg + "\033[32m", .style = bk::AnimationStyle::Ellipsis, .interval = 0.1});
+			  {.message = "\033[32m[+]\033[0m " + msg, .style = bk::AnimationStyle::Ellipsis, .interval = 0.1});
 	}
 	if (!fs::exists("build")) {
 		fs::create_directories("build");
@@ -67,7 +67,7 @@ int ProcessManager::startProcess(const std::vector<std::string>& args, std::stri
 	if (anim) {
 		anim->done();
 	}
-	std::fstream fs("compile.logs", std::ios::out);
+	std::fstream fs("build/logs.txt", std::ios::out);
 	if (!fs.is_open()) {
 		Log::log("failed to open compile.logs", Type::E_ERROR);
 	} else {
@@ -77,7 +77,7 @@ int ProcessManager::startProcess(const std::vector<std::string>& args, std::stri
 		}
 		fs.write(processLog.c_str(), processLog.length());
 		if (exitCode != 0) {
-			Log::log("You can find more info in \033[95mcompile.logs\033[0m", Type::E_DISPLAY);
+			Log::log("You can find more info in \033[95mbuild/logs.txt\033[0m", Type::E_DISPLAY);
 		}
 		fs.close();
 	}

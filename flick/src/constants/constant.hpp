@@ -25,46 +25,81 @@ static std::string VCPKG_TRIPLET{"default"};
 enum class Language { CXX, C, NONE };
 enum class ProjectType { NONE, EXECUTABLE, LIBRARY };
 constexpr std::string_view CLANGD{R"(CompileFlags:
-  CompilationDatabase: build/default/
+  CompilationDatabase: build/default
+
+FallbackFlags:
+  - -std=c++23
+  - -Wall
+  - -Wextra
+  - -O0
+  - -fdiagnostics-color=always
+
+Index:
+  Background: true
+
+Diagnostics:
+  UnusedIncludes: Strict
+  ClangTidy:
+    Add: '*'
+    Remove: '-clang-analyzer-alpha.*'
+
 )"};
 constexpr std::string_view CLANG_FORMAT{R"(
-# .clang-format for Flick
-BasedOnStyle: LLVM
-
-# General formatting rules
-IndentWidth: 8
-TabWidth: 8
-UseTab: Always
-ContinuationIndentWidth: 2
-ColumnLimit: 150
-BreakBeforeBraces: Linux
-IndentCaseLabels: false
+BasedOnStyle: Google
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 100
 AllowShortIfStatementsOnASingleLine: false
-
-# Optional: Improve readability by ensuring clarity in template and lambda formatting
-SpacesInAngles: false
-SpaceBeforeParens: ControlStatements
-
-# Optional: For namespace and class definition spacing
+BreakBeforeBraces: Allman
+SortIncludes: true
+IncludeBlocks: Regroup
+AlwaysBreakTemplateDeclarations: Yes
 DerivePointerAlignment: false
 PointerAlignment: Left
+SpacesInAngles: false
+SpaceBeforeParens: ControlStatements
+EmptyLineBeforeAccessModifier: Always
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AlignTrailingComments: true
+AllowShortBlocksOnASingleLine: Empty
+ReflowComments: true
+
 )"};
 
 constexpr std::string_view CLANG_TIDY{
-  R"(Checks: >
-  clang-analyzer-*,bugprone-*,performance-*,portability-*,readability-*,modernize-*
-WarningsAsErrors: clang-analyzer-*,bugprone-*
-HeaderFilterRegex: .*
+	R"(Checks: >
+  clang-analyzer-*,
+  cppcoreguidelines-*,
+  modernize-*,
+  performance-*,
+  readability-*,
+  bugprone-*,
+  portability-*,
+  misc-*,
+  -clang-analyzer-alpha.*,  # disable unstable checks
+  -google-readability-braces-around-statements,
+  -fuchsia-*,
+  -hicpp-*,
+  -llvm-*,
+  -cert-*,
+  -readability-magic-numbers
+
+WarningsAsErrors: ''
+HeaderFilterRegex: '.*'
+AnalyzeTemporaryDtors: true
 FormatStyle: file
 CheckOptions:
   - key:             modernize-use-nullptr.NullMacros
     value:           'NULL'
-  - key:             readability-identifier-naming.VariableCase
-    value:           camelCase
-  - key:             readability-identifier-naming.MemberPrefix
-    value:           m
   - key:             readability-identifier-naming.ClassCase
-    value:           PascalCase
+    value:           CamelCase
+  - key:             readability-identifier-naming.FunctionCase
+    value:           camelBack
+  - key:             readability-identifier-naming.VariableCase
+    value:           camelBack
+
 )"};
 constexpr std::string_view EDITOR_CONFIG{R"(# EditorConfig for Flick-style C++ projects
 root = true

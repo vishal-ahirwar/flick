@@ -7,6 +7,39 @@
 #include <string.h>
 #include <unordered_set>
 
+std::string normalize(const std::string& s) {
+	std::string out;
+	for (char c : s) {
+		if (c == '-' || c == '_') out += ' ';
+		else out += std::tolower(c);
+	}
+	return out;
+}
+
+std::vector<std::string> tokenize(const std::string& s) {
+	std::istringstream iss(s);
+	std::vector<std::string> tokens;
+	std::string token;
+	while (iss >> token) tokens.push_back(token);
+	return tokens;
+}
+
+int fuzzy_score(const std::string& query, const std::string& target) {
+	auto qTokens = tokenize(normalize(query));
+	auto tTokens = tokenize(normalize(target));
+
+	int score = 0;
+	for (const auto& qt : qTokens) {
+		for (const auto& tt : tTokens) {
+			if (qt == tt) score += 10;
+			else if (tt.find(qt) == 0) score += 6;
+			else if (tt.find(qt) != std::string::npos) score += 3;
+		}
+	}
+
+	return score;
+}
+
 std::vector<std::pair<std::string, std::regex>> patterns = {
   {"find_package", std::regex(R"(find_package\([^\)]+\))", std::regex_constants::icase)},
   {"target_link_libraries", std::regex(R"(target_link_libraries\([^)]*\))", std::regex_constants::icase)},
@@ -74,18 +107,20 @@ Packages Extractor::extract(const std::string& vcpkgLog, std::string package)
 		}
 		searchStart = match.suffix().first;
 	}
-	std::transform(package.begin(), package.end(), package.begin(), ::tolower);
-	Packages packages{};
-	const char hyphen[] = {'-', '_'};
-	for (int i = 0; i < 2; ++i) {
-		std::replace(package.begin(), package.end(), hyphen[i], hyphen[(i + 1) % 2]);
-		for (const auto& entry : mPackages) {
-			auto tmpName = entry.first;
-			std::transform(tmpName.begin(), tmpName.end(), tmpName.begin(), ::tolower);
-			if (tmpName.find(package) != std::string::npos)
-				if (!packages.contains(entry.first))
-					packages[entry.first] = entry.second;
-		}
+	std::vector<std::pair<std::string, int>> scored;
+
+	for (const auto& [name, data] : mPackages) {
+		int score = fuzzy_score(package, name);
+		if (score >= 6)
+			scored.emplace_back(name, score);
 	}
-	return packages;
+
+	std::sort(scored.begin(), scored.end(), [](auto& a, auto& b) {
+	    return b.second > a.second;
+	});
+
+	Packages result;
+	for (auto& [name, _] : scored)
+		result[name] = mPackages.at(name);
+	return result;
 };

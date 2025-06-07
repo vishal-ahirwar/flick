@@ -53,7 +53,9 @@ class Logger
 			color = "\033[31m";
 			break;
 		}
-
+		if (level == Level::Error) {
+			fmt::println("────────────────────────────────────────────────────────────");
+		}
 		// Main message
 		fmt::print("{}{:<3}\033[0m {}{}", color, toLabel(level), message, end);
 
@@ -71,6 +73,9 @@ class Logger
 			if (highlightColumn >= 0) {
 				fmt::print("           {}\033[0m\n", std::string(highlightColumn, ' ') + "\033[35m^");
 			}
+		}
+		if (level == Level::Error) {
+			fmt::println("────────────────────────────────────────────────────────────");
 		}
 	}
 

@@ -171,6 +171,7 @@ void ProjectGenerator::generateRootCMake()
 		std::transform(mProjectSetting.getProjectName().begin(), mProjectSetting.getProjectName().end(), cap.begin(), ::toupper);
 		file.open(config, std::ios::out);
 		if (file.is_open()) {
+			file<<"#pragma once\n";
 			file << "#include<string_view>" << std::endl;
 			file << "namespace Project{" << std::endl;
 			file << ("\tconstexpr std::string_view VERSION_STRING=\"@" + mProjectSetting.getProjectName() + "_VERSION_MAJOR@.@" +
@@ -189,6 +190,7 @@ void ProjectGenerator::generateRootCMake()
 		std::transform(mProjectSetting.getProjectName().begin(), mProjectSetting.getProjectName().end(), cap.begin(), ::toupper);
 		file.open(config, std::ios::out);
 		if (file.is_open()) {
+			file<<"#pragma once\n";
 			file << ("const char*const VERSION_STRING=\"@" + mProjectSetting.getProjectName() + "_VERSION_MAJOR@.@" +
 				 mProjectSetting.getProjectName() + "_VERSION_MINOR@.@" + mProjectSetting.getProjectName() + "_VERSION_PATCH@\";")
 			     << std::endl;
@@ -199,7 +201,7 @@ void ProjectGenerator::generateRootCMake()
 		};
 		cmake << std::format("project({} VERSION 1.0.0 LANGUAGES C)\n", mProjectSetting.getProjectName());
 	}
-	cmake << "include(res/config.cmake)\n";
+	cmake << "include(cmake/config.cmake)\n";
 	cmake << "#@add_find_package Warning: Do not remove this line\n";
 	cmake << "#@add_subproject Warning: Do not remove this line\n";
 	cmake.close();
@@ -236,7 +238,7 @@ void ProjectGenerator::generateSubProjectCMake(const std::string& projectName)
 }
 void ProjectGenerator::configCMake()
 {
-	std::ofstream file{mProjectSetting.getProjectName() + "/res/config.cmake"};
+	std::ofstream file{mProjectSetting.getProjectName() + "/cmake/config.cmake"};
 	constexpr std::string_view config_in{"@config_in"};
 	constexpr std::string_view config_h{"@config_h"};
 	constexpr std::string_view comment{"@COPYRIGHT"};
@@ -299,6 +301,7 @@ void ProjectGenerator::createDir()
 	fs::create_directories(mProjectSetting.getProjectName() + "/" + mProjectSetting.getProjectName() + "/src");
 	fs::create_directories(mProjectSetting.getProjectName() + "/" + mProjectSetting.getProjectName() + "/include");
 	fs::create_directories(mProjectSetting.getProjectName() + "/res");
+	fs::create_directories(mProjectSetting.getProjectName() + "/cmake");
 };
 //
 void ProjectGenerator::generateCppTemplateFile(const std::string& projectName, bool isRoot)
