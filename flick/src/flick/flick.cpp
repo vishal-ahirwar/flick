@@ -434,9 +434,9 @@ void Flick::run()
 	boost::process::ipstream out;
 	boost::process::ipstream err;
 	boost::process::child c{run, args};
-	Log::log(std::format("Running \033[95m{}\033[0m\n────────────────────────────────────────────────────────────", app), Type::E_DISPLAY);
+	//Log::log(std::format("Running \033[95m{}\033[0m\n────────────────────────────────────────────────────────────", app), Type::E_DISPLAY);
 	c.wait();
-	fmt::println("────────────────────────────────────────────────────────────");
+	//fmt::println("────────────────────────────────────────────────────────────");
 	Log::log(std::format("\033[95m{}\033[0m exited with code {}", app, c.exit_code()), Type::E_DISPLAY);
 }
 

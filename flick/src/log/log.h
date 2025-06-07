@@ -2,12 +2,12 @@
 #define _LOG_H_
 #include <string>
 #include <string_view>
-
+#include<fmt/color.h>
 enum class Type { E_DISPLAY, E_WARNING, E_ERROR, E_NONE };
 class Log
 {
       public:
-	static void log(const std::string&, Type = Type::E_NONE, const std::string_view& end = "\n");
+	static void log(const std::string&, Type = Type::E_NONE, const std::string_view& end = "");
 	static void about();
 };
 
@@ -53,11 +53,13 @@ class Logger
 			color = "\033[31m";
 			break;
 		}
-		if (level == Level::Error) {
-			fmt::println("────────────────────────────────────────────────────────────");
+		if (level==Level::Error||level==Level::Warning) {
+			fmt::print(fmt::emphasis::underline,"{}{:<3}\033[0m {}{}", color, toLabel(level), message, end);
+		}else {
+			// Main message
+			fmt::print("{}{:<3}\033[0m {}{}", color, toLabel(level), message, end);
+
 		}
-		// Main message
-		fmt::print("{}{:<3}\033[0m {}{}", color, toLabel(level), message, end);
 
 		// File + line + column
 		if (!file.empty()) {
@@ -73,9 +75,6 @@ class Logger
 			if (highlightColumn >= 0) {
 				fmt::print("           {}\033[0m\n", std::string(highlightColumn, ' ') + "\033[35m^");
 			}
-		}
-		if (level == Level::Error) {
-			fmt::println("────────────────────────────────────────────────────────────");
 		}
 	}
 
