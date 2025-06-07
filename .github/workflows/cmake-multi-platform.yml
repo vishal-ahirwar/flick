@@ -46,7 +46,7 @@ jobs:
             echo "CMAKE_PRESET=windows-static-build" >> $GITHUB_ENV
           elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
             echo "CMAKE_PRESET=linux-static-build" >> $GITHUB_ENV
-          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+          elif [[ "${{ matrix.os }}" == "macos-13" ]]; then
             echo "CMAKE_PRESET=osx-static-build" >> $GITHUB_ENV
           fi
         shell: bash
