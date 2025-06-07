@@ -18,7 +18,17 @@ jobs:
         uses: actions/checkout@v4
         
       - name: Clone vcpkg
-        run: git clone https://github.com/microsoft/vcpkg.git vcpkg
+        run: git clone https://github.com/microsoft/vcpkg.git vcpkg --depth 1
+        
+      - name: Cache vcpkg
+        uses: actions/cache@v3
+        with:
+          path: |
+            vcpkg/installed
+            vcpkg/buildtrees
+          key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
+          restore-keys: |
+            ${{ runner.os }}-vcpkg-
         
       - name: Bootstrap vcpkg (Linux/macOS)
         if: runner.os != 'Windows'
@@ -40,22 +50,45 @@ jobs:
         run: echo "VCPKG_ROOT=$env:GITHUB_WORKSPACE\vcpkg" >> $env:GITHUB_ENV
         shell: powershell
         
-      - name: Set CMAKE_PRESET environment variable
-        run: |
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            echo "CMAKE_PRESET=windows-static-build" >> $GITHUB_ENV
-          elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-            echo "CMAKE_PRESET=linux-static-build" >> $GITHUB_ENV
-          elif [[ "${{ matrix.os }}" == "macos-13" ]]; then
-            echo "CMAKE_PRESET=osx-static-build" >> $GITHUB_ENV
-          fi
+      - name: Set CMAKE_PRESET environment variable (Windows)
+        if: runner.os == 'Windows'
+        run: echo "CMAKE_PRESET=windows-static-build" >> $env:GITHUB_ENV
+        shell: powershell
+        
+      - name: Set CMAKE_PRESET environment variable (Linux)
+        if: runner.os == 'Linux'
+        run: echo "CMAKE_PRESET=linux-static-build" >> $GITHUB_ENV
         shell: bash
         
-      - name: Configure CMake with preset
+      - name: Set CMAKE_PRESET environment variable (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          echo "CMAKE_PRESET=osx-static-build" >> $GITHUB_ENV
+          echo "CMAKE_OSX_ARCHITECTURES=x86_64" >> $GITHUB_ENV
+          echo "MACOSX_DEPLOYMENT_TARGET=10.15" >> $GITHUB_ENV
+        shell: bash
+        
+      - name: Configure CMake with preset (Windows/Linux)
+        if: runner.os != 'macOS'
         run: cmake --preset ${{ env.CMAKE_PRESET }}
+        timeout-minutes: 15
+        
+      - name: Configure CMake with preset (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          cmake --preset ${{ env.CMAKE_PRESET }} \
+            -DCMAKE_OSX_ARCHITECTURES=x86_64 \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
+            -DCMAKE_THREAD_LIBS_INIT="-lpthread" \
+            -DCMAKE_HAVE_THREADS_LIBRARY=1 \
+            -DCMAKE_USE_WIN32_THREADS_INIT=0 \
+            -DCMAKE_USE_PTHREADS_INIT=1 \
+            -DTHREADS_PREFER_PTHREAD_FLAG=ON
+        timeout-minutes: 15
         
       - name: Build with preset
-        run: cmake --build --preset ${{ env.CMAKE_PRESET }} --config Release
+        run: cmake --build --preset ${{ env.CMAKE_PRESET }} --config Release --parallel
+        timeout-minutes: 30
         
       - name: Prepare artifacts folder
         run: |
@@ -101,7 +134,7 @@ jobs:
       - name: Download macOS artifact
         uses: actions/download-artifact@v4
         with:
-          name: flick-macos-latest
+          name: flick-macos-13
           path: artifacts/macos
           
       - name: Create GitHub Release
