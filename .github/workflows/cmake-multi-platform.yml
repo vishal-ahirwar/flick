@@ -1,5 +1,4 @@
 name: Build and Release Flick
-
 on:
   push:
     tags:
@@ -11,42 +10,57 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
-
-    env:
-      CMAKE_PRESET: ${{ matrix.os == 'windows-latest' && 'windows-static-build' || matrix.os == 'ubuntu-latest' && 'linux-static-build' || matrix.os == 'macos-latest' && 'osx-static-build' }}
-
+    
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
-
-
+        uses: actions/checkout@v4
+        
       - name: Clone vcpkg
         run: git clone https://github.com/microsoft/vcpkg.git vcpkg
-
+        
       - name: Bootstrap vcpkg (Linux/macOS)
         if: runner.os != 'Windows'
         run: ./vcpkg/bootstrap-vcpkg.sh
         shell: bash
-
+        
       - name: Bootstrap vcpkg (Windows)
         if: runner.os == 'Windows'
         run: .\vcpkg\bootstrap-vcpkg.bat
-
-      - name: Set VCPKG_ROOT environment variable
+        shell: cmd
+        
+      - name: Set VCPKG_ROOT environment variable (Linux/macOS)
+        if: runner.os != 'Windows'
         run: echo "VCPKG_ROOT=$(pwd)/vcpkg" >> $GITHUB_ENV
-
+        shell: bash
+        
+      - name: Set VCPKG_ROOT environment variable (Windows)
+        if: runner.os == 'Windows'
+        run: echo "VCPKG_ROOT=$env:GITHUB_WORKSPACE\vcpkg" >> $env:GITHUB_ENV
+        shell: powershell
+        
+      - name: Set CMAKE_PRESET environment variable
+        run: |
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            echo "CMAKE_PRESET=windows-static-build" >> $GITHUB_ENV
+          elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            echo "CMAKE_PRESET=linux-static-build" >> $GITHUB_ENV
+          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            echo "CMAKE_PRESET=osx-static-build" >> $GITHUB_ENV
+          fi
+        shell: bash
+        
       - name: Configure CMake with preset
-        run: cmake --preset $CMAKE_PRESET
-
+        run: cmake --preset ${{ env.CMAKE_PRESET }}
+        
       - name: Build with preset
-        run: cmake --build --preset $CMAKE_PRESET --config Release
-
+        run: cmake --build --preset ${{ env.CMAKE_PRESET }} --config Release
+        
       - name: Prepare artifacts folder
         run: |
           mkdir -p artifacts
           if [[ "$RUNNER_OS" == "Windows" ]]; then
-            cp ./build/windows-static-build/flick/flick.exe artifacts/
-            cp ./build/windows-static-build/flick/utool.exe artifacts/
+            cp ./build/windows-static-build/flick/Release/flick.exe artifacts/ || cp ./build/windows-static-build/flick/flick.exe artifacts/
+            cp ./build/windows-static-build/flick/Release/utool.exe artifacts/ || cp ./build/windows-static-build/flick/utool.exe artifacts/
           elif [[ "$RUNNER_OS" == "macOS" ]]; then
             cp ./build/osx-static-build/flick/flick artifacts/
             cp ./build/osx-static-build/flick/utool artifacts/
@@ -55,9 +69,9 @@ jobs:
             cp ./build/linux-static-build/flick/utool artifacts/
           fi
         shell: bash
-
+        
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: flick-${{ matrix.os }}
           path: artifacts/
@@ -65,48 +79,37 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Download Windows artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: flick-windows-latest
           path: artifacts/windows
-
+          
       - name: Download Linux artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: flick-ubuntu-latest
           path: artifacts/linux
-
+          
       - name: Download macOS artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: flick-macos-latest
           path: artifacts/macos
-
+          
       - name: Create GitHub Release
-        id: create_release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
-
-      - name: Upload Windows binaries
-        uses: softprops/action-gh-release@v1
-        with:
           files: |
             artifacts/windows/flick.exe
             artifacts/windows/utool.exe
-
-      - name: Upload Linux binaries
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
             artifacts/linux/flick
             artifacts/linux/utool
-
-      - name: Upload macOS binaries
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
             artifacts/macos/flick
             artifacts/macos/utool
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
