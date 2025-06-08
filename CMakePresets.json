@@ -33,7 +33,7 @@
       "inherits": "default",
       "cacheVariables": {
         "VCPKG_TARGET_TRIPLET": "x64-osx",
-        "STATIC_LINK": true
+        "STATIC_LINK": false
       }
     }
   ]
