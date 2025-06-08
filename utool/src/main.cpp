@@ -1,21 +1,25 @@
 #include <constants/colors.hpp>
+#include <cstdlib>
 #include <downloader/downloader.h>
-#include <iostream>
 #include <log/log.h>
 #include <rt/rt.h>
-
-#ifdef _WIN32
-constexpr std::string_view UPDATE_URL{"https://github.com/vishal-ahirwar/Flick/releases/latest/download/flick.exe"};
-#else
-constexpr std::string_view UPDATE_URL{"https://github.com/vishal-ahirwar/Flick/releases/latest/download/flick"};
+#include <string>
+#include <unzip/unzip.h>
+#if defined(_WIN32)
+#include <windows.h>
+#define USERNAME "USERPROFILE" // Windows environment variable
+#define RELEASE_BUILDS_NAME "flick-windows-latest-zip"
+#elif defined(__linux__)
+#include <unistd.h>
+#define USERNAME "USER" // Linux environment variable
+#define RELEASE_BUILDS_NAME "flick-ubuntu-latest.zip"
+#elif defined(__APPLE__)
+#include <unistd.h>	// For macOS
+#define USERNAME "USER" // macOS environment variable
+#define RELEASE_BUILDS_NAME "flick-macos-13.zip"
 #endif
 
-#ifdef _WIN32
-#define USERNAME "USERPROFILE"
-#else
-#define USERNAME "USER"
-#endif
-
+#define BASE_URL "https://github.com/vishal-ahirwar/Flick/releases/latest/download/"
 int main()
 {
 	RT rt("utool");
@@ -25,14 +29,11 @@ int main()
 #else
 	std::string home{"/home/"};
 	home += getenv(USERNAME);
-	home += "/flick";
+	home += "/flick/";
 #endif
 	Log::log("Updating Flick...", Type::E_DISPLAY);
-#ifdef _WIN32
-	Downloader::download(std::string(UPDATE_URL), home + "\\flick.exe");
-#else
-	Downloader::download(std::string(UPDATE_URL), home + "/flick");
-#endif
+	Downloader::download(std::string(BASE_URL) + std::string(RELEASE_BUILDS_NAME), home + RELEASE_BUILDS_NAME);
+	Unzip::unzip(home + RELEASE_BUILDS_NAME, home);
 	Log::log("done!", Type::E_DISPLAY);
 	Log::log("Press any key to quit!", Type::E_DISPLAY);
 	getchar();

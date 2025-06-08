@@ -415,7 +415,6 @@ constexpr std::string_view VSCODE_CONFIG{R"(    {
        "version": 4
    })"};
 
-constexpr std::string_view UPDATER_URL{"https://github.com/vishal-ahirwar/Flick/releases/latest/download/utool.exe"};
 constexpr std::string_view COMPILER_URL{
   "https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/clang+llvm-19.1.7-x86_64-pc-windows-msvc.tar.xz"};
 constexpr std::string_view CMAKE_URL{"https://github.com/Kitware/CMake/releases/download/v3.31.5/cmake-3.31.5-windows-x86_64.zip"};
@@ -443,6 +442,5 @@ constexpr std::string_view VSCODE_CONFIG{R"(     {
        ],
        "version": 4
    })"};
-constexpr std::string_view UPDATER_URL{"https://github.com/vishal-ahirwar/Flick/releases/latest/download/utool"};
 #endif
 #endif

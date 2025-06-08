@@ -15,7 +15,8 @@ add_executable(
     src/unittester/unittester.cpp
     src/userinfo/userinfo.cpp
     src/utester/utester.cpp
-    src/utils/utils.cpp)# Add your Source Files here
+    src/utils/utils.cpp
+    src/unzip/unzip.cpp)# Add your Source Files here
 target_link_libraries(flick PRIVATE LibArchive::LibArchive)
 target_link_libraries(flick PRIVATE Boost::process)
 target_link_libraries(flick PRIVATE cpr::cpr)
