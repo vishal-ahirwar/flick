@@ -94,13 +94,13 @@ jobs:
           mkdir -p artifacts
           if [[ "$RUNNER_OS" == "Windows" ]]; then
             cp ./build/windows-static-build/flick/flick.exe artifacts/ || cp ./build/windows-static-build/flick/flick.exe artifacts/
-            cp ./build/windows-static-build/flick/utool.exe artifacts/ || cp ./build/windows-static-build/flick/utool.exe artifacts/
+            cp ./build/windows-static-build/utool/utool.exe artifacts/ || cp ./build/windows-static-build/utool/utool.exe artifacts/
           elif [[ "$RUNNER_OS" == "macOS" ]]; then
             cp ./build/osx-static-build/flick/flick artifacts/
-            cp ./build/osx-static-build/flick/utool artifacts/
+            cp ./build/osx-static-build/utool/utool artifacts/
           else
             cp ./build/linux-static-build/flick/flick artifacts/
-            cp ./build/linux-static-build/flick/utool artifacts/
+            cp ./build/linux-static-build/utool/utool artifacts/
           fi
         shell: bash
         
