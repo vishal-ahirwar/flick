@@ -7,7 +7,6 @@ on:
 
 jobs:
   build:
-    timeout-minutes: 60
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -71,7 +70,7 @@ jobs:
       - name: Configure CMake with preset (Windows/Linux)
         if: runner.os != 'macOS'
         run: cmake --preset ${{ env.CMAKE_PRESET }}
-        timeout-minutes: 15
+        timeout-minutes: 60
         
       - name: Configure CMake with preset (macOS)
         if: runner.os == 'macOS'
@@ -87,15 +86,15 @@ jobs:
         timeout-minutes: 15
         
       - name: Build with preset
-        run: cmake --build --preset ${{ env.CMAKE_PRESET }} --config Release --parallel
-        timeout-minutes: 30
+        run: cmake --build build/${{ env.CMAKE_PRESET }} --parallel
+        timeout-minutes: 120
         
       - name: Prepare artifacts folder
         run: |
           mkdir -p artifacts
           if [[ "$RUNNER_OS" == "Windows" ]]; then
-            cp ./build/windows-static-build/flick/Release/flick.exe artifacts/ || cp ./build/windows-static-build/flick/flick.exe artifacts/
-            cp ./build/windows-static-build/flick/Release/utool.exe artifacts/ || cp ./build/windows-static-build/flick/utool.exe artifacts/
+            cp ./build/windows-static-build/flick/flick.exe artifacts/ || cp ./build/windows-static-build/flick/flick.exe artifacts/
+            cp ./build/windows-static-build/flick/utool.exe artifacts/ || cp ./build/windows-static-build/flick/utool.exe artifacts/
           elif [[ "$RUNNER_OS" == "macOS" ]]; then
             cp ./build/osx-static-build/flick/flick artifacts/
             cp ./build/osx-static-build/flick/utool artifacts/
