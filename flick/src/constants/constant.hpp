@@ -11,9 +11,7 @@ static std::string VCPKG_TRIPLET{"default"};
 #include <unistd.h>
 #define USERNAME "USER" // Linux environment variable
 #elif defined(__APPLE__)
-#include "flick.hpp"
 #include <unistd.h>	// For macOS
-
 #define USERNAME "USER" // macOS environment variable
 #endif
 #ifdef _WIN32
