@@ -1,9 +1,10 @@
 name: Build and Release Flick
+
 on:
   push:
-    branches: [ "main", "master", "develop" ]  # trigger on push to main branches
+    branches: [ "main", "master", "develop" ]
   pull_request:
-    branches: [ "main", "master" ]  # also run on PRs
+    branches: [ "main", "master" ]
 
 jobs:
   build:
@@ -11,14 +12,14 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-13]
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
+
       - name: Clone vcpkg
         run: git clone https://github.com/microsoft/vcpkg.git vcpkg
-        
+
       - name: Cache vcpkg
         uses: actions/cache@v3
         with:
@@ -28,130 +29,105 @@ jobs:
           key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
           restore-keys: |
             ${{ runner.os }}-vcpkg-
-        
+
       - name: Bootstrap vcpkg (Linux/macOS)
         if: runner.os != 'Windows'
         run: ./vcpkg/bootstrap-vcpkg.sh
-        shell: bash
-        
+
       - name: Bootstrap vcpkg (Windows)
         if: runner.os == 'Windows'
         run: .\vcpkg\bootstrap-vcpkg.bat
         shell: cmd
-        
-      - name: Set VCPKG_ROOT environment variable (Linux/macOS)
-        if: runner.os != 'Windows'
-        run: echo "VCPKG_ROOT=$(pwd)/vcpkg" >> $GITHUB_ENV
-        shell: bash
-        
-      - name: Set VCPKG_ROOT environment variable (Windows)
-        if: runner.os == 'Windows'
-        run: echo "VCPKG_ROOT=$env:GITHUB_WORKSPACE\vcpkg" >> $env:GITHUB_ENV
-        shell: powershell
-        
-      - name: Set CMAKE_PRESET environment variable (Windows)
-        if: runner.os == 'Windows'
-        run: echo "CMAKE_PRESET=windows-static-build" >> $env:GITHUB_ENV
-        shell: powershell
-        
-      - name: Set CMAKE_PRESET environment variable (Linux)
-        if: runner.os == 'Linux'
-        run: echo "CMAKE_PRESET=linux-static-build" >> $GITHUB_ENV
-        shell: bash
-        
-      - name: Set CMAKE_PRESET environment variable (macOS)
-        if: runner.os == 'macOS'
+
+      - name: Set environment variables
         run: |
-          echo "CMAKE_PRESET=osx-static-build" >> $GITHUB_ENV
-          echo "CMAKE_OSX_ARCHITECTURES=x86_64" >> $GITHUB_ENV
-          echo "MACOSX_DEPLOYMENT_TARGET=10.15" >> $GITHUB_ENV
+          echo "VCPKG_ROOT=$GITHUB_WORKSPACE/vcpkg" >> $GITHUB_ENV
+          echo "CMAKE_PRESET=${{ matrix.os == 'windows-latest' && 'windows-static-build' || matrix.os == 'ubuntu-latest' && 'linux-static-build' || 'osx-static-build' }}" >> $GITHUB_ENV
         shell: bash
-        
-      - name: Configure CMake with preset (Windows/Linux)
-        if: runner.os != 'macOS'
-        run: cmake --preset ${{ env.CMAKE_PRESET }}
-        timeout-minutes: 60
-        
-      - name: Configure CMake with preset (macOS)
-        if: runner.os == 'macOS'
+
+      - name: Configure CMake
         run: |
-          cmake --preset ${{ env.CMAKE_PRESET }} \
-            -DCMAKE_OSX_ARCHITECTURES=x86_64 \
-            -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
-            -DCMAKE_THREAD_LIBS_INIT="-lpthread" \
-            -DCMAKE_HAVE_THREADS_LIBRARY=1 \
-            -DCMAKE_USE_WIN32_THREADS_INIT=0 \
-            -DCMAKE_USE_PTHREADS_INIT=1 \
-            -DTHREADS_PREFER_PTHREAD_FLAG=ON
-        timeout-minutes: 15
-        
-      - name: Build with preset
-        run: cmake --build build/${{ env.CMAKE_PRESET }} --parallel
-        timeout-minutes: 120
-        
-      - name: Prepare artifacts folder
-        run: |
-          mkdir -p artifacts
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
-            cp ./build/windows-static-build/flick/flick.exe artifacts/ || cp ./build/windows-static-build/flick/flick.exe artifacts/
-            cp ./build/windows-static-build/utool/utool.exe artifacts/ || cp ./build/windows-static-build/utool/utool.exe artifacts/
-          elif [[ "$RUNNER_OS" == "macOS" ]]; then
-            cp ./build/osx-static-build/flick/flick artifacts/
-            cp ./build/osx-static-build/utool/utool artifacts/
+          if [[ "${{ matrix.os }}" == "macos-13" ]]; then
+            cmake --preset $CMAKE_PRESET \
+              -DCMAKE_OSX_ARCHITECTURES=x86_64 \
+              -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
+              -DCMAKE_THREAD_LIBS_INIT="-lpthread" \
+              -DCMAKE_HAVE_THREADS_LIBRARY=1 \
+              -DCMAKE_USE_WIN32_THREADS_INIT=0 \
+              -DCMAKE_USE_PTHREADS_INIT=1 \
+              -DTHREADS_PREFER_PTHREAD_FLAG=ON
           else
-            cp ./build/linux-static-build/flick/flick artifacts/
-            cp ./build/linux-static-build/utool/utool artifacts/
+            cmake --preset $CMAKE_PRESET
           fi
         shell: bash
-        
-      - name: Upload build artifacts
+
+      - name: Build project
+        run: cmake --build build/${{ env.CMAKE_PRESET }} --parallel
+
+      - name: Prepare and zip artifacts
+        run: |
+          mkdir -p out
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            cp build/windows-static-build/flick/flick.exe out/
+            cp build/windows-static-build/utool/utool.exe out/
+            7z a flick-windows-latest.zip ./out/*
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            cp build/osx-static-build/flick/flick out/
+            cp build/osx-static-build/utool/utool out/
+            zip -r flick-macos-13.zip out/
+          else
+            cp build/linux-static-build/flick/flick out/
+            cp build/linux-static-build/utool/utool out/
+            zip -r flick-ubuntu-latest.zip out/
+          fi
+        shell: bash
+
+      - name: Upload zip artifact
         uses: actions/upload-artifact@v4
         with:
           name: flick-${{ matrix.os }}
-          path: artifacts/
+          path: |
+            flick-*.zip
 
   release:
     needs: build
     runs-on: ubuntu-latest
-    # Only create release on main/master branch pushes, not on PRs
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
     permissions:
       contents: write
+
     steps:
-      - name: Download Windows artifact
+      - name: Download Windows zip
         uses: actions/download-artifact@v4
         with:
           name: flick-windows-latest
-          path: artifacts/windows
-          
-      - name: Download Linux artifact
+          path: artifacts/
+
+      - name: Download Linux zip
         uses: actions/download-artifact@v4
         with:
           name: flick-ubuntu-latest
-          path: artifacts/linux
-          
-      - name: Download macOS artifact
+          path: artifacts/
+
+      - name: Download macOS zip
         uses: actions/download-artifact@v4
         with:
           name: flick-macos-13
-          path: artifacts/macos
-          
+          path: artifacts/
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.sha }}
           name: Build ${{ github.sha }}
           body: |
-            Automated build from commit ${{ github.sha }}
-            
-            **Branch:** ${{ github.ref_name }}
-            **Commit:** ${{ github.event.head_commit.message }}
+            🚀 Automated build from commit ${{ github.sha }}
+
+            - **Branch:** `${{ github.ref_name }}`
+            - **Message:** _${{ github.event.head_commit.message }}_
           files: |
-            artifacts/windows/flick.exe
-            artifacts/windows/utool.exe
-            artifacts/linux/flick
-            artifacts/linux/utool
-            artifacts/macos/flick
-            artifacts/macos/utool
+            artifacts/flick-windows-latest.zip
+            artifacts/flick-ubuntu-latest.zip
+            artifacts/flick-macos-13.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
