@@ -26,7 +26,7 @@ bool Deps::addDeps(const std::string& packageName, const std::string& version, b
 		;
 	if (!version.empty()) {
 		if (_version != version) {
-			Log::log(std::format("Package version : {} does not match", version), Type::E_ERROR);
+			Log::log(fmt::format("Package version : {} does not match", version), Type::E_ERROR);
 			Log::log("Do you still want to add ?(y/n) ", Type::E_DISPLAY, "");
 			char y{};
 			std::cin >> y;
@@ -71,7 +71,7 @@ bool Deps::addDeps(const std::string& packageName, const std::string& version, b
 		std::string baseLine{};
 		findBuildinBaseline(name, _version, baseLine);
 		if (baseLine.empty()) {
-			Log::log(std::format("Built-in baseline not found for version : {}", _version), Type::E_ERROR);
+			Log::log(fmt::format("Built-in baseline not found for version : {}", _version), Type::E_ERROR);
 			return false;
 		}
 		data["builtin-baseline"] = baseLine;
@@ -94,7 +94,7 @@ bool Deps::updateCMakeFile(const std::string& vcpkgLog, const std::string& proje
 		return false;
 	};
 	if (!subProjectCMake.is_open()) {
-		Log::log(std::format("Failed to open {}/CMakeLists.txt for Reading", projectName), Type::E_ERROR);
+		Log::log(fmt::format("Failed to open {}/CMakeLists.txt for Reading", projectName), Type::E_ERROR);
 		return false;
 	}
 	std::vector<std::string> rootCMakeLines{}, subProjectLines;
@@ -120,7 +120,7 @@ bool Deps::updateCMakeFile(const std::string& vcpkgLog, const std::string& proje
 	for (auto& [name, values] : packages) {
 		if (name.empty())
 			continue;
-		Log::log(std::format("\033[95m-----------+{} \033[0m", name), Type::E_NONE);
+		Log::log(fmt::format("\033[95m-----------+{} \033[0m", name), Type::E_NONE);
 	}
 	packages.clear();
 	packages = out;
@@ -159,7 +159,7 @@ bool Deps::updateCMakeFile(const std::string& vcpkgLog, const std::string& proje
 		return false;
 	};
 	if (!subProjectCMake.is_open()) {
-		Log::log(std::format("Failed to open {}/CMakeLists.txt for Writing", projectName), Type::E_ERROR);
+		Log::log(fmt::format("Failed to open {}/CMakeLists.txt for Writing", projectName), Type::E_ERROR);
 		return false;
 	}
 	for (const auto& line : rootCMakeLines)
@@ -193,7 +193,6 @@ void Deps::findCMakeConfig(const std::string& root, std::vector<std::string>& co
 	};
 };
 
-
 bool Deps::isPackageAvailableOnVCPKG(const std::string& packageName, std::string& outName, std::string& outVersion)
 {
 	auto anim = bk::Animation({.message = "\033[32m[+]\033[0m Searching for package : " + packageName + "\033[32m",
@@ -222,7 +221,7 @@ bool Deps::isPackageAvailableOnVCPKG(const std::string& packageName, std::string
 				outName = match[1];
 				outVersion = match[2];
 				puts("");
-				Log::log(std::format("Selected Package : {}, Version : {}, About : {}", outName, outVersion, match[3].str()),
+				Log::log(fmt::format("Selected Package : {}, Version : {}, About : {}", outName, outVersion, match[3].str()),
 					 Type::E_WARNING);
 				c.terminate();
 				if (anim)
@@ -231,7 +230,7 @@ bool Deps::isPackageAvailableOnVCPKG(const std::string& packageName, std::string
 			}
 		}
 	} catch (std::exception& e) {
-		Log::log(std::format("Exception : {}", e.what()), Type::E_ERROR);
+		Log::log(fmt::format("Exception : {}", e.what()), Type::E_ERROR);
 		if (anim)
 			anim->done();
 		return false;
@@ -242,7 +241,7 @@ bool Deps::isPackageAvailableOnVCPKG(const std::string& packageName, std::string
 		if (similiarPackages.size() > 0) {
 			Log::log("Did you mean one of these packages ?", Type::E_NONE);
 			for (const auto& package : similiarPackages) {
-				Log::log(std::format("\033[95m------{} \033[0m",package));
+				Log::log(fmt::format("\033[95m------{} \033[0m", package));
 			}
 		}
 	}
@@ -274,13 +273,13 @@ bool Deps::findBuildinBaseline(const std::string& name, const std::string& versi
 				auto index = line.find(" ");
 				outBaseLine = line.substr(0, index);
 				std::string _version = line.substr(index, line.find(" ", index));
-				Log::log(std::format("Package : {}, Version : {}, Baseline Commit : {}", name, _version, outBaseLine), Type::E_NONE);
+				Log::log(fmt::format("Package : {}, Version : {}, Baseline Commit : {}", name, _version, outBaseLine), Type::E_NONE);
 				c.terminate();
 				return true;
 			}
 		} else if (line.find(first) != std::string::npos && line.find(version) != std::string::npos) {
 			outBaseLine = line.substr(0, line.find(" "));
-			Log::log(std::format("Package : {}, Version : {}, Baseline Commit : {}", name, version, outBaseLine), Type::E_NONE);
+			Log::log(fmt::format("Package : {}, Version : {}, Baseline Commit : {}", name, version, outBaseLine), Type::E_NONE);
 			c.terminate();
 			return true;
 		} else if (latestBaseLine.empty()) {
@@ -289,7 +288,7 @@ bool Deps::findBuildinBaseline(const std::string& name, const std::string& versi
 	}
 	c.wait();
 	if (outBaseLine.empty()) {
-		Log::log(std::format("Failed to find Baseline Commit for version : {} using latest baseline commit {}", version, latestBaseLine),
+		Log::log(fmt::format("Failed to find Baseline Commit for version : {} using latest baseline commit {}", version, latestBaseLine),
 			 Type::E_WARNING);
 		outBaseLine = latestBaseLine;
 	}

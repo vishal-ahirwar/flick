@@ -18,7 +18,7 @@ bool UnitTester::runUnitTesting(const std::vector<std::string>& args)
 
 	namespace fs = std::filesystem;
 	std::string cpuThreads{std::to_string(std::thread::hardware_concurrency() - 1)};
-	// auto formatedString = std::format("Threads in use : {}", cpuThreads.c_str());
+	// auto formatedString = fmt::format("Threads in use : {}", cpuThreads.c_str());
 	// Log::log(formatedString, Type::E_DISPLAY);
 	if (!fs::exists(fs::current_path().string() + "/build/" + VCPKG_TRIPLET)) {
 		// run cmake

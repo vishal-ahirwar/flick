@@ -1,8 +1,8 @@
 #ifndef _LOG_H_
 #define _LOG_H_
+#include <fmt/color.h>
 #include <string>
 #include <string_view>
-#include<fmt/color.h>
 enum class Type { E_DISPLAY, E_WARNING, E_ERROR, E_NONE };
 class Log
 {
@@ -53,12 +53,15 @@ class Logger
 			color = "\033[31m";
 			break;
 		}
-		if (level==Level::Error||level==Level::Warning) {
-			fmt::print(fmt::emphasis::bold,"{}{:<3}\033[0m {}{}", color, toLabel(level), message, end);
-		}else {
+		if (level == Level::Warning) {
+			fmt::print(fmt::emphasis::bold, "{}{:<3}\033[0m", color, toLabel(level));
+			fmt::print(fmt::emphasis::faint, "{}{}", message, end);
+		} else if (level == Level::Error) {
+			fmt::print(fmt::emphasis::bold, "{}{:<3}\033[0m", color, toLabel(level));
+			fmt::print(fmt::emphasis::underline, "{}{}", message, end);
+		} else {
 			// Main message
 			fmt::print("{}{:<3}\033[0m {}{}", color, toLabel(level), message, end);
-
 		}
 
 		// File + line + column

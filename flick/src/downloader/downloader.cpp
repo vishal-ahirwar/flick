@@ -19,7 +19,7 @@ void Downloader::download(const std::string& url, const std::string& outputFileP
 	  cpr::Url{url}, cpr::ReserveSize{1024 * 1024 * 8},
 	  cpr::ProgressCallback([&](cpr::cpr_off_t download_total, cpr::cpr_off_t download_now, cpr::cpr_off_t upload_total,
 				    cpr::cpr_off_t upload_now, intptr_t user_data) -> bool {
-		  Log::log(std::format("Downloading \033[32m{}\033[0m : {:.2f}%", name.c_str(), ((double)download_now / download_total) * 100.0),
+		  Log::log(fmt::format("Downloading \033[32m{}\033[0m : {:.2f}%", name.c_str(), ((double)download_now / download_total) * 100.0),
 			   Type::E_DISPLAY, "\r");
 		  return true;
 	  }));
@@ -32,8 +32,8 @@ void Downloader::download(const std::string& url, const std::string& outputFileP
 		// Write the response content to the file
 		outputFile.write(response.text.c_str(), response.text.size());
 		outputFile.close();
-		Log::log(std::format("file downloaded and saved as \033[32m{}\033[0m", outputFilePath));
+		Log::log(fmt::format("file downloaded and saved as \033[32m{}\033[0m", outputFilePath));
 	} else {
-		Log::log(std::format("Failed to download file. Status code:\033[32m{}\033[0m", response.status_code));
+		Log::log(fmt::format("Failed to download file. Status code:\033[32m{}\033[0m", response.status_code));
 	}
 }

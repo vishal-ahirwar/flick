@@ -9,7 +9,6 @@
 #include <projectgenerator/projectgenerator.h>
 #include <utils/utils.h>
 
-
 namespace fs = std::filesystem;
 ProjectGenerator::ProjectGenerator() {
 
@@ -64,20 +63,20 @@ bool ProjectGenerator::generateSubProject(const std::string& projectName, bool i
 		case Language::CXX:
 			switch (_type) {
 			case ProjectType::EXECUTABLE:
-				file << std::format("add_executable({} src/main.cpp)# Add your Source Files here\n", projectName);
+				file << fmt::format("add_executable({} src/main.cpp)# Add your Source Files here\n", projectName);
 				break;
 			case ProjectType::LIBRARY:
-				file << std::format("add_library({} src/{}.cpp)# Add your Source Files here\n", projectName, projectName);
+				file << fmt::format("add_library({} src/{}.cpp)# Add your Source Files here\n", projectName, projectName);
 				break;
 			}
 			break;
 		case Language::C:
 			switch (_type) {
 			case ProjectType::EXECUTABLE:
-				file << std::format("add_executable({}  src/main.c)# Add your Source Files here\n", projectName);
+				file << fmt::format("add_executable({}  src/main.c)# Add your Source Files here\n", projectName);
 				break;
 			case ProjectType::LIBRARY:
-				file << std::format("add_library({}  src/{}.c)# Add your Source Files here\n", projectName, projectName);
+				file << fmt::format("add_library({}  src/{}.c)# Add your Source Files here\n", projectName, projectName);
 				break;
 			}
 			break;
@@ -104,7 +103,7 @@ bool ProjectGenerator::generateSubProject(const std::string& projectName, bool i
 			appnedIndex = index;
 	};
 	in.close();
-	lines.insert(lines.begin() + appnedIndex, std::format("add_subdirectory({})", projectName));
+	lines.insert(lines.begin() + appnedIndex, fmt::format("add_subdirectory({})", projectName));
 	std::ofstream out;
 	isRoot ? out.open(mProjectSetting.getProjectName() + "/CMakeLists.txt") : out.open("CMakeLists.txt");
 	for (const auto& line : lines)
@@ -163,7 +162,7 @@ void ProjectGenerator::generateRootCMake()
 	std::string config{(mProjectSetting.getProjectName() + "/res/config.h.in")};
 	std::ofstream cmake{mProjectSetting.getProjectName() + "/CMakeLists.txt"};
 	cmake << "#Auto Generated Root CMake file by Flick CLI\n";
-	cmake << std::format("#Copyright(c) 2025 {}.All rights reerved.\n", mUserInfo.getUserName());
+	cmake << fmt::format("#Copyright(c) 2025 {}.All rights reerved.\n", mUserInfo.getUserName());
 	cmake << "cmake_minimum_required(VERSION 3.6...3.31)\n";
 	if (_lang == Language::CXX) {
 		std::ofstream file;
@@ -171,7 +170,7 @@ void ProjectGenerator::generateRootCMake()
 		std::transform(mProjectSetting.getProjectName().begin(), mProjectSetting.getProjectName().end(), cap.begin(), ::toupper);
 		file.open(config, std::ios::out);
 		if (file.is_open()) {
-			file<<"#pragma once\n";
+			file << "#pragma once\n";
 			file << "#include<string_view>" << std::endl;
 			file << "namespace Project{" << std::endl;
 			file << ("\tconstexpr std::string_view VERSION_STRING=\"@" + mProjectSetting.getProjectName() + "_VERSION_MAJOR@.@" +
@@ -183,14 +182,14 @@ void ProjectGenerator::generateRootCMake()
 			file << "}";
 			file.close();
 		};
-		cmake << std::format("project({} VERSION 1.0.0 LANGUAGES CXX)\n", mProjectSetting.getProjectName());
+		cmake << fmt::format("project({} VERSION 1.0.0 LANGUAGES CXX)\n", mProjectSetting.getProjectName());
 	} else if (_lang == Language::C) {
 		std::ofstream file;
 		std::string cap("", mProjectSetting.getProjectName().length());
 		std::transform(mProjectSetting.getProjectName().begin(), mProjectSetting.getProjectName().end(), cap.begin(), ::toupper);
 		file.open(config, std::ios::out);
 		if (file.is_open()) {
-			file<<"#pragma once\n";
+			file << "#pragma once\n";
 			file << ("const char*const VERSION_STRING=\"@" + mProjectSetting.getProjectName() + "_VERSION_MAJOR@.@" +
 				 mProjectSetting.getProjectName() + "_VERSION_MINOR@.@" + mProjectSetting.getProjectName() + "_VERSION_PATCH@\";")
 			     << std::endl;
@@ -199,7 +198,7 @@ void ProjectGenerator::generateRootCMake()
 			file << ("const char*const PROJECT_NAME=\"@PROJECT_NAME@\";") << std::endl;
 			file.close();
 		};
-		cmake << std::format("project({} VERSION 1.0.0 LANGUAGES C)\n", mProjectSetting.getProjectName());
+		cmake << fmt::format("project({} VERSION 1.0.0 LANGUAGES C)\n", mProjectSetting.getProjectName());
 	}
 	cmake << "include(cmake/config.cmake)\n";
 	cmake << "#@add_find_package Warning: Do not remove this line\n";
@@ -215,20 +214,20 @@ void ProjectGenerator::generateSubProjectCMake(const std::string& projectName)
 	case Language::CXX:
 		switch (_type) {
 		case ProjectType::EXECUTABLE:
-			file << std::format("add_executable({} src/main.cpp)# Add your Source Files here\n", projectName);
+			file << fmt::format("add_executable({} src/main.cpp)# Add your Source Files here\n", projectName);
 			break;
 		case ProjectType::LIBRARY:
-			file << std::format("add_library({} src/{}.cpp)# Add your Source Files here\n", projectName, projectName);
+			file << fmt::format("add_library({} src/{}.cpp)# Add your Source Files here\n", projectName, projectName);
 			break;
 		}
 		break;
 	case Language::C:
 		switch (_type) {
 		case ProjectType::EXECUTABLE:
-			file << std::format("add_executable({}  src/main.c)# Add your Source Files here\n", projectName);
+			file << fmt::format("add_executable({}  src/main.c)# Add your Source Files here\n", projectName);
 			break;
 		case ProjectType::LIBRARY:
-			file << std::format("add_library({}  src/{}.c)# Add your Source Files here\n", projectName, projectName);
+			file << fmt::format("add_library({}  src/{}.c)# Add your Source Files here\n", projectName, projectName);
 			break;
 		}
 		break;
@@ -425,8 +424,13 @@ void ProjectGenerator::generateLicenceFile(const UserInfo& user_info)
 	constexpr std::string_view year{"@_YEAR_"};
 	constexpr std::string_view name{"@_OWNER_"};
 	auto index = _licence.find(year);
-	if (index != std::string::npos)
-		_licence.replace(index, year.length(), std::format("{:%Y}", std::chrono::system_clock::now()));
+	if (index != std::string::npos) {
+		std::ostringstream oss;
+		std::time_t now_c = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+		std::tm tm = *std::localtime(&now_c);
+		oss << (1900 + tm.tm_year);
+		_licence.replace(index, year.length(), oss.str());
+	}
 	index = _licence.find(name);
 	if (index != std::string::npos)
 		_licence.replace(index, name.length(), user_info.getUserName());

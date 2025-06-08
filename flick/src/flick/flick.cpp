@@ -8,7 +8,6 @@
 #include <boost/process/v1/io.hpp>
 #include <boost/process/v1/pipe.hpp>
 #include <boost/process/v1/search_path.hpp>
-#include <chrono>
 #include <constants/colors.hpp>
 #include <constants/constant.hpp>
 #include <ctime>
@@ -16,7 +15,6 @@
 #include <downloader/downloader.h>
 #include <filesystem>
 #include <flick/flick.hpp>
-#include <format>
 #include <fstream>
 #include <iostream>
 #include <limits>
@@ -25,7 +23,6 @@
 #include <projectgenerator/projectgenerator.h>
 #include <regex>
 #include <rt/rt.h>
-#include <string.h>
 #include <thread>
 #include <unittester/unittester.h>
 #include <userinfo/userinfo.h>
@@ -56,9 +53,9 @@ void Flick::addToPathPermanent(const std::vector<std::string>& paths)
 	for (const auto& path : paths) {
 		if (existingContent.find(path) == std::string::npos) {
 			bashrcFile << "export PATH=\"$PATH:" << path << "\"\n";
-			Log::log(std::format("Added to PATH: {}", path.c_str()));
+			Log::log(fmt::format("Added to PATH: {}", path.c_str()));
 		} else {
-			Log::log(std::format("Already in PATH: {}", path.c_str()));
+			Log::log(fmt::format("Already in PATH: {}", path.c_str()));
 		}
 	}
 
@@ -135,13 +132,13 @@ bool extractArchive(const std::string& archivePath, const std::string& outputDir
 	// 3. Open the archive file for reading
 	r = archive_read_open_filename(archiveReader, archivePath.c_str(), 10240); // 10KB block size
 	if (r != ARCHIVE_OK) {
-		Log::log(std::format("Error opening archive '{}': {}", archivePath, archive_error_string(archiveReader)), Type::E_ERROR);
+		Log::log(fmt::format("Error opening archive '{}': {}", archivePath, archive_error_string(archiveReader)), Type::E_ERROR);
 		archive_read_free(archiveReader);
 		archive_write_free(archiveWriter);
 		return false;
 	}
 
-	Log::log(std::format("Extracting '{}' to '{}'", archivePath, outputDir));
+	Log::log(fmt::format("Extracting '{}' to '{}'", archivePath, outputDir));
 
 	// 4. Loop through each entry in the archive
 	while ((r = archive_read_next_header(archiveReader, &entry)) == ARCHIVE_OK) {
@@ -154,7 +151,7 @@ bool extractArchive(const std::string& archivePath, const std::string& outputDir
 			try {
 				fs::create_directories(parentPath);
 			} catch (const fs::filesystem_error& e) {
-				Log::log(std::format("Error creating directory '{}': {}", parentPath.string(), e.what()), Type::E_ERROR);
+				Log::log(fmt::format("Error creating directory '{}': {}", parentPath.string(), e.what()), Type::E_ERROR);
 				// Don't just return false, try to continue with other files if possible,
 				// or handle this more gracefully depending on desired behavior.
 				// For now, we'll continue but log the error.
@@ -167,7 +164,7 @@ bool extractArchive(const std::string& archivePath, const std::string& outputDir
 		// Write the entry's header to disk (creates files/directories with correct permissions)
 		r = archive_write_header(archiveWriter, entry);
 		if (r != ARCHIVE_OK) {
-			Log::log(std::format("Error finishing entry '{}' : {}", fullOutputPath.string(), archive_error_string(archiveWriter)),
+			Log::log(fmt::format("Error finishing entry '{}' : {}", fullOutputPath.string(), archive_error_string(archiveWriter)),
 				 Type::E_ERROR);
 			// If header write fails, skip writing data for this entry
 			archive_read_data_skip(archiveReader); // Important to skip data for failed entry
@@ -176,7 +173,7 @@ bool extractArchive(const std::string& archivePath, const std::string& outputDir
 			if (archive_entry_size(entry) > 0 || archive_entry_filetype(entry) == AE_IFREG) {
 				r = copy_data(archiveReader, archiveWriter);
 				if (r != ARCHIVE_OK) {
-					Log::log(std::format("Error finishing entry '{}' : {}", fullOutputPath.string(),
+					Log::log(fmt::format("Error finishing entry '{}' : {}", fullOutputPath.string(),
 							     archive_error_string(archiveWriter)),
 						 Type::E_ERROR);
 					// If data copy fails, we might still want to try finishing the entry
@@ -187,13 +184,13 @@ bool extractArchive(const std::string& archivePath, const std::string& outputDir
 		// Finish processing the current entry
 		r = archive_write_finish_entry(archiveWriter);
 		if (r != ARCHIVE_OK) {
-			Log::log(std::format("Error finishing entry '{}' : {}", fullOutputPath.string(), archive_error_string(archiveWriter)),
+			Log::log(fmt::format("Error finishing entry '{}' : {}", fullOutputPath.string(), archive_error_string(archiveWriter)),
 				 Type::E_ERROR);
 		}
 	}
 
 	if (r == ARCHIVE_FATAL) {
-		Log::log(std::format("Fatal error encountered during archive reading: ", archive_error_string(archiveReader)), Type::E_ERROR);
+		Log::log(fmt::format("Fatal error encountered during archive reading: ", archive_error_string(archiveReader)), Type::E_ERROR);
 		// Clean up before returning false for fatal error
 		archive_read_close(archiveReader);
 		archive_read_free(archiveReader);
@@ -202,7 +199,7 @@ bool extractArchive(const std::string& archivePath, const std::string& outputDir
 		return false;
 	} else if (r < ARCHIVE_OK && r != ARCHIVE_EOF) {
 		// Non-fatal error or warning
-		Log::log(std::format("Warning during archive processing: {}", archive_error_string(archiveReader)), Type::E_WARNING);
+		Log::log(fmt::format("Warning during archive processing: {}", archive_error_string(archiveReader)), Type::E_WARNING);
 	}
 
 	// 5. Clean up
@@ -327,7 +324,7 @@ bool Flick::compile()
 
 	namespace fs = std::filesystem;
 	std::string cpuThreads{std::to_string(std::thread::hardware_concurrency() - 1)};
-	// auto formatedString = std::format("Threads in use : {}", cpuThreads.c_str());
+	// auto formatedString = fmt::format("Threads in use : {}", cpuThreads.c_str());
 	// Log::log(formatedString, Type::E_DISPLAY);
 	for (auto& arg : mArgs) {
 		if (arg.find("--static") != std::string::npos) {
@@ -434,10 +431,10 @@ void Flick::run()
 	boost::process::ipstream out;
 	boost::process::ipstream err;
 	boost::process::child c{run, args};
-	//Log::log(std::format("Running \033[95m{}\033[0m\n────────────────────────────────────────────────────────────", app), Type::E_DISPLAY);
+	// Log::log(fmt::format("Running \033[95m{}\033[0m\n────────────────────────────────────────────────────────────", app), Type::E_DISPLAY);
 	c.wait();
-	//fmt::println("────────────────────────────────────────────────────────────");
-	Log::log(std::format("\033[95m{}\033[0m exited with code {}", app, c.exit_code()), Type::E_DISPLAY);
+	// fmt::println("────────────────────────────────────────────────────────────");
+	Log::log(fmt::format("\033[95m{}\033[0m exited with code {}", app, c.exit_code()), Type::E_DISPLAY);
 }
 
 //
@@ -498,7 +495,7 @@ bool addToPathPermanentWindows(const std::string& newPath)
 	// Broadcast WM_SETTINGCHANGE so new shells pick it up
 	SendMessageTimeoutA(HWND_BROADCAST, WM_SETTINGCHANGE, 0, reinterpret_cast<LPARAM>("Environment"), SMTO_ABORTIFHUNG, 5000, nullptr);
 
-	Log::log(std::format("Added to PATH permanently: \033[95m{}\033[0m", newPath));
+	Log::log(fmt::format("Added to PATH permanently: \033[95m{}\033[0m", newPath));
 	return true;
 }
 
@@ -522,7 +519,7 @@ void Flick::addToPathWin()
 		try {
 			fs::create_directories(flickDir);
 		} catch (const std::exception& e) {
-			Log::log(std::format("Failed to create flick directory: {}", e.what()), Type::E_ERROR);
+			Log::log(fmt::format("Failed to create flick directory: {}", e.what()), Type::E_ERROR);
 			return;
 		}
 
@@ -533,10 +530,10 @@ void Flick::addToPathWin()
 			if (dll.path().extension() == ".dll") {
 				std::string dllDest = flickDir + "\\" + dll.path().filename().string();
 				try {
-					Log::log(std::format("Copying {} to {}", dll.path().filename().string().c_str(), flickDir.c_str()));
+					Log::log(fmt::format("Copying {} to {}", dll.path().filename().string().c_str(), flickDir.c_str()));
 					fs::copy_file(dll.path(), dllDest, fs::copy_options::update_existing);
 				} catch (const std::exception& e) {
-					Log::log(std::format("Failed to copy {}: {}", dll.path().filename().string(), e.what()), Type::E_WARNING);
+					Log::log(fmt::format("Failed to copy {}: {}", dll.path().filename().string(), e.what()), Type::E_WARNING);
 				}
 			}
 		}
@@ -544,12 +541,12 @@ void Flick::addToPathWin()
 		if (!fs::exists(source)) {
 			Log::log("Flick.exe doesn't exist in current directory", Type::E_WARNING);
 		} else {
-			Log::log(std::format("Copying Flick.exe into '{}'", flickDir));
+			Log::log(fmt::format("Copying Flick.exe into '{}'", flickDir));
 			try {
 				fs::copy_file(source, destination, fs::copy_options::update_existing);
-				Log::log(std::format("{} copied to {}", source, destination));
+				Log::log(fmt::format("{} copied to {}", source, destination));
 			} catch (const std::exception& e) {
-				Log::log(std::format("Error copying Flick.exe: {}", e.what()), Type::E_ERROR);
+				Log::log(fmt::format("Error copying Flick.exe: {}", e.what()), Type::E_ERROR);
 			}
 		}
 	}
@@ -629,10 +626,10 @@ void Flick::addToPathUnix()
 			return;
 		}
 
-		Log::log(std::format("Copying Flick into {}", destination.c_str()));
+		Log::log(fmt::format("Copying Flick into {}", destination.c_str()));
 		fs::remove(destination);
 		if (fs::copy_file(source, destination, fs::copy_options::overwrite_existing)) {
-			Log::log(std::format("{} copied to {}", source.c_str(), destination.c_str()));
+			Log::log(fmt::format("{} copied to {}", source.c_str(), destination.c_str()));
 		} else {
 			Log::log("Error while copying Flick into flick directory!", Type::E_ERROR);
 			return;
@@ -735,7 +732,7 @@ void Flick::installTools(bool& isInstallationComplete)
 	Downloader::download(std::string(COMPILER_URL), home + "\\compiler.tar.xz");
 	Downloader::download(std::string(CMAKE_URL), home + "\\cmake.zip");
 	Downloader::download(std::string(NINJA_URL), home + "\\ninja.zip");
-	Log::log(std::format("Extracting file at '{}'", home.c_str()));
+	Log::log(fmt::format("Extracting file at '{}'", home.c_str()));
 	extractArchive(home + "\\compiler.tar.xz", home);
 	extractArchive(home + "\\cmake.zip", home);
 	extractArchive(home + "\\ninja.zip", home);
@@ -831,9 +828,9 @@ void Flick::test()
 	if (!tester.runUnitTesting(mArgs))
 		return;
 #ifdef _WIN32
-	system(std::format(".\\build\\{}\\tests\\tests.exe", VCPKG_TRIPLET).c_str());
+	system(fmt::format(".\\build\\{}\\tests\\tests.exe", VCPKG_TRIPLET).c_str());
 #else
-	system(std::format("./build/{}/tests/tests", VCPKG_TRIPLET).c_str());
+	system(fmt::format("./build/{}/tests/tests", VCPKG_TRIPLET).c_str());
 #endif
 };
 
@@ -891,7 +888,7 @@ bool Flick::onSetup()
 	if (!fs::create_directory(home + "/flick")) {
 		Log::log("flick dir alread exist", Type::E_WARNING);
 	} else {
-		Log::log(std::format("Creating Flick dir at {}", home.c_str()));
+		Log::log(fmt::format("Creating Flick dir at {}", home.c_str()));
 	};
 
 	file.open((home + "/flick/.cconfig").c_str(), std::ios::in);
@@ -941,7 +938,7 @@ void Flick::fixInstallation()
 	for (const auto& dir : fs::directory_iterator(path)) {
 		if (dir.is_directory()) {
 			fs::remove_all(dir);
-			Log::log(std::format("\033[95m{}\033[0m removed.", dir.path().string()), Type::E_WARNING);
+			Log::log(fmt::format("\033[95m{}\033[0m removed.", dir.path().string()), Type::E_WARNING);
 		}
 	}
 	bool status{};
@@ -1050,7 +1047,7 @@ bool Flick::release()
 
 	namespace fs = std::filesystem;
 	std::string cpuThreads{std::to_string(std::thread::hardware_concurrency() - 1)};
-	// auto formatedString = std::format("Threads in use : {}", cpuThreads.c_str());
+	// auto formatedString = fmt::format("Threads in use : {}", cpuThreads.c_str());
 	// Log::log(formatedString, Type::E_DISPLAY);
 	for (auto& arg : mArgs) {
 		if (arg.find("--static") != std::string::npos) {
@@ -1241,9 +1238,9 @@ void Flick::listPackages()
 			return;
 		}
 		const auto dependencies = j["dependencies"];
-		Log::log(std::format("total dependencies: \033[95m{}\033[0m", dependencies.size()));
+		Log::log(fmt::format("total dependencies: \033[95m{}\033[0m", dependencies.size()));
 		for (const auto& dep : dependencies) {
-			Log::log(std::format("\033[95m------{} \033[0mversion : {}", dep.get<std::string>(),
+			Log::log(fmt::format("\033[95m------{} \033[0mversion : {}", dep.get<std::string>(),
 					     [&j](const std::string& dep) -> std::string {
 						     if (!j.contains("overrides"))
 							     return "latest";
