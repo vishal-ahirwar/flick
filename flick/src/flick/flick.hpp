@@ -35,7 +35,6 @@ class Flick
 	void reinit(const std::string& projectDir);
 
       private:
-	void genVSCode(const std::string& projectDir);
 	void genCMakePreset();
 	void generateClangFiles(const std::string& projectDir);
 	void addToPathPermanent(const std::vector<std::string>&);

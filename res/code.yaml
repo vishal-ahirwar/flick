@@ -1,0 +1,238 @@
+CLANGD: |
+  CompileFlags:
+    CompilationDatabase: build/default
+
+  FallbackFlags:
+    - -std=c++23
+    - -Wall
+    - -Wextra
+    - -O0
+    - -fdiagnostics-color=always
+
+  Index:
+    Background: true
+
+  Diagnostics:
+    UnusedIncludes: Strict
+    ClangTidy:
+      Add: '*'
+
+CLANG_FORMAT: |
+  BasedOnStyle: Google
+  IndentWidth: 4
+  TabWidth: 4
+  UseTab: Never
+  ColumnLimit: 100
+  AllowShortIfStatementsOnASingleLine: false
+  BreakBeforeBraces: Allman
+  SortIncludes: true
+  IncludeBlocks: Regroup
+  AlwaysBreakTemplateDeclarations: Yes
+  DerivePointerAlignment: false
+  PointerAlignment: Left
+  SpacesInAngles: false
+  SpaceBeforeParens: ControlStatements
+  EmptyLineBeforeAccessModifier: Always
+  AlignConsecutiveAssignments: true
+  AlignConsecutiveDeclarations: true
+  AlignTrailingComments: true
+  AllowShortBlocksOnASingleLine: Empty
+  ReflowComments: true
+
+CLANG_TIDY: |
+  Checks: >
+    clang-analyzer-*,
+    cppcoreguidelines-*,
+    modernize-*,
+    performance-*,
+    readability-*,
+    bugprone-*,
+    portability-*,
+    misc-*,
+    -clang-analyzer-alpha.*,
+    -google-readability-braces-around-statements,
+    -fuchsia-*,
+    -hicpp-*,
+    -llvm-*,
+    -cert-*,
+    -readability-magic-numbers
+
+  WarningsAsErrors: ''
+  HeaderFilterRegex: '.*'
+  AnalyzeTemporaryDtors: true
+  FormatStyle: file
+  CheckOptions:
+    - key: modernize-use-nullptr.NullMacros
+      value: 'NULL'
+    - key: readability-identifier-naming.ClassCase
+      value: CamelCase
+    - key: readability-identifier-naming.FunctionCase
+      value: camelBack
+    - key: readability-identifier-naming.VariableCase
+      value: camelBack
+
+EDITOR_CONFIG: |
+  # EditorConfig for Flick-style C++ projects
+  root = true
+
+  [*]
+  charset = utf-8
+  end_of_line = lf
+  insert_final_newline = true
+  trim_trailing_whitespace = true
+
+  [*.{cpp,h,hpp,c}]
+  indent_style = tab
+  indent_size = 8
+  tab_width = 8
+  max_line_length = 150
+
+LICENSE_TEXT: |
+  Copyright (c) @_YEAR_, @_OWNER_
+  All rights reserved.
+  Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+  1. Redistributions of source code must retain the above copyright notice...
+  2. Redistributions in binary form must reproduce...
+  3. Neither the name of the [organization]...
+
+  THIS SOFTWARE IS PROVIDED "AS IS"...
+
+CPACK_CODE: |
+  include(InstallRequiredSystemLibraries)
+  set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/License.txt")
+  set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
+  set(CPACK_PACKAGE_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
+  set(CPACK_PACKAGE_VENDOR ${COMPANY})
+  include(CPack)
+
+UNIT_TEST_CODE:
+  - |
+    #include <gtest/gtest.h>
+    int add(int a,int b){return a+b;};
+    int subtract(int a,int b){return a-b;};
+    TEST(CalculatorTest, Addition) {
+        EXPECT_EQ(add(3, 4), 7);
+        EXPECT_EQ(add(-1, 5), 4);
+    }
+
+    TEST(CalculatorTest, Subtraction) {
+        EXPECT_EQ(subtract(10, 3), 7);
+        EXPECT_EQ(subtract(7, 7), 0);
+    }
+
+    int main(int argc, char **argv) {
+        ::testing::InitGoogleTest(&argc, argv);
+        return RUN_ALL_TESTS();
+    }
+
+  - |
+    #include <stdarg.h>
+    #include <stddef.h>
+    #include <setjmp.h>
+    #include <cmocka.h>
+    int add(int a,int b){return a+b;};
+    int subtract(int a,int b){return a-b;};
+
+    static void test_add(void **state) {
+        assert_int_equal(add(3, 4), 7);
+        assert_int_equal(add(-1, 5), 4);
+    }
+
+    static void test_subtract(void **state) {
+        assert_int_equal(subtract(10, 3), 7);
+        assert_int_equal(subtract(7, 7), 0);
+    }
+
+    int main(void) {
+        const struct CMUnitTest tests[] = {
+            cmocka_unit_test(test_add),
+            cmocka_unit_test(test_subtract),
+        };
+
+        return cmocka_run_group_tests(tests, NULL, NULL);
+    }
+
+GITIGNORE_CODE: |
+  .vs
+  CMakeLists.txt.user
+  CMakeCache.txt
+  CMakeFiles
+  CMakeScripts
+  Testing
+  Makefile
+  cmake_install.cmake
+  install_manifest.txt
+  compile_commands.json
+  CTestTestfile.cmake
+  _deps
+  build
+  install
+  __pycache__
+  .compile.logs
+
+CONFIG_CMAKE:
+  - |
+    # C++ Template CMakeLists.txt
+    set(CMAKE_CXX_STANDARD 20)
+    # ...rest
+  - |
+    # C Template CMakeLists.txt
+    set(CMAKE_C_STANDARD 17)
+    # ...rest
+
+MAIN_CODE:
+  - |
+    //Auto Genrated C++ file by Flick CLI
+    #include<iostream>
+    _HEADER_
+    int main(int argc,char*argv[]) {
+        std::cerr << "Hello, " << Project::COMPANY_NAME << std::endl;
+        return 0;
+    }
+
+  - |
+    //Auto Genrated C file by Flick CLI
+    #include<stdio.h>
+    _HEADER_
+    int main(int argc,char*argv[]) {
+        printf("%s v%s %s\n",PROJECT_NAME,VERSION_STRING,COMPANY_NAME);
+        return 0;
+    }
+
+CMAKE_PRESETS:
+  - |
+    {
+      "version": 2,
+      "configurePresets": [
+        {
+          "name": "default",
+          "generator": "Ninja",
+          "binaryDir": "${sourceDir}/build/${presetName}",
+          "cacheVariables": {
+            "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+            "CMAKE_CXX_COMPILER": "clang++",
+            "STATIC_LINK": false
+          }
+        }
+      ]
+    }
+  - |
+    {
+      "version": 2,
+      "configurePresets": [
+        {
+          "name": "default",
+          "generator": "Ninja",
+          "binaryDir": "${sourceDir}/build/${presetName}",
+          "cacheVariables": {
+            "CMAKE_C_COMPILER": "clang",
+            "STATIC_LINK": false
+          }
+        }
+      ]
+    }
+COMPILER_URL: "https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/clang+llvm-19.1.7-x86_64-pc-windows-msvc.tar.xz"
+CMAKE_URL: "https://github.com/Kitware/CMake/releases/download/v3.31.5/cmake-3.31.5-windows-x86_64.zip"
+NINJA_URL: "https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-win.zip"
+VS_BUILD_TOOLS_INSTALLER_URL: "https://aka.ms/vs/17/release/vs_BuildTools.exe"
+VS_CONFIG: "https://github.com/vishal-ahirwar/flick/blob/master/res/flick.vsconfig"

@@ -593,7 +593,7 @@ void Flick::installTools(bool& isInstallationComplete)
 	if (!fs::exists(fs::path("C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\vswhere.exe"))) {
 
 		Downloader::download(std::string(VS_BUILD_TOOLS_INSTALLER_URL), home + "\\vs.exe");
-		Downloader::download("https://github.com/vishal-ahirwar/flick/blob/master/res/flick.vsconfig", home + "\\flick.vsconfig");
+		Downloader::download(/*Fix */, home + "\\flick.vsconfig");
 		if (system((home + "\\vs.exe --quiet --wait --config " + home + "\\flick.vsconfig").c_str())) {
 			Log::log("installing Visual Studio C++ Build Tools failed!", Type::E_ERROR);
 		} else {
@@ -944,22 +944,7 @@ bool Flick::release()
 };
 // for generating vscode intelligence
 // everytime user run this command it's will override everything in c_cpp_properties.json
-void Flick::genVSCode(const std::string& projectDir)
-{
-	namespace fs = std::filesystem;
 
-	if (fs::exists(projectDir + "/.vscode"))
-		Log::log(".vscode already exist!", Type::E_WARNING);
-	else
-		fs::create_directory(projectDir + "/.vscode");
-	std::ofstream file(projectDir + "/.vscode/c_cpp_properties.json", std::ios::out);
-	if (file.is_open()) {
-		file << VSCODE_CONFIG;
-	} else {
-		Log::log("failed to create .vscode/c_cpp_properties.json", Type::E_ERROR);
-	}
-	file.close();
-}
 
 // it will simply delete the whole build folder and compile the project again
 void Flick::reBuild()
@@ -1149,6 +1134,5 @@ void Flick::generateClangFiles(const std::string& projectDir)
 
 void Flick::reinit(const std::string& projectDir)
 {
-	genVSCode(projectDir);
 	generateClangFiles(projectDir);
 };
