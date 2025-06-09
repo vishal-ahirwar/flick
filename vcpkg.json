@@ -1,14 +1,16 @@
 {
   "name": "flick",
   "version": "3.0.0",
+  "builtin-baseline": "566f9496b7e00ee0cc00aca0ab90493d122d148a",
   "dependencies": [
+    "barkeep",
     "boost-process",
     "cpr",
     "fmt",
     "gtest",
     "libarchive",
     "nlohmann-json",
-    "barkeep"
+    "yaml-cpp"
   ],
   "overrides": [
     {
@@ -38,7 +40,10 @@
     {
       "name": "barkeep",
       "version": "0.1.5"
+    },
+    {
+      "name": "yaml-cpp",
+      "version": "0.8.0#3"
     }
-  ],
-  "builtin-baseline": "566f9496b7e00ee0cc00aca0ab90493d122d148a"
+  ]
 }

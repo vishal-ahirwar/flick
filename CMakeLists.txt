@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 3.6...3.31)
 project(flick VERSION 4.1.0 LANGUAGES CXX)
 include(res/config.cmake)
 #@add_find_package Warning: Do not remove this line
+find_package(yaml-cpp CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(cpr CONFIG REQUIRED)
