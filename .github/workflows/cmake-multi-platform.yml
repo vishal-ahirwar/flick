@@ -67,19 +67,21 @@ jobs:
       - name: Prepare and zip artifacts
         run: |
           mkdir -p out
+          
           if [[ "$RUNNER_OS" == "Windows" ]]; then
             cp build/windows-static-build/flick/flick.exe out/
             cp build/windows-static-build/utool/utool.exe out/
-            7z a flick-windows-latest.zip ./out/*
+            (cd out && 7z a ../flick-windows-latest.zip *)  # Go into 'out' before zipping
           elif [[ "$RUNNER_OS" == "macOS" ]]; then
             cp build/osx-static-build/flick/flick out/
             cp build/osx-static-build/utool/utool out/
-            zip -r flick-macos-13.zip out/
+            (cd out && zip -r ../flick-macos-13.zip .)     # Use . to zip all contents, not 'out'
           else
             cp build/linux-static-build/flick/flick out/
             cp build/linux-static-build/utool/utool out/
-            zip -r flick-ubuntu-latest.zip out/
+            (cd out && zip -r ../flick-ubuntu-latest.zip .)
           fi
+
         shell: bash
 
       - name: Upload zip artifact
