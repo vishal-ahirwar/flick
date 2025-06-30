@@ -260,7 +260,7 @@ bool Deps::findBuildinBaseline(const std::string& name, const std::string& versi
 	boost::process::ipstream out;
 	boost::process::ipstream err;
 	boost::process::child c(boost::process::search_path("git"),
-				boost::process::args({"-C", vcpkg, "log", "--format=%H %cd %s", "--date=short", "--left-only", "--",
+				boost::process::args({"-C", vcpkg, "log", "--format=%H %cd %s", "--date=short","--",
 						      std::string("versions/") + name[0] + "-/" + name + ".json"}),
 				boost::process::std_err > err, boost::process::std_out > out);
 	std::string line{}, first{};
