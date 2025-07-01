@@ -47,6 +47,9 @@ jobs:
 
       - name: Configure CMake
         run: |
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+             choco install llvm.portable
+          fi
           if [[ "${{ matrix.os }}" == "macos-13" ]]; then
             cmake --preset $CMAKE_PRESET \
               -DCMAKE_OSX_ARCHITECTURES=x86_64 \
