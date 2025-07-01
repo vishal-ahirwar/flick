@@ -8,7 +8,9 @@
       "binaryDir": "${sourceDir}/build/${presetName}",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
-        "STATIC_LINK": false
+        "STATIC_LINK": false,
+        "CMAKE_CXX_COMPILER":"clang++",
+        "CMAKE_C_COMPILER":"clang"
       }
     },
     {
