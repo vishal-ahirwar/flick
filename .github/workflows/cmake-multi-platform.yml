@@ -48,7 +48,21 @@ jobs:
       - name: Configure CMake
         run: |
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-             choco install llvm.portable
+              - name: Install Clang
+                  # You may pin to the exact commit or the version.
+                  # uses: egor-tensin/setup-clang@ef434b41eb33a70396fb336b1bae39c76d740c3d
+                  uses: egor-tensin/setup-clang@v1
+                  with:
+                    # Version to install
+                    version: 19.1.0
+                    # Target platform
+                    platform: # optional, default is x64
+                    # Install Cygwin packages
+                    cygwin: # optional, default is 0
+                    # Set up cc/clang/c++/clang++ executables
+                    cc: # optional, default is 1
+                    # On Cygwin, replace executable symlinks with hardlinks
+                    hardlinks: # optional, default is 0                        
           fi
           if [[ "${{ matrix.os }}" == "macos-13" ]]; then
             cmake --preset $CMAKE_PRESET \
