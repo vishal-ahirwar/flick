@@ -5,6 +5,7 @@
 #include <barkeep/barkeep.h>
 #include <boost/process.hpp>
 #include <cstddef>
+#include <cstdlib>
 #include <filesystem>
 #include <format>
 #include <fstream>
@@ -17,7 +18,7 @@
 namespace bk = barkeep;
 namespace fs = std::filesystem;
 bool Deps::buildDeps() { return true; }
-
+const std::string VCPKG_ROOT{std::getenv("VCPKG_ROOT")};
 bool Deps::addDeps(const std::string& packageName, const std::string& version, bool forceUpdateBaseLine)
 {
 	std::string _version{};
@@ -81,7 +82,11 @@ bool Deps::addDeps(const std::string& packageName, const std::string& version, b
 		return false;
 	out << data.dump(4);
 	out.close();
-	std::vector<std::string> args{"vcpkg", "add", "port", packageName};
+	if(VCPKG_ROOT.empty()){
+		Log::log("VCPKG_ROOT is not set!",Type::E_ERROR);
+		return false;
+	};
+	std::vector<std::string> args{VCPKG_ROOT+"/vcpkg", "add", "port", packageName};
 	return ProcessManager::startProcess(args, processLog, "", false) == 0;
 };
 
@@ -202,8 +207,12 @@ bool Deps::isPackageAvailableOnVCPKG(const std::string& packageName, std::string
 	boost::process::ipstream out;
 	boost::process::ipstream err;
 	std::vector<std::string> similiarPackages{};
+		if(VCPKG_ROOT.empty()){
+		Log::log("VCPKG_ROOT is not set!",Type::E_ERROR);
+		return false;
+	};
 	try {
-		boost::process::child c(boost::process::search_path("vcpkg"), args, boost::process::std_err > err, boost::process::std_out > out);
+		boost::process::child c(boost::process::search_path(VCPKG_ROOT+"/vcpkg"), args, boost::process::std_err > err, boost::process::std_out > out);
 		std::string line{};
 		std::regex pattern(R"(^\s*([a-zA-Z0-9\-_]+)\s+((?:\d{4}-\d{2}-\d{2}|\d+(?:\.\d+){0,2})(?:#\d+)?)(?:\s{2,}(.*))?$)");
 		while (std::getline(out, line) || std::getline(err, line)) {
