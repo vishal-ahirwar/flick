@@ -1,20 +1,17 @@
 {
   "name": "flick",
   "version": "3.0.0",
+  "builtin-baseline": "566f9496b7e00ee0cc00aca0ab90493d122d148a",
   "dependencies": [
-    "boost-process",
+    "barkeep",
     "cpr",
     "fmt",
     "gtest",
     "libarchive",
     "nlohmann-json",
-    "barkeep"
+    "reproc"
   ],
   "overrides": [
-    {
-      "name": "boost-process",
-      "version": "1.87.0"
-    },
     {
       "name": "libarchive",
       "version": "3.7.8#1"
@@ -38,7 +35,10 @@
     {
       "name": "barkeep",
       "version": "0.1.5"
+    },
+    {
+      "name": "reproc",
+      "version": "14.2.5"
     }
-  ],
-  "builtin-baseline": "566f9496b7e00ee0cc00aca0ab90493d122d148a"
+  ]
 }

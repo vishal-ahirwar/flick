@@ -10,7 +10,6 @@ add_executable(
 
 target_link_libraries(tests PRIVATE GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main)
 target_link_libraries(tests PRIVATE LibArchive::LibArchive)
-target_link_libraries(tests PRIVATE Boost::process)
 target_link_libraries(tests PRIVATE cpr::cpr)
 target_link_libraries(tests PRIVATE fmt::fmt)
 target_link_libraries(tests PRIVATE nlohmann_json::nlohmann_json)

@@ -2,10 +2,7 @@
 #define NOMINMAX
 #define LIBARCHIVE_STATIC
 #include <algorithm>
-#include <boost/process/v1/child.hpp>
-#include <boost/process/v1/io.hpp>
-#include <boost/process/v1/pipe.hpp>
-#include <boost/process/v1/search_path.hpp>
+#include <reproc++/reproc.hpp>
 #include <constants/colors.hpp>
 #include <constants/constant.hpp>
 #include <ctime>
@@ -23,10 +20,10 @@
 #include <rt/rt.h>
 #include <thread>
 #include <unittester/unittester.h>
+#include <unzip/unzip.h>
 #include <userinfo/userinfo.h>
 #include <utils/utils.h>
 #include <vector>
-#include<unzip/unzip.h>
 
 namespace fs = std::filesystem;
 
@@ -77,13 +74,16 @@ std::pair<ProjectType, Language> Flick::readuserInput()
 	Language lang{Language::NONE};
 	ProjectType projectType{ProjectType::NONE};
 	std::transform(input.begin(), input.end(), input.begin(), ::tolower);
-	if (input.empty())
+	if (input.empty()) {
+
 		lang = Language::CXX;
-	else if (input == "c")
+	} else if (input == "c") {
+
 		lang = Language::C;
-	else if (input == "cc")
+	} else if (input == "cc") {
+
 		lang = Language::CXX;
-	else if (input == "q") {
+	} else if (input == "q") {
 		mRt.~RT();
 		std::exit(0);
 	}
@@ -466,9 +466,8 @@ void Flick::addToPathWin()
 void Flick::addToPathUnix()
 {
 	namespace fs = std::filesystem;
-	if(!std::getenv(USERNAME))
-	{
-		Log::log("USERNAME is not set!",Type::E_ERROR);
+	if (!std::getenv(USERNAME)) {
+		Log::log("USERNAME is not set!", Type::E_ERROR);
 		return;
 	}
 	std::string homeDir = std::string("/home/") + getenv(USERNAME);
@@ -1057,12 +1056,16 @@ void Flick::genCMakePreset()
 	std::string input{};
 	std::getline(std::cin, input);
 	Language lang{};
-	if (input.empty())
+	if (input.empty()) {
+
 		lang = Language::CXX;
-	else if (input == "c")
+	} else if (input == "c") {
+
 		lang = Language::C;
-	else if (input == "cc")
+	} else if (input == "cc") {
+
 		lang = Language::CXX;
+	}
 	ProjectGenerator::generateCMakePreset(lang);
 };
 
