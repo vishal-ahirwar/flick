@@ -1,4 +1,5 @@
-﻿#define NOMINMAX
+﻿#include <cstdlib>
+#define NOMINMAX
 #define LIBARCHIVE_STATIC
 #include <algorithm>
 #include <boost/process/v1/child.hpp>
@@ -465,6 +466,11 @@ void Flick::addToPathWin()
 void Flick::addToPathUnix()
 {
 	namespace fs = std::filesystem;
+	if(!std::getenv(USERNAME))
+	{
+		Log::log("USERNAME is not set!",Type::E_ERROR);
+		return;
+	}
 	std::string homeDir = std::string("/home/") + getenv(USERNAME);
 	std::string flickDir = homeDir + "/flick";
 	std::string source = fs::current_path().string() + "/flick";
@@ -546,7 +552,7 @@ void Flick::setupVcpkg(const std::string& home, bool& is_install)
 	std::fstream file(bashrc.c_str(), std::ios::app);
 	if (file.is_open()) {
 		file << "export VCPKG_ROOT=" << home + "/vcpkg" << std::endl;
-		file << "export PATH=$VCPKG_ROOT:$PATH" << std::endl;
+		file << "export PATH=$PATH:$VCPKG_ROOT" << std::endl;
 		file.close();
 	} else {
 		Log::log("failed to open ~/.bashrc file!\n", Type::E_ERROR);
