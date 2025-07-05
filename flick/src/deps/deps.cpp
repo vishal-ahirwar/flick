@@ -3,7 +3,7 @@
 #include "log/log.h"
 #include "processmanager/processmanager.h"
 #include <barkeep/barkeep.h>
-#include <reproc++/reproc.hpp>
+#include <boost/process.hpp>
 #include <cstddef>
 #include <cstdlib>
 #include <filesystem>

@@ -6,6 +6,6 @@
 class ProcessManager
 {
       public:
-	static int startProcess(const std::vector<std::string>& args, std::string& processLog, const std::string& msg, bool bLog = false);
+	static int startProcess(const std::vector<std::string>& args, std::string& processLog, const std::string& msg, bool bLog = true);
 };
 #endif

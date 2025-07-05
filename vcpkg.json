@@ -9,7 +9,7 @@
     "gtest",
     "libarchive",
     "nlohmann-json",
-    "reproc"
+    "boost-process"
   ],
   "overrides": [
     {
@@ -37,8 +37,8 @@
       "version": "0.1.5"
     },
     {
-      "name": "reproc",
-      "version": "14.2.5"
+      "name": "boost-process",
+      "version": "1.87.0"
     }
   ]
 }
