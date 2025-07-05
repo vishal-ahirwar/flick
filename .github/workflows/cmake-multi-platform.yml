@@ -17,6 +17,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         
+      - name: Install LLVM
+        uses: KyleMayes/install-llvm-action@v2
+        with:
+          version: "19"
+          
       - name: Clone vcpkg
         run: git clone https://github.com/microsoft/vcpkg.git vcpkg
 
