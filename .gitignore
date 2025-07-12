@@ -19,3 +19,8 @@ install
 demoapp
 .idea
 compile.logs
+.packages/*.cmake
+.packages/*.bat
+.packages/*.sh
+.packages/*.json
+
