@@ -16,12 +16,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        # Add this as a separate step before "Configure CMake"
-      - name: Install Clang (Windows)
-        if: matrix.os == 'windows-latest'
-        uses: egor-tensin/setup-clang@v1
+        
+      - name: Install LLVM
+        uses: KyleMayes/install-llvm-action@v2
+        if: runner.os == 'Windows'
         with:
-          version: 19.1.0
+          version: "19"
+          
       - name: Clone vcpkg
         run: git clone https://github.com/microsoft/vcpkg.git vcpkg
 
