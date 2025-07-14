@@ -14,6 +14,43 @@
       }
     },
     {
+      "name": "conan",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": ".packages/conan_toolchain.cmake",
+        "STATIC_LINK": false,
+        "CMAKE_BUILD_TYPE":"Release"
+      }
+    },
+        {
+      "name": "conan-windows",
+      "inherits":"conan",
+      "cacheVariables": {
+
+        "CMAKE_CXX_COMPILER":"clang-cl",
+        "CMAKE_C_COMPILER":"clang-cl"
+      }
+    },
+            {
+      "name": "conan-linux",
+      "inherits":"conan",
+      "cacheVariables": {
+
+        "CMAKE_CXX_COMPILER":"clang++",
+        "CMAKE_C_COMPILER":"clang"
+      }
+    },
+            {
+      "name": "conan-osx",
+      "inherits":"conan",
+      "cacheVariables": {
+
+        "CMAKE_CXX_COMPILER":"clang++",
+        "CMAKE_C_COMPILER":"clang"
+      }
+    },
+    {
       "name": "windows-static-build",
       "inherits": "default",
       "cacheVariables": {
