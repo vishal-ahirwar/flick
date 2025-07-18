@@ -1,78 +1,45 @@
-
 {
-  "version": 2,
-  "configurePresets": [
-    {
-      "name": "default",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/${presetName}",
-      "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
-        "STATIC_LINK": false,
-        "CMAKE_CXX_COMPILER":"clang++",
-        "CMAKE_C_COMPILER":"clang"
-      }
-    },
-    {
-      "name": "conan",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/${presetName}",
-      "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": ".packages/conan_toolchain.cmake",
-        "STATIC_LINK": false,
-        "CMAKE_BUILD_TYPE":"Release"
-      }
-    },
+    "version": 2,
+    "configurePresets": [
         {
-      "name": "conan-windows",
-      "inherits":"conan",
-      "cacheVariables": {
-
-        "CMAKE_CXX_COMPILER":"clang-cl",
-        "CMAKE_C_COMPILER":"clang-cl"
-      }
-    },
-            {
-      "name": "conan-linux",
-      "inherits":"conan",
-      "cacheVariables": {
-
-        "CMAKE_CXX_COMPILER":"clang++",
-        "CMAKE_C_COMPILER":"clang"
-      }
-    },
-            {
-      "name": "conan-osx",
-      "inherits":"conan",
-      "cacheVariables": {
-
-        "CMAKE_CXX_COMPILER":"clang++",
-        "CMAKE_C_COMPILER":"clang"
-      }
-    },
-    {
-      "name": "windows-static-build",
-      "inherits": "default",
-      "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-windows-static",
-        "STATIC_LINK": true
-      }
-    },
-    {
-      "name": "linux-static-build",
-      "inherits": "default",
-      "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-linux",
-        "STATIC_LINK": true
-      }
-    },
-    {
-      "name": "osx-static-build",
-      "inherits": "default",
-      "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-osx",
-        "STATIC_LINK": false
-      }
-    }
-  ]
+            "name": "conan",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "packages/install/conan_toolchain.cmake",
+                "STATIC_LINK": false,
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_C_COMPILER": "clang"
+            }
+        },
+        {
+            "name": "conan-debug",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "packages/install/conan_toolchain.cmake",
+                "STATIC_LINK": false,
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_C_COMPILER": "clang"
+            }
+        },
+        {
+            "name": "conan-debug-windows",
+            "inherits": "conan-debug",
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "clang-cl",
+                "CMAKE_C_COMPILER": "clang-cl"
+            }
+        },
+        {
+            "name": "conan-windows",
+            "inherits": "conan",
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "clang-cl",
+                "CMAKE_C_COMPILER": "clang-cl"
+            }
+        }
+    ]
 }

@@ -17,7 +17,10 @@ add_executable(
     src/utester/utester.cpp
     src/utils/utils.cpp
     src/unzip/unzip.cpp)# Add your Source Files here
-target_link_libraries(flick PRIVATE LibArchive::LibArchive xmllite)
+target_link_libraries(flick PRIVATE LibArchive::LibArchive)
+if(WIN32)
+target_link_libraries(flick  PRIVATE xmllite)
+endif()
 target_link_libraries(flick PRIVATE cpr::cpr)
 target_link_libraries(flick PRIVATE fmt::fmt)
 target_link_libraries(flick PRIVATE nlohmann_json::nlohmann_json)

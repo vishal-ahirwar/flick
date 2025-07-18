@@ -18,7 +18,7 @@
 namespace bk = barkeep;
 namespace fs = std::filesystem;
 bool Deps::buildDeps() { return true; }
-const std::string VCPKG_ROOT{std::getenv("VCPKG_ROOT")};
+const std::string VCPKG_ROOT{std::getenv("VCPKG_ROOT")?std::getenv("VCPKG_ROOT"):""};
 bool Deps::addDeps(const std::string& packageName, const std::string& version, bool forceUpdateBaseLine)
 {
 	std::string _version{};

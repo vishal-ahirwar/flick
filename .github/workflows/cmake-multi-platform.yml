@@ -22,33 +22,13 @@ jobs:
         if: runner.os == 'Windows'
         with:
           version: "19"
-          
-      - name: Clone vcpkg
-        run: git clone https://github.com/microsoft/vcpkg.git vcpkg
 
-      - name: Cache vcpkg
-        uses: actions/cache@v3
-        with:
-          path: |
-            vcpkg/installed
-            vcpkg/buildtrees
-          key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
-          restore-keys: |
-            ${{ runner.os }}-vcpkg-
-
-      - name: Bootstrap vcpkg (Linux/macOS)
-        if: runner.os != 'Windows'
-        run: ./vcpkg/bootstrap-vcpkg.sh
-
-      - name: Bootstrap vcpkg (Windows)
-        if: runner.os == 'Windows'
-        run: .\vcpkg\bootstrap-vcpkg.bat
-        shell: cmd
+      - name: install conan and sage by viuvlabs
+        run: pip install conan && pip install viuvsage && sage install
 
       - name: Set environment variables
         run: |
-          echo "VCPKG_ROOT=$GITHUB_WORKSPACE/vcpkg" >> $GITHUB_ENV
-          echo "CMAKE_PRESET=${{ matrix.os == 'windows-latest' && 'windows-static-build' || matrix.os == 'ubuntu-latest' && 'linux-static-build' || 'osx-static-build' }}" >> $GITHUB_ENV
+          echo "CMAKE_PRESET=${{ matrix.os == 'windows-latest' && 'conan-windows' || matrix.os == 'ubuntu-latest' && 'conan' || 'conan' }}" >> $GITHUB_ENV
         shell: bash
 
       - name: Configure CMake
@@ -75,16 +55,16 @@ jobs:
           mkdir -p out
           
           if [[ "$RUNNER_OS" == "Windows" ]]; then
-            cp build/windows-static-build/flick/flick.exe out/
-            cp build/windows-static-build/utool/utool.exe out/
+            cp build/${{ env.CMAKE_PRESET }}/flick/flick.exe out/
+            cp build/${{ env.CMAKE_PRESET }}/utool/utool.exe out/
             (cd out && 7z a ../flick-windows-latest.zip *)  # Go into 'out' before zipping
           elif [[ "$RUNNER_OS" == "macOS" ]]; then
-            cp build/osx-static-build/flick/flick out/
-            cp build/osx-static-build/utool/utool out/
+            cp build/${{ env.CMAKE_PRESET }}/flick/flick out/
+            cp build/${{ env.CMAKE_PRESET }}/utool/utool out/
             (cd out && zip -r ../flick-macos-13.zip .)     # Use . to zip all contents, not 'out'
           else
-            cp build/linux-static-build/flick/flick out/
-            cp build/linux-static-build/utool/utool out/
+            cp build/${{ env.CMAKE_PRESET }}/flick/flick out/
+            cp build/${{ env.CMAKE_PRESET }}/utool/utool out/
             (cd out && zip -r ../flick-ubuntu-latest.zip .)
           fi
 
