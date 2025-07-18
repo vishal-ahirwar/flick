@@ -2,7 +2,7 @@ name: Build and Release Flick
 
 on:
   push:
-    branches: ["release"]
+    branches: ["release","master" ]
   pull_request:
     branches: [ "main", "master" ]
 
