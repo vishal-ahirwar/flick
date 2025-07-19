@@ -28,7 +28,7 @@ jobs:
 
       - name: Set environment variables
         run: |
-          echo "CMAKE_PRESET=${{ matrix.os == 'windows-latest' && 'conan-windows' || matrix.os == 'ubuntu-latest' && 'conan' || 'conan' }}" >> $GITHUB_ENV
+          echo "CMAKE_PRESET=${{ matrix.os == 'windows-latest' && 'windows' || matrix.os == 'ubuntu-latest' && 'default' || 'default' }}" >> $GITHUB_ENV
         shell: bash
 
       - name: Configure CMake
