@@ -24,7 +24,7 @@ jobs:
           version: "19"
 
       - name: install conan and sage by viuvlabs
-        run: pip install viuvsage && sage doctor && sage install
+        run: pip install viuvsage && pip install conan && conan profile detect && sage install
 
       - name: Set environment variables
         run: |
