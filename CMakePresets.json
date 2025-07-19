@@ -2,7 +2,7 @@
     "version": 2,
     "configurePresets": [
         {
-            "name": "conan",
+            "name": "default",
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/build/${presetName}",
             "cacheVariables": {
@@ -14,31 +14,25 @@
             }
         },
         {
-            "name": "conan-debug",
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build/${presetName}",
+            "name": "debug",
+            "inherits":"default",
             "cacheVariables": {
-                "CMAKE_TOOLCHAIN_FILE": "packages/install/conan_toolchain.cmake",
-                "STATIC_LINK": false,
-                "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_CXX_COMPILER": "clang++",
-                "CMAKE_C_COMPILER": "clang"
+                "CMAKE_BUILD_TYPE":"Debug"
             }
         },
         {
-            "name": "conan-debug-windows",
-            "inherits": "conan-debug",
+            "name": "windows",
+            "inherits": "default",
             "cacheVariables": {
                 "CMAKE_CXX_COMPILER": "clang-cl",
                 "CMAKE_C_COMPILER": "clang-cl"
             }
         },
         {
-            "name": "conan-windows",
-            "inherits": "conan",
+            "name": "debug-windows",
+            "inherits": "windows",
             "cacheVariables": {
-                "CMAKE_CXX_COMPILER": "clang-cl",
-                "CMAKE_C_COMPILER": "clang-cl"
+                "CMAKE_BUILD_TYPE":"Debug"
             }
         }
     ]
