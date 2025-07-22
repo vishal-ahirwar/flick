@@ -24,31 +24,12 @@ jobs:
           version: "19"
 
       - name: install conan and sage by viuvlabs
-        run: pip install viuvsage && pip install conan && conan profile detect && sage install
+        run: pip install cppsage && sage doctor && sage compile
 
       - name: Set environment variables
         run: |
           echo "CMAKE_PRESET=${{ matrix.os == 'windows-latest' && 'windows' || matrix.os == 'ubuntu-latest' && 'default' || 'default' }}" >> $GITHUB_ENV
         shell: bash
-
-      - name: Configure CMake
-        run: |
-          if [[ "${{ matrix.os }}" == "macos-13" ]]; then
-            cmake --preset $CMAKE_PRESET \
-              -DCMAKE_OSX_ARCHITECTURES=x86_64 \
-              -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
-              -DCMAKE_THREAD_LIBS_INIT="-lpthread" \
-              -DCMAKE_HAVE_THREADS_LIBRARY=1 \
-              -DCMAKE_USE_WIN32_THREADS_INIT=0 \
-              -DCMAKE_USE_PTHREADS_INIT=1 \
-              -DTHREADS_PREFER_PTHREAD_FLAG=ON
-          else
-            cmake --preset $CMAKE_PRESET
-          fi
-        shell: bash
-
-      - name: Build project
-        run: cmake --build build/${{ env.CMAKE_PRESET }} --parallel
 
       - name: Prepare and zip artifacts
         run: |
