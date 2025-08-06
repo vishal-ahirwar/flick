@@ -8,7 +8,7 @@
 #if defined(_WIN32)
 #include <windows.h>
 #define USERNAME "USERPROFILE" // Windows environment variable
-#define RELEASE_BUILDS_NAME "flick-windows-latest-zip"
+#define RELEASE_BUILDS_NAME "flick-windows-latest.zip"
 #elif defined(__linux__)
 #include <unistd.h>
 #define USERNAME "USER" // Linux environment variable
