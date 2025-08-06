@@ -25,7 +25,7 @@ int main()
 	RT rt("utool");
 #ifdef _WIN32
 	std::string home = getenv(USERNAME);
-	home += "\\flick";
+	home += "\\flick\\";
 #else
 	std::string home{"/home/"};
 	home += getenv(USERNAME);
