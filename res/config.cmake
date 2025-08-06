@@ -25,13 +25,12 @@ configure_file(res/config.h.in flickconfig.h)
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     message(STATUS "Enabling secure coding features for Clang")
     add_compile_options(
-            -Wall -Wextra -Wpedantic        # General warnings
+            -Xclang
+            -Wall  -Wpedantic        # General warnings
             -Wshadow -Wold-style-cast       # Detect potential issues
             -Wcast-align -Wnull-dereference # Runtime safety
             -Wformat=2 -Wformat-security    # Secure formatting
-            -fstack-protector-strong        # Stack protection
             -D_FORTIFY_SOURCE=2             # Buffer security
-            -fno-common                     # Avoid common symbol issues
             #-Werror                         # Treat warnings as errors
     )
 endif()

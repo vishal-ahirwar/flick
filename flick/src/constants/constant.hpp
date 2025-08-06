@@ -25,22 +25,6 @@ enum class ProjectType { NONE, EXECUTABLE, LIBRARY };
 constexpr std::string_view CLANGD{R"(CompileFlags:
   CompilationDatabase: build/default
 
-FallbackFlags:
-  - -std=c++23
-  - -Wall
-  - -Wextra
-  - -O0
-  - -fdiagnostics-color=always
-
-Index:
-  Background: true
-
-Diagnostics:
-  UnusedIncludes: Strict
-  ClangTidy:
-    Add: '*'
-    Remove: '-clang-analyzer-alpha.*'
-
 )"};
 constexpr std::string_view CLANG_FORMAT{R"(
 BasedOnStyle: Google
@@ -66,39 +50,6 @@ ReflowComments: true
 
 )"};
 
-constexpr std::string_view CLANG_TIDY{
-	R"(Checks: >
-  clang-analyzer-*,
-  cppcoreguidelines-*,
-  modernize-*,
-  performance-*,
-  readability-*,
-  bugprone-*,
-  portability-*,
-  misc-*,
-  -clang-analyzer-alpha.*,  # disable unstable checks
-  -google-readability-braces-around-statements,
-  -fuchsia-*,
-  -hicpp-*,
-  -llvm-*,
-  -cert-*,
-  -readability-magic-numbers
-
-WarningsAsErrors: ''
-HeaderFilterRegex: '.*'
-AnalyzeTemporaryDtors: true
-FormatStyle: file
-CheckOptions:
-  - key:             modernize-use-nullptr.NullMacros
-    value:           'NULL'
-  - key:             readability-identifier-naming.ClassCase
-    value:           CamelCase
-  - key:             readability-identifier-naming.FunctionCase
-    value:           camelBack
-  - key:             readability-identifier-naming.VariableCase
-    value:           camelBack
-
-)"};
 constexpr std::string_view EDITOR_CONFIG{R"(# EditorConfig for Flick-style C++ projects
 root = true
 
@@ -233,6 +184,7 @@ configure_file(@config_in @config_h)
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     message(STATUS "Enabling secure coding features for Clang")
     add_compile_options(
+        -Xclang
         -Wall -Wextra -Wpedantic        # General warnings
         -Wshadow -Wold-style-cast       # Detect potential issues
         -Wcast-align -Wnull-dereference # Runtime safety
@@ -269,6 +221,7 @@ configure_file(@config_in @config_h)
 if(CMAKE_C_COMPILER_ID MATCHES "Clang")
   message(STATUS "Enabling secure coding features for Clang")
   add_compile_options(
+    -Xclang
     -Wall -Wextra -Wpedantic        # General warnings
     -Wshadow -Wold-style-cast       # Detect potential issues
     -Wcast-align -Wnull-dereference # Runtime safety

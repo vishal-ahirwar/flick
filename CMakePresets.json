@@ -4,7 +4,7 @@
         {
             "name": "default",
             "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build/${presetName}",
+            "binaryDir": "${sourceDir}/build/",
             "cacheVariables": {
                 "CMAKE_TOOLCHAIN_FILE": "packages/install/conan_toolchain.cmake",
                 "STATIC_LINK": false,

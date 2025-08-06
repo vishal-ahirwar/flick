@@ -1,6 +1,6 @@
 ﻿#include <cstdlib>
 #define NOMINMAX
-#define LIBARCHIVE_STATIC
+#define _CRT_SECURE_NO_WARNINGS
 #include <algorithm>
 #include <boost/process.hpp>
 #include <constants/colors.hpp>
@@ -1048,6 +1048,8 @@ void Flick::addDeps()
 			return;
 		};
 		deps.updateCMakeFile(vcpkgLog, project, name);
+	}else{
+		Log::log("AddDeps Failed",Type::E_ERROR);
 	}
 }
 void Flick::genCMakePreset()
@@ -1124,16 +1126,7 @@ void Flick::generateClangFiles(const std::string& projectDir)
 	file << CLANG_FORMAT;
 	file.close();
 	Log::log(".clang-format generated");
-	path = projectDir + "/.clang-tidy";
-	file.open(path);
-	if (!file) {
-		Log::log("Failed to create .clang-tidy file", Type::E_ERROR);
-		return;
-	}
 
-	file << CLANG_TIDY;
-	file.close();
-	Log::log(".clang-tidy generated");
 	path = projectDir + "/.clangd";
 	file.open(path);
 	if (!file) {

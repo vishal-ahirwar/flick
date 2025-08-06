@@ -1,4 +1,5 @@
-﻿#include <main/main.h>
+﻿#define _CRT_SECURE_NO_WARNINGS
+#include <main/main.h>
 int main(int argc, char* argv[])
 {
 	if (argc < 2)
