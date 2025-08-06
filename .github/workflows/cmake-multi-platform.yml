@@ -36,16 +36,16 @@ jobs:
           mkdir -p out
           
           if [[ "$RUNNER_OS" == "Windows" ]]; then
-            cp build/${{ env.CMAKE_PRESET }}/flick/flick.exe out/
-            cp build/${{ env.CMAKE_PRESET }}/utool/utool.exe out/
+            cp build/flick/flick.exe out/
+            cp build/utool/utool.exe out/
             (cd out && 7z a ../flick-windows-latest.zip *)  # Go into 'out' before zipping
           elif [[ "$RUNNER_OS" == "macOS" ]]; then
-            cp build/${{ env.CMAKE_PRESET }}/flick/flick out/
-            cp build/${{ env.CMAKE_PRESET }}/utool/utool out/
+            cp build/flick/flick out/
+            cp build/utool/utool out/
             (cd out && zip -r ../flick-macos-13.zip .)     # Use . to zip all contents, not 'out'
           else
-            cp build/${{ env.CMAKE_PRESET }}/flick/flick out/
-            cp build/${{ env.CMAKE_PRESET }}/utool/utool out/
+            cp build/flick/flick out/
+            cp build/utool/utool out/
             (cd out && zip -r ../flick-ubuntu-latest.zip .)
           fi
 
