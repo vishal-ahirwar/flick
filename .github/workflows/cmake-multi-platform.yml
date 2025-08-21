@@ -22,6 +22,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         
+      - name: OnWindows
+        if: runner.os =='Windows'
+        run: chcp 65001
+        
       - name: Install LLVM
         uses: KyleMayes/install-llvm-action@v2
         if: runner.os == 'Windows'
@@ -30,7 +34,7 @@ jobs:
 
       - name: install conan and sage by viuvlabs
         run: pip install cppsage && sage doctor && sage compile
-
+        
       - name: Set environment variables
         run: |
           echo "CMAKE_PRESET=${{ matrix.os == 'windows-latest' && 'windows' || matrix.os == 'ubuntu-latest' && 'default' || 'default' }}" >> $GITHUB_ENV
