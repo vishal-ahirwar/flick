@@ -1,7 +1,7 @@
 #include "deps.h"
 
 #include <barkeep/barkeep.h>
-
+#define WIN32_LEAN_AND_MEAN
 #include <boost/process.hpp>
 #include <cstddef>
 #include <cstdlib>
