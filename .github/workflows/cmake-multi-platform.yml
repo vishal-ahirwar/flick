@@ -51,7 +51,11 @@ jobs:
         run: |
           conan profile detect
           leaf doctor
-          leaf install -v -r
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            conan install .  -pr:h=profiles/windows_profile --build=missing -of .install
+          else
+            leaf install -v -r
+          fi
           leaf build -r -v
         
       - name: Set environment variables
