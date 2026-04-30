@@ -11,12 +11,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-13]
+        os: [windows-latest, ubuntu-latest, macos-15]
       
     steps:
       - name: Set up leaf
         shell: bash
-        run : |
+        run: |
           if [[ "$RUNNER_OS" == "Windows" ]]; then
             powershell -NoProfile -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Uri https://raw.githubusercontent.com/vishal-ahirwar/leaf/master/install.bat -OutFile install.bat; .\install.bat"
             echo "$USERPROFILE/leaf" >> $GITHUB_PATH
@@ -24,7 +24,20 @@ jobs:
             curl -fsSL https://raw.githubusercontent.com/vishal-ahirwar/leaf/master/install.sh | bash
             echo "$HOME/leaf" >> $GITHUB_PATH
           fi
-          
+      
+      - name: Install build dependencies
+        shell: bash
+        run: |
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            choco install conan ccache -y
+            pip install conan
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            brew install conan ccache
+          else
+            sudo apt-get update
+            sudo apt-get install -y ccache
+            pip install conan
+          fi
       - name: Checkout repository
         uses: actions/checkout@v4
         
@@ -35,10 +48,15 @@ jobs:
           version: "19"
 
       - name: Run leaf doctor, setup, install and build
+        shell: bash
         run: |
+          conan profile detect
           leaf doctor
-          leaf setup
-          leaf install -v -r
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            conan install .  -pr:h=profiles/windows_profile --build=missing -of .install
+          else
+            leaf install -v -r
+          fi
           leaf build -r -v
         
       - name: Set environment variables
