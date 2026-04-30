@@ -49,6 +49,7 @@ jobs:
 
       - name: Run leaf doctor, setup, install and build
         run: |
+          conan profile detect
           leaf doctor
           leaf install -v -r
           leaf build -r -v
