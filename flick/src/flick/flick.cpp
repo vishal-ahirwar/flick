@@ -1,4 +1,4 @@
-﻿#include <boost/process/v1/detail/child_decl.hpp>
+#include <boost/process/v1/detail/child_decl.hpp>
 #include <cstdlib>
 #define NOMINMAX
 #define _CRT_SECURE_NO_WARNINGS
@@ -104,7 +104,7 @@ std::pair<ProjectType, Language> Flick::readuserInput() {
   }
 
   if (projectType == ProjectType::NONE) {
-    Log::log("Unkown Project Type", Type::E_ERROR);
+    Log::log("Unknown Project Type", Type::E_ERROR);
     mRt.~RT();
     std::exit(0);
   }
@@ -207,7 +207,7 @@ bool Flick::compile() {
                                      "Compiling this may take minutes") ==
         0)  // if there is any kind of error then don't clear the terminal
     {
-      Logger::status("BUILD SUCCESSFULL");
+      Logger::status("BUILD SUCCESSFUL");
       return true;
     } else {
       Logger::error("BUILD FAILED");
@@ -225,7 +225,7 @@ bool Flick::compile() {
                                      "Compiling this may take minutes") ==
         0)  // if there is any kind of error then don't clear the terminal
     {
-      Logger::status("BUILD SUCCESSFULL");
+      Logger::status("BUILD SUCCESSFUL");
 
       return true;
     } else {
@@ -322,14 +322,18 @@ bool addToPathPermanentWindows(const std::string& newPath) {
 
   // Query existing PATH value
   DWORD type = REG_EXPAND_SZ;
-  char buffer[8192];
-  DWORD bufferSize = sizeof(buffer);
-
+  DWORD bufferSize = 0;
   std::string currentPath;
-  if (RegQueryValueExA(hKey, pathName, nullptr, &type,
-                       reinterpret_cast<LPBYTE>(buffer),
-                       &bufferSize) == ERROR_SUCCESS) {
-    currentPath.assign(buffer, bufferSize - 1);
+
+  if (RegQueryValueExA(hKey, pathName, nullptr, &type, nullptr, &bufferSize) == ERROR_SUCCESS) {
+    std::vector<char> buffer(bufferSize);
+    if (RegQueryValueExA(hKey, pathName, nullptr, &type, reinterpret_cast<LPBYTE>(buffer.data()), &bufferSize) == ERROR_SUCCESS) {
+      if (bufferSize > 0 && buffer[bufferSize - 1] == '\0') {
+        currentPath.assign(buffer.data(), bufferSize - 1);
+      } else {
+        currentPath.assign(buffer.data(), bufferSize);
+      }
+    }
   }
 
   // Check if newPath is already in PATH (case-insensitive on Windows)
@@ -681,7 +685,7 @@ void Flick::setup() {
 #ifdef _WIN32
   Log::log(
       "[Attention] On Windows in order to use vcpkg packages without any issue "
-      "please install Visual Studio Desktop Developement with C++",
+      "please install Visual Studio Desktop Development with C++",
       Type::E_WARNING);
 #else
   Log::log(
@@ -753,7 +757,7 @@ bool Flick::onSetup() {
   std::fstream file;
 #ifdef _WIN32
   if (!fs::create_directory(home + "\\flick")) {
-    Log::log("flick dir alread exist", Type::E_WARNING);
+    Log::log("flick dir already exists", Type::E_WARNING);
   };
   file.open((home + "\\flick\\.cconfig").c_str(), std::ios::in);
   if (file.is_open()) {
@@ -790,7 +794,7 @@ bool Flick::onSetup() {
   return true;
 #else
   if (!fs::create_directory(home + "/flick")) {
-    Log::log("flick dir alread exist", Type::E_WARNING);
+    Log::log("flick dir already exists", Type::E_WARNING);
   } else {
     Log::log(fmt::format("Creating Flick dir at {}", home.c_str()));
   };
@@ -979,7 +983,7 @@ bool Flick::release() {
                                      "Compiling this may take minutes") ==
         0)  // if there is any kind of error then don't clear the terminal
     {
-      Log::log("BUILD SUCCESSFULL");
+      Log::log("BUILD SUCCESSFUL");
       return true;
     } else {
       Log::log("BUILD FAILED", Type::E_ERROR);
@@ -997,7 +1001,7 @@ bool Flick::release() {
                                      "Compiling this may take minutes") ==
         0)  // if there is any kind of error then don't clear the terminal
     {
-      Log::log("BUILD SUCCESSFULL");
+      Log::log("BUILD SUCCESSFUL");
 
       return true;
     } else {
@@ -1014,7 +1018,7 @@ void Flick::genVSCode(const std::string& projectDir) {
   namespace fs = std::filesystem;
 
   if (fs::exists(projectDir + "/.vscode"))
-    Log::log(".vscode already exist!", Type::E_WARNING);
+    Log::log(".vscode already exists!", Type::E_WARNING);
   else
     fs::create_directory(projectDir + "/.vscode");
   std::ofstream file(projectDir + "/.vscode/c_cpp_properties.json",

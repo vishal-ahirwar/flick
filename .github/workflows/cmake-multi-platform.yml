@@ -14,10 +14,16 @@ jobs:
         os: [windows-latest, ubuntu-latest, macos-13]
       
     steps:
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
+      - name: Set up leaf
+        shell: bash
+        run : |
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            powershell -NoProfile -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Uri https://raw.githubusercontent.com/vishal-ahirwar/leaf/master/install.bat -OutFile install.bat; .\install.bat"
+            echo "$USERPROFILE/leaf" >> $GITHUB_PATH
+          else
+            curl -fsSL https://raw.githubusercontent.com/vishal-ahirwar/leaf/master/install.sh | bash
+            echo "$HOME/leaf" >> $GITHUB_PATH
+          fi
           
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -28,12 +34,16 @@ jobs:
         with:
           version: "19"
 
-      - name: install conan and sage by viuvlabs
-        run: pip install cppsage && sage doctor && sage compile
+      - name: Run leaf doctor, setup, install and build
+        run: |
+          leaf doctor
+          leaf setup
+          leaf install -v -r
+          leaf build -r -v
         
       - name: Set environment variables
         run: |
-          echo "CMAKE_PRESET=${{ matrix.os == 'windows-latest' && 'windows' || matrix.os == 'ubuntu-latest' && 'default' || 'default' }}" >> $GITHUB_ENV
+          echo "CMAKE_PRESET=release" >> $GITHUB_ENV
         shell: bash
 
       - name: Prepare and zip artifacts
@@ -41,16 +51,16 @@ jobs:
           mkdir -p out
           
           if [[ "$RUNNER_OS" == "Windows" ]]; then
-            cp build/flick/flick.exe out/
-            cp build/utool/utool.exe out/
+            cp .build/release/flick/flick.exe out/
+            cp .build/release/utool/utool.exe out/
             (cd out && 7z a ../flick-windows-latest.zip *)  # Go into 'out' before zipping
           elif [[ "$RUNNER_OS" == "macOS" ]]; then
-            cp build/flick/flick out/
-            cp build/utool/utool out/
+            cp .build/release/flick/flick out/
+            cp .build/release/utool/utool out/
             (cd out && zip -r ../flick-macos-13.zip .)     # Use . to zip all contents, not 'out'
           else
-            cp build/flick/flick out/
-            cp build/utool/utool out/
+            cp .build/release/flick/flick out/
+            cp .build/release/utool/utool out/
             (cd out && zip -r ../flick-ubuntu-latest.zip .)
           fi
 

@@ -24,3 +24,5 @@ compile.logs
 .packages/*.sh
 .packages/*.json
 
+.install
+.build
