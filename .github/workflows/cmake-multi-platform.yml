@@ -48,6 +48,7 @@ jobs:
           version: "19"
 
       - name: Run leaf doctor, setup, install and build
+        shell: bash
         run: |
           conan profile detect
           leaf doctor
