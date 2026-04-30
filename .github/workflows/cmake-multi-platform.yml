@@ -34,7 +34,8 @@ jobs:
             brew install conan ccache
           else
             sudo apt-get update
-            sudo apt-get install -y conan ccache
+            sudo apt-get install -y ccache
+            pip install conan
           fi
       - name: Checkout repository
         uses: actions/checkout@v4
