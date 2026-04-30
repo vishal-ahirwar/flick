@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: Set up leaf
         shell: bash
-        run : |
+        run: |
           if [[ "$RUNNER_OS" == "Windows" ]]; then
             powershell -NoProfile -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Uri https://raw.githubusercontent.com/vishal-ahirwar/leaf/master/install.bat -OutFile install.bat; .\install.bat"
             echo "$USERPROFILE/leaf" >> $GITHUB_PATH
@@ -24,7 +24,18 @@ jobs:
             curl -fsSL https://raw.githubusercontent.com/vishal-ahirwar/leaf/master/install.sh | bash
             echo "$HOME/leaf" >> $GITHUB_PATH
           fi
-          
+      
+      - name: Install build dependencies
+        shell: bash
+        run: |
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            choco install conan ccache -y
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            brew install conan ccache
+          else
+            sudo apt-get update
+            sudo apt-get install -y conan ccache
+          fi
       - name: Checkout repository
         uses: actions/checkout@v4
         
