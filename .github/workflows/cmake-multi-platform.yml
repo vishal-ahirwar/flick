@@ -30,6 +30,7 @@ jobs:
         run: |
           if [[ "$RUNNER_OS" == "Windows" ]]; then
             choco install conan ccache -y
+            pip install conan
           elif [[ "$RUNNER_OS" == "macOS" ]]; then
             brew install conan ccache
           else
@@ -49,7 +50,6 @@ jobs:
       - name: Run leaf doctor, setup, install and build
         run: |
           leaf doctor
-          leaf setup
           leaf install -v -r
           leaf build -r -v
         
